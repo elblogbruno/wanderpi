@@ -27,7 +27,7 @@ def init_camera():
         print("Camera has not been initialized. Initializing...")
         print("Initialized video camera")
         a = "rtsp://192.168.1.10:554/user=admin_password=VyJdSdKg_channel=0_stream=1.sdp?real_stream"
-        return VideoCamera()  
+        return VideoCamera(1)  
     else:
         print("Video Camera Object exists")
         
