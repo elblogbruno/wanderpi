@@ -1,0 +1,41 @@
+.camera-view-responsive
+{
+    border-radius: 5px;
+    margin-bottom: 12px;
+}
+
+  
+@media (max-width: 768px) {
+    .btn-responsive {
+      padding:2px 4px;
+      font-size:80%;
+      line-height: 1;
+      border-radius:3px;
+    }
+  }
+  
+  @media (min-width: 769px) and (max-width: 992px) {
+    .btn-responsive {
+      padding:4px 9px;
+      font-size:90%;
+      line-height: 1.2;
+    }
+  }
+  
+  
+
+.map-responsive{
+    position: relative;
+    /* padding-bottom: 75%; */
+    height: 0;
+    overflow: hidden;
+}
+
+.map-responsive iframe{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 5px;
+}
