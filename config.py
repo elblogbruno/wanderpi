@@ -19,6 +19,8 @@ class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = logging.DEBUG
     UPLOAD_FOLDER = UPLOAD_FOLDER
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:manresa21@localhost:5432/wanderpi_db_test'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):
     # 上线配置

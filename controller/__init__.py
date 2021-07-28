@@ -2,6 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
 from config import config_dict, STATIC_FOLDER
+from flask_sqlalchemy import SQLAlchemy
 
 
 # 设置日志(目的是将flask默认的日志和自定义的日志保存到文件中)
@@ -23,9 +24,12 @@ def setup_log(log_level):
 def create_app(config_type):  # 封装web应用的创建过程
     # 根据类型取出对应的配置子类
     config_class = config_dict[config_type]
-    app = Flask(__name__, static_folder=STATIC_FOLDER)
-    app.config.from_object(config_class)
 
+    app = Flask(__name__, static_folder=STATIC_FOLDER)
+    
+
+    app.config.from_object(config_class)
+    
     # 注册蓝图对象  如果内容只在文件中使用一次, 最好在使用前才导入, 可以有效避免导入错误
     from controller.modules.home import home_blu
     app.register_blueprint(home_blu)

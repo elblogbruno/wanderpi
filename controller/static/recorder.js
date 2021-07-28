@@ -4,6 +4,7 @@ var statusBadgeContainer = document.getElementById("recording_status_container")
 var statusBadge = document.getElementById("recording_status");
 var downloadLink = document.getElementById("download_video");
 var saveButton = document.getElementById("save_video");
+var saveButtonModal = document.getElementById("save_request_button");
 
 
 var gps = document.getElementById("gps_text");
@@ -15,12 +16,42 @@ buttonStop.disabled = true;
 statusBadgeContainer.style.display = "none";
 
 
+function initializeDropdown() {
+    
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.responseText);
+            obj = JSON.parse(xhr.responseText);
+            var devices = obj.devices;
+            for(var i = 0; i < devices.length; i ++){
+                var device = devices[i];
+                var option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.deviceLabel || 'camera ' + (i + 1);
+                document.querySelector('select#videoSource').appendChild(option);
+            };
+        }
+    }
+
+    xhr.open("POST", "/get_available_video_sources");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send();
+
+    
+}
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    initializeDropdown();
+});
+
 
 buttonRecord.onclick = function () {
     // var url = window.location.href + "record_status";
     buttonRecord.disabled = true;
     buttonStop.disabled = false;
-
+    saveButton.style.display = "none";
+    downloadLink.style.display = "none";
     // XMLHttpRequest
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -42,6 +73,20 @@ buttonRecord.onclick = function () {
     initializeMapAndLocator();
 };
 
+saveButtonModal.onclick = function () {
+    //makes a request to save the video and when it is done, it will redirect to the home page where the video is saved
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.responseText);
+            window.location.href = "/";
+        }
+    }
+    xhr.open("POST", "/save_video/" + saveButton.value + "/");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send();
+};
+
 buttonStop.onclick = function () {
     buttonRecord.disabled = false;
     buttonStop.disabled = true;
@@ -56,6 +101,7 @@ buttonStop.onclick = function () {
             console.log(video_id);
 
             saveButton.style.display = "inline";
+            saveButton.value = video_id;
             downloadLink.style.display = "inline";
             downloadLink.onclick = function () {
                 window.location.href = "/uploads/" + video_id;
