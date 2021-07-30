@@ -43,7 +43,7 @@
           <form>
             <div class="mb-3">
               <label for="recipient-name" class="col-form-label">Name:</label>
-              <input type="text" class="form-control" id="recipient-name">
+              <input id="name_input" type="text" class="form-control" id="recipient-name">
             </div>
           </form>
         </div>
@@ -59,24 +59,31 @@
 
 <!-- Image and text -->
 
-<nav class="navbar  sticky-top navbar-expand-sm navbar-light bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="#">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+        <a class="navbar-brand" href="/">
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" width="60" height="60" class="d-inline-block align-top" alt="">
         </a>
-        <ul class="navbar-nav mr-auto mt-1 mt-lg-0">
-        
-        <li class="nav-item">
-            <select id="videoSource"></select>
-        </li>
 
-        <li class="nav-item" id="recording_status_container">
-            <span id="recording_status" class="badge">
-                Camera loaded 
-            </span>
-        </li>
-        
-        <ul>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <select id="videoSource"></select>
+            </li>
+            
+            <li class="nav-item" id="recording_status_container">
+              <span id="recording_status" class="badge">
+                  Camera loaded 
+              </span>
+            </li>
+          </ul>
+
+          <button id="save_video"  type="button" class="navbar-btn btn btn-outline-success btn-block" data-bs-toggle="modal" data-bs-target="#saveWanderpiModal">Save Wanderpi <i class="bi bi-save"></i></button>
+        </div>
     </div>    
 </nav>
 
@@ -95,7 +102,7 @@
                         <!-- <button type="button" value="Log-out"  onclick="javascript:window.location.href='{{ url_for('user.logout') }}'" class="btn btn-secondary">Log out</button> -->
                         <button id="download_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive">Download Wanderpi <i class="bi bi-file-arrow-down-fill"></i></button>                   
                     </div>
-                    <button id="save_video"  type="button" class="btn btn-outline-success btn-block" data-bs-toggle="modal" data-bs-target="#saveWanderpiModal">Save Wanderpi <i class="bi bi-save"></i></button>
+                   
                 </div> 
             </div>
         </div>
@@ -120,7 +127,7 @@
 
 <div class="top">
     <div class="recorder" id="recorder" align="center">
-        <script type="text/javascript" src="{{ url_for('static', filename='recorder.js') }}"></script>
+        <script type="text/javascript" src="/static/js/recorder.js"></script>
     </div>
 </div>
 

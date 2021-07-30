@@ -4,6 +4,8 @@ from datetime import timedelta
 
 UPLOAD_FOLDER = os.getcwd()+'/uploads/'
 STATIC_FOLDER = os.getcwd()+'/controller/static/'
+VIDEOS_FOLDER = os.getcwd()+'/controller/static/videos'
+
 
 class Config:
     # 调试模式
@@ -19,8 +21,6 @@ class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = logging.DEBUG
     UPLOAD_FOLDER = UPLOAD_FOLDER
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:manresa21@localhost:5432/wanderpi_db_test'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):
     # 上线配置

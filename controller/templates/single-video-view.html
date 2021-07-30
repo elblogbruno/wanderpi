@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Wanderpi</title>
+
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="../static/css/recording-screen-style.css" rel="stylesheet">
+    
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+
+    <script src="../static/js/single-video-view.js"></script>
+
+    <add name="Access-Control-Allow-Headers" value="*" />
+</head>
+
+<body>
+
+<!-- Modal -->
+<div class="modal fade" id="saveWanderpiModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Save Wanderpi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Name:</label>
+              <input id="name_input" type="text" class="form-control" id="recipient-name">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- style="background-color: #B6E4FF;" -->
+
+<!-- Image and text -->
+
+<nav class="navbar  sticky-top navbar-expand-sm navbar-light bg-light" style="background-color: #B6E4FF;">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" width="60" height="60" class="d-inline-block align-top" alt="">
+        </a>
+        <ul class="navbar-nav mr-auto mt-1 mt-lg-0">
+        <ul>
+    </div>    
+</nav>
+
+<div class="py-4">
+  <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
+          <div class="card h-100">
+              <div class="card-body" >
+                  <video class="player-overlay camera-view-responsive card-img-top" width="640" height="auto" controls>
+                      <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+                  </video>
+                  
+                  {% block content %}
+                  <h5 class="card-title"> {{ video.name }} </h5>
+                  <a> {{ video.created_date }}</a>
+                  <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ video.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                      <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                      <button id="delete_video" type="button"  onclick="window.location.href='/delete_video/{{ video.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                      <button id="edit_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
+                  </div>
+                  {% endblock %}    
+              </div>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
+          <div class="card h-100">
+              <div class="card-body">
+                  <div id="map-container-google-1" class="z-depth-1-half map-responsive" style="height: 480px">
+                  </div>
+                  <a id="gps_text" > </a>
+              </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<script>
+    var lat = '{{ video.lat }}';
+    var long  = '{{ video.long }}';
+    console.log(lat ,long);
+    showPosition(lat,long);
+</script>
+
+
+</body>
+</html>

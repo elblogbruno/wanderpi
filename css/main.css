@@ -1,0 +1,11 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  font-size: 14px;
+}
+.v9:41 {
+  background: url("../images/v9:41.png");
+  width: 340px;
+  height: 250px;
+}

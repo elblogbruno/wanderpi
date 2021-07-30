@@ -1,9 +1,10 @@
-from app import Wanderpi
 from os import name
-from config import UPLOAD_FOLDER
+from config import VIDEOS_FOLDER
 from flask import json, session, render_template, redirect, url_for, Response,request, jsonify,send_from_directory
 from controller.modules.home import home_blu
 from controller.utils.camera import VideoCamera
+from controller.models.models import Wanderpi
+
 
 video_camera_ids = [{"deviceId" : 0, "deviceLabel" : "Webcam"}, {"deviceId" : 1, "deviceLabel" : "Webcam1"}]
 
@@ -19,7 +20,25 @@ def index():
         return redirect(url_for("user.login"))
         
     wanderpis = Wanderpi.get_all()
-    return render_template("test.html", wanderpis=wanderpis)   
+    return render_template("index.html", wanderpis=wanderpis)   
+
+@home_blu.route('/delete_video/<string:id>')
+def delete_video(id):
+    print(id)
+    Wanderpi.delete(id)
+    return redirect("/", code=302)
+
+
+@home_blu.route('/<path:id>')
+def single_video(id):
+    # 模板渲染
+    username = session.get("username")
+    if not username:
+        session["initialized"] = False
+        return redirect(url_for("user.login"))
+        
+    wanderpi = Wanderpi.get_by_id(id)
+    return render_template("single-video-view.html", video=wanderpi)   
 
 # 主页
 @home_blu.route('/record')
@@ -103,7 +122,7 @@ def record_status():
 
 @home_blu.route('/uploads/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
-    return send_from_directory(directory=UPLOAD_FOLDER, path=filename, as_attachment=True)
+    return send_from_directory(VIDEOS_FOLDER, filename, as_attachment=True)
 
 
 @home_blu.route('/get_available_video_sources', methods=['GET', 'POST'])
@@ -114,7 +133,16 @@ def get_available_video_sources(): #todo get available video sources from databa
 def save_video(video_id): #todo get available video sources from database
     print("Saving video {0}".format(video_id))
     
-    wanderpi = Wanderpi(id=video_id, name="a", lat="a", long="a")
+    name = request.args.get('name', default=video_id)
+    if name == "":
+        name = video_id
+    lat_coord = request.args.get('lat')
+    long_coord = request.args.get('long')
+    thumbnail_url = "thumbnail-%s.jpg" % str(video_id)
+        
+    print(name, lat_coord, long_coord, thumbnail_url)
+
+    wanderpi = Wanderpi(id=video_id, name=name, lat=lat_coord, long=long_coord, thumbnail_url=thumbnail_url)
     wanderpi.save()
 
     return jsonify(devices = video_camera_ids)
