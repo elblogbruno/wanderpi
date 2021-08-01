@@ -2,3 +2,5 @@ flask
 opencv-python
 flask-sqlalchemy
 psycopg2
+moviepy
+geopy

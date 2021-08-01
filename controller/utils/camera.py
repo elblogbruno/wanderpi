@@ -12,6 +12,8 @@ class RecordingThread(threading.Thread):
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')
         self.video_id = str(uuid.uuid4()) 
         self.path = './controller/static/videos/' + str(self.video_id) + '.mp4'
+        self.path_rel = '/controller/static/videos/' + str(self.video_id) + '.mp4'
+        
         self.out = cv2.VideoWriter(self.path, fourcc, 20.0, (640, 480))
         self.latest_frame = None
 
@@ -75,3 +77,5 @@ class VideoCamera(object):
         cv2.imwrite(thumbnail_url, self.recordingThread.latest_frame)
 
         return self.recordingThread.video_id
+
+    

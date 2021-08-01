@@ -12,3 +12,17 @@ body {
     width: 200px;
 }
 
+@media (max-width: 768px) {
+    .btn-responsive {
+        width: 30px;
+        height: 30px;
+    }
+}
+  
+@media (min-width: 769px) and (max-width: 992px) {
+    .btn-responsive {
+        width: 60px;
+        height: 60px;
+    }
+}
+

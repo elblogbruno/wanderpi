@@ -9,6 +9,8 @@ var saveButtonModal = document.getElementById("save_request_button");
 
 var gps = document.getElementById("gps_text");
 var map = L.map('map-container-google-1');
+var video_name = "";
+var travel_id = "";
 
 saveButton.style.display = "none";
 downloadLink.style.display = "none";
@@ -17,6 +19,7 @@ statusBadgeContainer.style.display = "none";
 
 var lat = 0;
 var long = 0;
+var video_id = 0;
 
 function initializeDropdown() {
     
@@ -68,7 +71,16 @@ buttonRecord.onclick = function () {
     statusBadgeContainer.style.display = "block";
     statusBadge.innerHTML  = "Recording...";
 
-    xhr.open("POST", "/record_status");
+    var url = "/record_status";
+
+    console.log(video_id);
+
+    if (video_id != 0) 
+    {
+        url = "/record_status?video_id="+video_id;
+    } 
+
+    xhr.open("POST",  url);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({status: "true"}));
 
@@ -81,7 +93,10 @@ saveButtonModal.onclick = function () {
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
             console.log(xhr.responseText);
-            window.location.href = "/";
+            var response = JSON.parse(xhr.responseText);
+            if (response.status_code == 200) {
+                window.location.href = "/";
+            }
         }
     }
 
@@ -93,7 +108,7 @@ saveButtonModal.onclick = function () {
     url.searchParams.append('name', name_input.value);
     url.searchParams.append('lat', lat);
     url.searchParams.append('long', long);
-    
+    url.searchParams.append('travel_id', travel_id);
 
     xhr.open("POST", url.toString());
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -110,8 +125,10 @@ buttonStop.onclick = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
             console.log(xhr.responseText);
             obj = JSON.parse(xhr.responseText);
-            var video_id = obj.video_id;
+            video_id = obj.video_id;
             console.log(video_id);
+            video_name = obj.video_name;
+            gps.innerHTML = video_name;
 
             saveButton.style.display = "inline";
             saveButton.value = video_id;
@@ -130,10 +147,33 @@ buttonStop.onclick = function () {
 
     xhr.open("POST", "/record_status");
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "false"}));
+    xhr.send(JSON.stringify({status: "false", lat: lat, long: long}));
+
+    setTimeout(function () {
+        statusBadgeContainer.style.display = "none";
+    }, 2000);
 };
 
+var saveWanderpiModal = document.getElementById('saveWanderpiModal')
+saveWanderpiModal.addEventListener('show.bs.modal', function (event) {
+  // Button that triggered the modal
+  // var button = event.relatedTarget
+  // Extract info from data-bs-* attributes
+  var button = event.relatedTarget
+  // Extract info from data-bs-* attributes
+  travel_id = button.getAttribute('data-bs-whatever')
 
+  var recipient = video_name;
+  // If necessary, you could initiate an AJAX request here
+  // and then do the updating in a callback.
+  //
+  // Update the modal's content.
+  //var modalTitle = exampleModal.querySelector('.modal-title')
+  var modalBodyInput = saveWanderpiModal.querySelector('.modal-body input')
+
+  //modalTitle.textContent = 'New message to ' + recipient
+  modalBodyInput.value = recipient
+})
 
 //function that inits leaflet map but shows text that says start recording to show map
 function initializeMapAndLocator()

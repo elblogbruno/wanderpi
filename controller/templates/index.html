@@ -15,11 +15,22 @@
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://osmnames.org/api/v1/autocomplete.js"></script>
+    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+
+    <script src="../static/dist/leaflet-realtime.js"></script>
 
     <script src="../static/js/index.js"></script>
-    
-    
+
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
@@ -27,35 +38,80 @@
 
 
 
-<!-- style="background-color: #B6E4FF;" -->
-
-<!-- Image and text -->
-
-
+<!-- Modal -->
+<div class="modal fade" id="saveTravelModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">New Travel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+                <label for="recipient-name" class="col-form-label">Name:</label>
+                <input id="name_input" type="text" class="form-control" id="recipient-name">
+            </div>
+            <div class="mb-3">
+                <label for="recipient-name" class="col-form-label">Destination:</label>
+                <input id="destination_input" placeholder="Enter your address"  type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="recipient-name" class="col-form-label">Start Date:</label>
+                <input id="start_date_input" type="date" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="recipient-name" class="col-form-label">End Date:</label>
+                <input id="end_date_input" type="date" class="form-control">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
     <div class="container-fluid">
+        <a class="navbar-brand mt-2 mt-lg-0" href="/">
+            <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
+        </a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <a class="navbar-brand" href="/">
-                <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" width="60" height="60" class="d-inline-block align-top" alt="">
-            </a>
-            
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                <li class="nav-item">
-                    <button id="new_wanderpi" type="button" onclick="window.location.href='/record'" class="btn btn-outline-primary btn-block btn-responsive">Record a new Wanderpi <i class="bi bi-plus-square"></i></button>
-                </li>
-            <ul>
+        {% if travels|length > 0 %} 
+        <h1 class=" mt-2 mt-lg-0">{{ travels|length }} travels</h1>
+        {% else %}
+        <h1 class=" mt-2 mt-lg-0">No travels</h1>
+        {% endif %}
 
-            <form class="d-flex">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
-        </div> 
+        <div class="d-flex align-items-center">
+                
+                <button id="new_travel" type="button" data-bs-toggle="modal" data-bs-target="#saveTravelModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+                
+                {% if travels|length > 0 %} 
+                    <form class="d-flex input-group w-auto">
+                        <input
+                          type="search"
+                          class="form-control"
+                          placeholder="Type query"
+                          aria-label="Search"
+                        />
+                        <button
+                          class="btn btn-outline-primary"
+                          type="button"
+                          data-mdb-ripple-color="dark"
+                        >
+                          Search
+                        </button>
+                      </form>
+                {% endif %}
+
+                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-link px-3 me-2">Logout</button>
+
+        </div>
+
     </div>    
 </nav>
 
@@ -64,22 +120,39 @@
     <div class="container-fluid">
         <!-- <div class="row hidden-md-up"> -->
             {% block content %}
-                {% if wanderpis|length > 0 %}     
+                {% if travels|length > 0 %}     
                 <div class="row">
-                    {% for post in wanderpis %}
+                    {% for post in travels %}
                         <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
                             <div class="card h-100">
-                                   
+                    
                                 <div class="card-body">
-                                    <a href="{{ post.id }}"> <img class="camera-view-responsive card-img-top" src="/static/thumbnails/{{ post.thumbnail_url }}"></img></a>
-                                 
-                                    <h5 class="card-title" href="{{ post.id }}"> {{ post.name }} </h5>
+                                    <div id="map-container-google-{{ post.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div>
+
+                                    <h5 class="card-title" href="travel/{{ post.id }}"> {{ post.name }} </h5>
+
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.destination }}</span>
+                                        </div>
+
+                                        <div class="col">
+                                            <i class="card-text pull-right bi bi-calendar3-range"></i><span> {{ post.start_date }} - {{ post.end_date }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ post.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
-                                        <button id="share_video" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_video" type="button"  onclick="window.location.href='/delete_video/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                                        <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
+                                        <button id="share_travel" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                                     </div>
+
+                                    <script>
+                                        initializeMapAndLocator("{{ post.id }}","{{ post.destination }}",);
+                                    </script>
+
                                 </div>
                             </div>    
                         </div>
@@ -89,33 +162,32 @@
                         <div class="card h-100">
                                
                             <div class="card-body">
-                                <a onclick="window.location.href='/record'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5>
+                                <a data-bs-toggle="modal" data-bs-target="#saveTravelModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
+                                <h5 class="card-title text-center"> New Travel </h5>
                             </div>
                         </div>    
                     </div>
                 </div>
                 {% else %}
-                    <!-- <div class="col-md d-flex align-items-stretch">
-                        <div class="card mx-auto border-dark  mb-3" style="max-width: 18rem;">
-                            <div class="card-header mx-auto bg-transparent border-dark">No wanderpis available</div>
-                            <img class="card-img-top mx-auto" style="width: 300px;" id="video" src="{{ url_for('static', filename='no_videos_icon.png') }}">
-                            
-                            <div class="mx-auto card-footer bg-transparent border-dark"><button id="new_wanderpi" type="button" onclick="window.location.href='/record'" class="btn btn-outline-secondary btn-block btn-responsive">Record a new Wanderpi <i class="bi bi-file-arrow-down-fill"></i></button>                   
-                        </div>
-                    </div> -->
+                    
                     <div class="col-md d-flex"> 
                         <div class="card mx-auto h-100">
                                
                             <div class="card-body">
-                                <a onclick="window.location.href='/record'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5>
+                                <a data-bs-toggle="modal" data-bs-target="#saveTravelModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
+                                <h5 class="card-title text-center"> New Travel </h5>
                             </div>
                         </div>    
                     </div>
                 {% endif %} 
             {% endblock %}    
         <!-- </div> -->
+    </div>
+</div>
+
+<div class="top">
+    <div class="recorder" id="recorder" align="center">
+        <script type="text/javascript" src="/static/js/index.js"></script>
     </div>
 </div>
 
