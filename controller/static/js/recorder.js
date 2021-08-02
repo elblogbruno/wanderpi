@@ -178,6 +178,8 @@ saveWanderpiModal.addEventListener('show.bs.modal', function (event) {
 //function that inits leaflet map but shows text that says start recording to show map
 function initializeMapAndLocator()
 { 
+    var pathCoords = [];
+    
     googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
             maxZoom: 20,
             subdomains:['mt0','mt1','mt2','mt3']
@@ -191,12 +193,18 @@ function initializeMapAndLocator()
     
     function onLocationFound(e) 
     {
-        console.log(e);
-        var radius = e.accuracy / 2;
-        lat = e.latitude;
-        long = e.longitude;
-        L.marker(e.latlng).addTo(map).bindPopup("You are within " + radius + " meters from this point").openPopup();
-        L.circle(e.latlng, radius).addTo(map);
+        // console.log(e);
+        // var radius = e.accuracy / 2;
+        // lat = e.latitude;
+        // long = e.longitude;
+        // L.marker(e.latlng).addTo(map).bindPopup("You are within " + radius + " meters from this point").openPopup();
+        // L.circle(e.latlng, radius).addTo(map);
+
+        pathCoords.push(e.latlng);
+
+        var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
+
+        map.fitBounds(pathLine.getBounds());
     }
     
     map.on('locationfound', onLocationFound);

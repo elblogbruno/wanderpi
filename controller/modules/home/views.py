@@ -189,12 +189,15 @@ def save_video(video_id): #todo get available video sources from database
         name = video_id
     lat_coord = request.args.get('lat')
     long_coord = request.args.get('long')
+
+    adress = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
+
     travel_id = request.args.get('travel_id')
     thumbnail_url = "thumbnail-%s.jpg" % str(video_id)
         
     print(name, lat_coord, long_coord, thumbnail_url)
 
-    wanderpi = Wanderpi(id=video_id, name=name, lat=lat_coord, long=long_coord, thumbnail_url=thumbnail_url, travel_id=travel_id)
+    wanderpi = Wanderpi(id=video_id, name=name, lat=lat_coord, long=long_coord, thumbnail_url=thumbnail_url, travel_id=travel_id, adress=adress)
     wanderpi.save()
 
     return jsonify(status_code = 200, message = "OK")

@@ -71,6 +71,8 @@ function initializeMapAndLocator(travel_id, travel_destination)
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
 
         map.fitBounds(pathLine.getBounds());
+
+        setInterval(locate, 5000);
     }
     
     map.on('locationfound', onLocationFound);
@@ -85,12 +87,9 @@ function initializeMapAndLocator(travel_id, travel_destination)
               var long = response.long;
 
               console.log(lat, long);
-
-              map.locate({setView: true, 
-                maxZoom: 10, 
-                watch:true,
-                enableHighAccuracy: true
-              });
+          
+              // call locate every 3 seconds... forever
+              locate();
               
               pathCoords.push(new L.LatLng(lat, long));
             }
@@ -98,6 +97,10 @@ function initializeMapAndLocator(travel_id, travel_destination)
             {
               console.log(response.status_code);
             }
+        }
+
+        function locate() {
+          map.locate({setView: true, maxZoom: 16});
         }
     }
 
@@ -111,3 +114,23 @@ function initializeMapAndLocator(travel_id, travel_destination)
     
 }
     
+
+//Get the button:
+mybutton = document.getElementById("myBtn");
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 10 || document.documentElement.scrollTop > 10) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0; // For Safari
+  document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+}
