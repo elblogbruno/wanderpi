@@ -18,10 +18,10 @@ class GeoCodeUtils:
         return location.address
 
     @staticmethod
-    def reverse_adress(adress):
+    def reverse_address(address):
         """Function that having an adress translates it to a lat and long values"
         """
         locator = Nominatim(user_agent="openmapquest")
-        location = locator.geocode(adress)
+        location = locator.geocode(address)
         print(location)
         return location.latitude, location.longitude

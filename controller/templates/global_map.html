@@ -47,13 +47,15 @@
 
         <div class="d-flex align-items-center">
                 <button id="new_wanderpi" type="button" onclick="window.location.href='{{ url_for('home.record', travel_id='{{ travel.id }}') }}'" class="btn btn-primary me-3">New <i class="bi bi-plus-square"></i></button>
-                
-                <button id="download_global_video" type="button" onclick="window.location.href='{{ url_for('home.record', travel_id='{{ travel.id }}') }}'" class="btn btn-primary me-3">Download video <i class="bi bi-plus-square"></i></button>
+                <button id="download_all_wanderpis" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" type="button"  class="btn btn-primary me-3"><i class="bi bi-file-earmark-arrow-down"></i></button>
         </div>
 
     </div>    
 </nav>
 
+<div id="dinamic-modal-body">
+
+</div>
 
 <div class="py-4">
     <div class="container-fluid">
@@ -80,9 +82,11 @@
     
 </div>
 
-<script>
-    
-</script>
+<div class="top">
+    <div class="recorder" id="recorder" align="center">
+        <script type="text/javascript" src="/static/js/download_handling.js"></script>
+    </div>
+</div>
 
 </body>
 </html>

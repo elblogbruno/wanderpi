@@ -95,7 +95,7 @@ saveButtonModal.onclick = function () {
             console.log(xhr.responseText);
             var response = JSON.parse(xhr.responseText);
             if (response.status_code == 200) {
-                window.location.href = "/";
+                window.location.href = "/travel/"+travel_id;
             }
         }
     }

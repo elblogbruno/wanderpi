@@ -35,7 +35,12 @@ def create_app(config_type):  # 封装web应用的创建过程
     app.register_blueprint(home_blu)
     from controller.modules.user import user_blu
     app.register_blueprint(user_blu)
-
+    from controller.modules.video import video_blu
+    app.register_blueprint(video_blu)
+    from controller.modules.travel import travel_blu
+    app.register_blueprint(travel_blu)
+    from controller.modules.record import record_blu
+    app.register_blueprint(record_blu)
     # 设置日志
     setup_log(config_class.LOG_LEVEL)
 

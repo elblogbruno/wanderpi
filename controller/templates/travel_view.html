@@ -15,22 +15,13 @@
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
    
+    <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-    <!-- <script src="../static/js/index.js"></script> -->
-    
-    
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
 <body>
-
-
-
-<!-- style="background-color: #B6E4FF;" -->
-
-<!-- Image and text -->
-
 
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
@@ -44,11 +35,13 @@
 
         <div class="d-flex align-items-center">
                 
-                
                 <button id="new_wanderpi" type="button" onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+                
+                {% if wanderpis|length > 0 %} 
+                <button id="download_all_wanderpis" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" type="button"  class="btn btn-primary me-3"><i class="bi bi-file-earmark-arrow-down"></i></button>
+                
                 <button id="global_map" type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-primary me-3"><i class="bi bi-map"></i></button>
 
-                {% if wanderpis|length > 0 %} 
                     <form class="d-flex input-group w-auto">
                         <input
                           type="search"
@@ -73,6 +66,9 @@
     </div>    
 </nav>
 
+<div id="dinamic-modal-body">
+
+</div>
 
 <div class="py-4">
     <div class="container-fluid">
@@ -91,7 +87,11 @@
                                     
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.destination }}</span>
+                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.address }}</span>
+                                        </div>
+
+                                        <div class="col">
+                                            <i class="card-text pull-right bi bi-stopwatch"></i><span> {{ post.time_duration }}</span>
                                         </div>
                                     </div>
                                     
@@ -134,7 +134,11 @@
     </div>
 </div>
 
-
+<div class="top">
+    <div class="recorder" id="recorder" align="center">
+        <script type="text/javascript" src="/static/js/download_handling.js"></script>
+    </div>
+</div>
 
 </body>
 </html>

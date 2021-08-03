@@ -133,15 +133,15 @@
 
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.destination }}</span>
+                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ post.destination }}</span>
                                         </div>
 
                                         <div class="col">
-                                            <i class="card-text pull-right bi bi-calendar3-range"></i><span> {{ post.start_date }} - {{ post.end_date }}</span>
+                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ post.start_date }} - {{ post.end_date }}</span>
                                         </div>
                                     </div>
                                     
-                                    <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
+                                    <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
                                         <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    

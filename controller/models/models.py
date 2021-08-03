@@ -9,8 +9,10 @@ class Wanderpi(db.Base):
     name = Column(String(256), nullable=False)
     lat = Column(String(256), nullable=False)
     long = Column(String(256), nullable=False)
-    adress = Column(String(256), nullable=False)
+    address = Column(String(256), nullable=False)
+    time_duration = Column(Integer, nullable=False)
     thumbnail_url = Column(String(256), nullable=False)
+    video_location_path = Column(String(256), nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow)
     travel_id = Column(String(256), nullable=False)
 

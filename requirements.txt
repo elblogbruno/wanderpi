@@ -4,3 +4,4 @@ flask-sqlalchemy
 psycopg2
 moviepy
 geopy
+ffmpeg-python
