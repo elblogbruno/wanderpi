@@ -1,21 +1,61 @@
 from moviepy import *
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, concatenate_videoclips
 
 import os
 class VideoEditor:
 
     @staticmethod
-    def AddTitleToVideo(video_path, title="My Holidays 2013"):
+    def AddTitleToVideo(video_path, video_id, title="My Holidays 2013"):
         """
-        Add title to video
+        Add a first clip to the video with the video title on the center of the screen
         """
-        #video_path = os.path.abspath(video_path)
-        # video = VideoFileClip(video_path)
+        clip = VideoFileClip(video_path)
 
-        # # Make the text. Many more options are available.
-        # txt_clip = ( TextClip(title,fontsize=70,color='white')
-        #             .with_position('center')
-        #             .with_duration(10) )
+        w,h = moviesize = clip.size
 
-        # result = CompositeVideoClip([video, txt_clip]) # Overlay text on video
-        # result.write_videofile(video_path, fps=25) 
+        # clip = clip.subclip(0, clip.duration)
+        # txt_clip = TextClip(title, fontsize=30, color='white').set_duration(1)
+        # clip = CompositeVideoClip([clip, txt_clip])
+        # clip = clip.set_pos(('center', 'bottom'))
+
+        # A CLIP WITH A TEXT AND A BLACK SEMI-OPAQUE BACKGROUND
+
+        txt = TextClip(title, font='Amiri-regular',
+                        color='white',fontsize=24).set_duration(clip.duration)
+
+        txt_col = txt.on_color(size=(clip.w + txt.w,txt.h-10),
+                        color=(0,0,0), pos=(6,'center'), col_opacity=0.6)
+
+
+        # THE TEXT CLIP IS ANIMATED.
+        # I am *NOT* explaining the formula, understands who can/want.
+        txt_mov = txt_col.set_pos( lambda t: (max(w/30,int(w-0.5*w*t)),
+                                        max(5*h/6,int(100*t))))
+
+        final = CompositeVideoClip([clip,txt_mov])
+
+        path_temp = './controller/static/videos/' + str(video_id) + '-edited.mp4'
+
+        final.write_videofile(path_temp, fps=25,codec='libx264') 
+
+        os.remove(video_path)
+        os.rename(path_temp, video_path)
+    
+    @staticmethod
+    def JoinVideos(videos_path, video_id):
+        video_clips = []
+        for path in videos_path:
+            #we use VideoFileClip() class create two video object, then we will merge them.
+            video_1 = VideoFileClip(path)
+            video_clips.append(video_1)
+
+        #Merge videos with concatenate_videoclips()
+        final_video = concatenate_videoclips(video_clips)
+
+        video_path = './controller/static/videos/' + str(video_id) + '.mp4'  
+        path_temp = './controller/static/videos/' + str(video_id) + '-edited.mp4'
+
+        final_video.write_videofile(path_temp, fps=25,codec='libx264') 
+
+        os.remove(video_path)
+        os.rename(path_temp, video_path)

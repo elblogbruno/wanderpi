@@ -1,28 +1,43 @@
 import cv2
 import threading
 import uuid
+import numpy as np
+import requests
+from time import sleep
 # import the necessary packages
-from picamera.array import PiRGBArray # Generates a 3D RGB array
-from picamera import PiCamera # Provides a Python interface for the RPi Camera Module
+try:
+    from picamera.array import PiRGBArray # Generates a 3D RGB array
+    from picamera import PiCamera # Provides a Python interface for the RPi Camera Module
+except ImportError:
+    print("Picamera not supported on windows")
+
 import time # Provides time-related functions
 
 class RecordingThread(threading.Thread):
-    def __init__(self, name, camera):
+    def __init__(self, name, camera, use_mjpg_cc = False):
         threading.Thread.__init__(self)
         self.name = name
         self.isRunning = True
-
         self.cap = camera
-        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        
+        if use_mjpg_cc:
+            print("Using mjpg cc")
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        else:
+            print("Using FMP4 cc")
+            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+      
         self.video_id = str(uuid.uuid4()) 
         self.path = './controller/static/videos/' + str(self.video_id) + '.mp4'
         self.path_rel = '/controller/static/videos/' + str(self.video_id) + '.mp4'
         
-        self.out = cv2.VideoWriter(self.path, fourcc, 20.0, (640, 480))
+        self.out = cv2.VideoWriter(self.path, fourcc, 25, (640, 480))
         self.latest_frame = None
 
     def run(self):
+        sleep(0.5)
         while self.isRunning:
+            sleep(0.01)
             ret, frame = self.cap.read()
             if ret:
                 self.out.write(frame)
@@ -38,20 +53,33 @@ class RecordingThread(threading.Thread):
 
 
 class VideoCamera(object):
-    def __init__(self, camera_id=0):
-        self.is_picamera = False
-        if 'picamera' in camera_id:
+    def __init__(self, camera_id=0, is_mjpeg=False, is_picamera=False, username="", password=""):
+        self.camera_id = camera_id
+        self.is_picamera = is_picamera
+        self.is_mjpeg = is_mjpeg
+        
+        
+        if self.is_picamera:
             self.cap, self.raw_capture = self.init_picamera()
-            self.is_picamera = True
+        elif not is_mjpeg:
+            if 'mjpg' in str(camera_id):
+                self.cap = cv2.VideoCapture(camera_id, cv2.CAP_OPENCV_MJPEG)
+                self.use_mjpg_cc = True
+            else:
+                self.cap = cv2.VideoCapture(camera_id, cv2.CAP_ANY)
+                self.use_mjpg_cc = False
         else:
-            self.cap = cv2.VideoCapture(camera_id, cv2.CAP_DSHOW)
+            self.bytes = bytes()
+            self.username = username
+            self.password = password
+            self.cap = None
+            print(self.camera_id, username, password)
+            self.stream = requests.get(self.camera_id, auth=(username,  password), stream=True)
 
-        # 初始化视频录制环境
         self.is_record = False
         self.out = None
 
-        # 视频录制线程
-        self.recordingThread = None
+        self.recording_thread = None
 
     def init_picamera (self):
         camera = PiCamera()
@@ -62,7 +90,6 @@ class VideoCamera(object):
         return camera, raw_capture
 
 
-    # 退出程序释放摄像头
     def __del__(self):
         self.cap.release()
 
@@ -85,33 +112,57 @@ class VideoCamera(object):
 
                 else:
                     return None
-        else:
-            ret, frame = self.cap.read()
+        elif not self.is_mjpeg:
+            self.ret, self.frame = self.cap.read()
 
-            if ret:
-                ret1, jpeg = cv2.imencode('.jpg', frame)
+            if self.ret:
+                ret1, jpeg = cv2.imencode('.jpg', self.frame)
 
                 if ret1:
                     return jpeg.tobytes()
 
             else:
                 return None
+        else:
+            if self.stream.status_code == 200:
+                print("reading from mjpeg camera")
+                for chunk in  self.stream.iter_content(chunk_size=1024):
+                    self.bytes += chunk
+                    a = self.bytes.find(b'\xff\xd8') # JPEG start
+                    b = self.bytes.find(b'\xff\xd9') # JPEG end
+                    if a !=-1 and b !=-1:
+                        jpg = self.bytes[a:b+2] # actual image
+                        self.bytes = self.bytes[b+2:] # other informations
+                        
+                        img = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.IMREAD_COLOR) 
+
+                        return img.tobytes()
+                    else:
+                        return None
+            else:
+                print("Received unexpected status code {}".format(self.stream.status_code))
+                return None
 
     def start_record(self):
         self.is_record = True
-        self.recordingThread = RecordingThread("Video Recording Thread", self.cap)
-        self.recordingThread.start()
-        return self.recordingThread.video_id
+        self.recording_thread = RecordingThread("Video Recording Thread", self.cap, self.use_mjpg_cc)
+        self.recording_thread.start()
+        return self.recording_thread.video_id
 
     def stop_record(self):
         self.is_record = False
 
-        if self.recordingThread != None:
-            self.recordingThread.stop()
+        if self.recording_thread != None:
+            self.recording_thread.stop()
 
-        thumbnail_url = "./controller/static/thumbnails/thumbnail-%s.jpg" % str(self.recordingThread.video_id)
-        cv2.imwrite(thumbnail_url, self.recordingThread.latest_frame)
+        thumbnail_url = "./controller/static/thumbnails/thumbnail-%s.jpg" % str(self.recording_thread.video_id)
+        
+        if len(self.recording_thread.latest_frame) > 0:
+            cv2.imwrite(thumbnail_url, self.recording_thread.latest_frame)
+        else:
+            print("No frame to save")
+            return None
 
-        return self.recordingThread.video_id
+        return self.recording_thread.video_id
 
     

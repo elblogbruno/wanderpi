@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from controller.modules.video.video_utils import VideoUtils
 from controller.models.models import Wanderpi
 from controller.modules.home.geocode_utils import GeoCodeUtils
@@ -24,11 +25,15 @@ def save_video(video_id): #todo get available video sources from database
 
     lat_coord = request.args.get('lat')
     long_coord = request.args.get('long')
-    video_location_path  = '/controller/static/videos/' + str(video_id) + '.mp4'
+    video_location_path  = './controller/static/videos/' + str(video_id) + '.mp4'
     thumbnail_url = "thumbnail-%s.jpg" % str(video_id)
 
     address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
-    time_duration = VideoUtils.get_video_info(video_location_path) 
+
+    a = VideoUtils.get_video_info(video_location_path)
+    print(a)
+
+    time_duration = a
 
     video = Wanderpi(id=video_id, name=name, lat=lat_coord, long=long_coord, thumbnail_url=thumbnail_url, travel_id=travel_id, address=address, time_duration=time_duration, video_location_path=video_location_path)
     video.save()

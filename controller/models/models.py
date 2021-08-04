@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import db
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Date
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Date, Time
 from datetime import datetime
 
 class Wanderpi(db.Base):
@@ -10,7 +10,7 @@ class Wanderpi(db.Base):
     lat = Column(String(256), nullable=False)
     long = Column(String(256), nullable=False)
     address = Column(String(256), nullable=False)
-    time_duration = Column(Integer, nullable=False)
+    time_duration = Column(Float, nullable=False)
     thumbnail_url = Column(String(256), nullable=False)
     video_location_path = Column(String(256), nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow)

@@ -5,7 +5,7 @@ var statusBadge = document.getElementById("recording_status");
 var downloadLink = document.getElementById("download_video");
 var saveButton = document.getElementById("save_video");
 var saveButtonModal = document.getElementById("save_request_button");
-
+var cameraDropdown = document.querySelector('select#videoSource');
 
 var gps = document.getElementById("gps_text");
 var map = L.map('map-container-google-1');
@@ -21,6 +21,25 @@ var lat = 0;
 var long = 0;
 var video_id = 0;
 
+//when camera dropdwon is changed, it will change the video source
+cameraDropdown.onchange = function () {
+    var videoSource = cameraDropdown.options[cameraDropdown.selectedIndex].value;
+    var player = document.getElementById("video");
+    
+    player.src =  `/video_feed/${videoSource}/`;
+}
+
+function initializeCameraView(){
+    var card = document.getElementById("video-card-body");
+    
+    var player = document.createElement("img");
+    player.id = "video";
+    player.className =  "camera-view-responsive card-img-top";
+    player.src = '/video_feed/0/';
+
+    card.appendChild(player);
+}
+
 function initializeDropdown() {
     
     var xhr = new XMLHttpRequest();
@@ -32,7 +51,10 @@ function initializeDropdown() {
             for(var i = 0; i < devices.length; i ++){
                 var device = devices[i];
                 var option = document.createElement('option');
-                option.value = device.deviceId;
+                if (i == 0) {
+                    option.setAttribute('selected', 'selected');
+                }
+                option.value = device.index;
                 option.text = device.deviceLabel || 'camera ' + (i + 1);
                 document.querySelector('select#videoSource').appendChild(option);
             };
@@ -48,15 +70,41 @@ function initializeDropdown() {
 
 window.addEventListener('DOMContentLoaded', (event) => {
     initializeDropdown();
+    initializeCameraView();
 });
 
+var stopTimerControl = false;
+var counter = 0;
+var timer = counter, minutes, seconds;
+
+function resetTimer(){
+    stopTimerControl = false;
+    counter = 0;
+}
+function stopTimer(){
+    stopTimerControl = true;
+    counter = 0;
+}
+function startTimer()  {  
+    
+    setInterval(function () {
+        if (!stopTimerControl) {
+            minutes = parseInt(timer / 60, 10)
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            statusBadge.textContent = minutes + ":" + seconds;
+
+            timer++;
+        }
+    }, 1000);
+}
 
 buttonRecord.onclick = function () {
-    // var url = window.location.href + "record_status";
-    buttonRecord.disabled = true;
-    buttonStop.disabled = false;
-    saveButton.style.display = "none";
-    downloadLink.style.display = "none";
+    setOnVideoStartUI();
+
     // XMLHttpRequest
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -64,12 +112,6 @@ buttonRecord.onclick = function () {
             console.log(xhr.responseText);
         }
     }
-    
-    statusBadge.classList.remove('bg-success');
-    statusBadge.classList.add('bg-danger');
-    
-    statusBadgeContainer.style.display = "block";
-    statusBadge.innerHTML  = "Recording...";
 
     var url = "/record_status";
 
@@ -84,7 +126,11 @@ buttonRecord.onclick = function () {
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({status: "true"}));
 
+
     initializeMapAndLocator();
+    
+    resetTimer();
+    startTimer();
 };
 
 saveButtonModal.onclick = function () {
@@ -115,29 +161,23 @@ saveButtonModal.onclick = function () {
     xhr.send();
 };
 
-buttonStop.onclick = function () {
+function setOnVideoStartUI(){
+    buttonRecord.disabled = true;
+    buttonStop.disabled = false;
+    saveButton.style.display = "none";
+    downloadLink.style.display = "none";
+
+    statusBadge.classList.remove('bg-success');
+    statusBadge.classList.add('bg-danger');
+    
+    statusBadgeContainer.style.display = "block";
+    statusBadge.innerHTML  = "Recording...";
+}
+
+function setOnVideoStopUI(){
     buttonRecord.disabled = false;
     buttonStop.disabled = true;
 
-    // XMLHttpRequest
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.responseText);
-            obj = JSON.parse(xhr.responseText);
-            video_id = obj.video_id;
-            console.log(video_id);
-            video_name = obj.video_name;
-            gps.innerHTML = video_name;
-
-            saveButton.style.display = "inline";
-            saveButton.value = video_id;
-            downloadLink.style.display = "inline";
-            downloadLink.onclick = function () {
-                window.location.href = "/uploads/" + video_id + '.mp4';
-            }
-        }
-    }
     statusBadge.innerHTML  = "Stopped";
 
     statusBadge.classList.remove('bg-danger');
@@ -145,13 +185,48 @@ buttonStop.onclick = function () {
 
     map.stopLocate();
 
-    xhr.open("POST", "/record_status");
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "false", lat: lat, long: long}));
-
     setTimeout(function () {
         statusBadgeContainer.style.display = "none";
     }, 2000);
+
+    var video_info_text = document.getElementById("video_info_text");
+    video_info_text.textContent = "Video name: " + video_name + " Duration: " + minutes + ":" + seconds;
+}
+
+buttonStop.onclick = function () {
+    stopTimer();
+    // XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.responseText);
+            obj = JSON.parse(xhr.responseText);
+
+            if (obj.status_code == 200) {
+                video_id = obj.video_id;
+                
+                video_name = obj.video_name;
+                gps.innerHTML = video_name;
+
+                saveButton.style.display = "inline";
+                saveButton.value = video_id;
+                downloadLink.style.display = "inline";
+                downloadLink.onclick = function () {
+                    window.location.href = "/uploads/" + video_id + '.mp4';
+                }
+
+                setOnVideoStopUI();
+                
+            }else{
+                alert("Something went wrong");
+            }
+        }
+    }
+    
+
+    xhr.open("POST", "/record_status");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify({status: "false", lat: lat, long: long}));
 };
 
 var saveWanderpiModal = document.getElementById('saveWanderpiModal')
@@ -193,13 +268,6 @@ function initializeMapAndLocator()
     
     function onLocationFound(e) 
     {
-        // console.log(e);
-        // var radius = e.accuracy / 2;
-        // lat = e.latitude;
-        // long = e.longitude;
-        // L.marker(e.latlng).addTo(map).bindPopup("You are within " + radius + " meters from this point").openPopup();
-        // L.circle(e.latlng, radius).addTo(map);
-
         pathCoords.push(e.latlng);
 
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
@@ -209,44 +277,4 @@ function initializeMapAndLocator()
     
     map.on('locationfound', onLocationFound);
     
-}
-    
-    
-
-var pointList = [];
-
-function showPosition(position) {
-    var crd = position.coords;
-    console.log('Your current position is:');
-    console.log('Latitude : ' + crd.latitude);
-    console.log('Longitude: ' + crd.longitude);
-    console.log('More or less ' + crd.accuracy + ' meters.');
-
-    gps.innerHTML = crd.latitude + " " + crd.longitude;
-
-    // var mymap = L.map('map-container-google-1').setView([ position.coords.latitude, position.coords.longitude], 13);
-    
-    
-
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(mymap);
-
-    realtime.on('update', function() {
-        mymap.fitBounds(realtime.getBounds(), {maxZoom: 3});
-        gps.innerHTML = realtime.latitude + " " + realtime.longitude;
-    });
-
-    // var pointA = new L.LatLng(position.coords.latitude, position.coords.longitude);
-    
-    // pointList.push(pointA);
-
-    // var firstpolyline = new L.Polyline(pointList, {
-    //     color: 'red',
-    //     weight: 3,
-    //     opacity: 0.5,
-    //     smoothFactor: 1
-    // });
-
-    // firstpolyline.addTo(mymap);
 }

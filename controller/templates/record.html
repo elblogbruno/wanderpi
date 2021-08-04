@@ -81,29 +81,36 @@
 
 <div class="py-4">
 <div class="container">
-    <div class="row hidden-md-up">
-      <div class="col-md d-flex align-items-stretch">
+    <div class="row">
+      <div class="col-md mb-4">
         <div class="card h-100">
-            <div class="card-body" >
-                <img class="camera-view-responsive card-img-top" id="video" src="{{ url_for('record.video_feed', camera_id=0) }}">
-                
+            <div class="card-body">
+                <!-- <img class="camera-view-responsive card-img-top" id="video" src="{{ url_for('record.video_feed', camera_id=0) }}"> -->
+                <div id="video-card-body">
+
+                </div>
+
                 <div class="gap-2 mx-auto pb-4"> 
                   <select class="form-select" id="videoSource"></select>
                 </div> 
-
+                
+               
                 <div class="container">
                     <div class="gap-2 mx-auto btn-group">
                         <button id="record" type="button" class="btn  btn-outline-info btn-block  btn-responsive ">Record Wanderpi <i class="bi bi-record2"></i></button>
                         <button id="stop" type="button" class="btn btn-outline-danger btn-block btn-responsive ">Stop Recording <i class="bi bi-stop-fill"></i></button>
                         <button id="download_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive">Download Wanderpi <i class="bi bi-file-arrow-down-fill"></i></button>                   
                     </div>
+
+                    <div class="gap-2 mx-auto pt-4"> 
+                      <p class="card-text"  id="video_info_text" > </p>
+                    </div> 
                 </div> 
-                
             </div>
         </div>
       </div>
       
-      <div class="col-md">
+      <div class="col-md mb-4">
         <div class="card h-100">
             <div class="card-body">
                 <div id="map-container-google-1" class="z-depth-1-half map-responsive" style="height: 500px">

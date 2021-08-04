@@ -1,4 +1,4 @@
-import ffmpeg
+import moviepy.editor as mp
 
 class VideoUtils:
     @staticmethod
@@ -7,5 +7,5 @@ class VideoUtils:
         Returns a dictionary with the video info.
         """
         #vid_info = ffmpeg.probe(path)
-        vid_info = "dsds"
-        return vid_info
+        #vid_info = "dsds"
+        return mp.VideoFileClip(path).duration
