@@ -52,15 +52,15 @@ def global_map(travel_id):
     wanderpis = travel.get_all_wanderpis()
     return render_template("global_map.html", wanderpis=wanderpis, travel=travel)   
 
-@home_blu.route('/video/<path:id>')
-def single_video(id):
+@home_blu.route('/file/<path:id>')
+def single_file(id):
     username = session.get("username")
     if not username:
         session["initialized"] = False
         return redirect(url_for("user.login"))
         
     wanderpi = Wanderpi.get_by_id(id)
-    return render_template("single-video-view.html", video=wanderpi)   
+    return render_template("single_video_view.html", file=wanderpi)   
 
 
 @home_blu.route('/record/<string:travel_id>')

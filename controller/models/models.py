@@ -1,20 +1,21 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import db
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Date, Time
+from sqlalchemy import Column, Boolean, String, Float, DateTime, Text, Date, Time
 from datetime import datetime
 
 class Wanderpi(db.Base):
-    __tablename__ = 'video'
+    __tablename__ = 'wanderpi'
     id = Column(String(256), primary_key=True)
     name = Column(String(256), nullable=False)
     lat = Column(String(256), nullable=False)
     long = Column(String(256), nullable=False)
     address = Column(String(256), nullable=False)
     time_duration = Column(Float, nullable=False)
-    thumbnail_url = Column(String(256), nullable=False)
-    video_location_path = Column(String(256), nullable=False)
+    file_thumbnail_path = Column(String(256), nullable=False)
+    file_path = Column(String(256), nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow)
     travel_id = Column(String(256), nullable=False)
+    is_image = Column(Boolean)
 
     def __repr__(self):
         return f'<User {self.id}>'

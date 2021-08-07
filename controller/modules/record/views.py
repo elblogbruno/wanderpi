@@ -139,7 +139,7 @@ def record_status():
             return jsonify(result="failed", status_code=400)
 
         if len(temp_video_to_join) > 0:
-            p = '/controller/static/videos/' + str(video_id) + '.mp4'
+            p = './controller/static/videos/' + str(video_id) + '.mp4'
             temp_video_to_join.append(p)
             #video_id = video_id + "joined"
             print(temp_video_to_join)

@@ -5,11 +5,11 @@ from flask import redirect, request, jsonify
 from datetime import *
 import uuid
 
-@travel_blu.route('/delete_travel/<string:id>')
-def delete_travel(id):
-    travel = Travel.get_by_id(id)
+@travel_blu.route('/delete_travel/<string:travel_id>')
+def delete_travel(travel_id):
+    travel = Travel.get_by_id(travel_id)
     travel.delete_all_wanderpis()
-    Travel.delete(id)
+    Travel.delete(travel_id)
     return redirect("/", code=302)
 
 def toDate(dateString):

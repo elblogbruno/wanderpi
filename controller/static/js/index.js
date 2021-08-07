@@ -1,5 +1,8 @@
-var saveButtonModal = document.getElementById("save_request_button");
-var saveWanderpiModal = document.getElementById('saveTravelModal')
+//when document has loaded initmodal
+$(document).ready(function(){
+    initModal();
+});
+
 
 function shareVideo(id){
 
@@ -16,40 +19,47 @@ function shareVideo(id){
         }
 }
 
-saveButtonModal.onclick = function()
-{
-  //get name, destionation, description, start time, end time, and duration from modal 
-  var name = document.getElementById("name_input").value;
-  var destination = document.getElementById("destination_input").value;
-  var startTime = document.getElementById("start_date_input").value;
-  var endTime = document.getElementById("end_date_input").value;
+function initModal(){
+  var addTravelModal = document.getElementById('addTravelModal')
 
-  var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.responseText);
+  addTravelModal.addEventListener('show.bs.modal', function (event) {
+    var saveButtonModal = document.getElementById("save_request_button"); 
+    saveButtonModal.onclick = function()
+    {
+      //get name, destionation, description, start time, end time, and duration from modal 
+      var name = document.getElementById("name_input").value;
+      var destination = document.getElementById("destination_input").value;
+      var startTime = document.getElementById("start_date_input").value;
+      var endTime = document.getElementById("end_date_input").value;
 
-            //parse json response and see if status code is 200
-            var response = JSON.parse(xhr.responseText);
-            if (response.status_code == 200) {
-                window.location.href = "/";
+      var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log(xhr.responseText);
+
+                //parse json response and see if status code is 200
+                var response = JSON.parse(xhr.responseText);
+                if (response.status_code == 200) {
+                    window.location.href = "/";
+                }
             }
         }
-    }
 
-    var base_url = window.location.origin;
-    var url = new URL(base_url+"/save_travel/");
-  
-    url.searchParams.append('name', name);
-    url.searchParams.append('destination', destination);
-    url.searchParams.append('start_date', startTime);
-    url.searchParams.append('end_date', endTime);
+        var base_url = window.location.origin;
+        var url = new URL(base_url+"/save_travel/");
+      
+        url.searchParams.append('name', name);
+        url.searchParams.append('destination', destination);
+        url.searchParams.append('start_date', startTime);
+        url.searchParams.append('end_date', endTime);
 
-    xhr.open("POST", url.toString());
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send();
-};
+        xhr.open("POST", url.toString());
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send();
+    };
+  })
 
+}
 
 //function that inits leaflet map but shows text that says start recording to show map
 //https://gis.stackexchange.com/questions/53394/select-two-markers-draw-line-between-them-in-leaflet
@@ -63,7 +73,10 @@ function initializeMapAndLocator(travel_id, travel_destination)
             subdomains:['mt0','mt1','mt2','mt3']
         }).addTo(map);
       
-    
+    function locate() {
+      map.locate({setView: true, maxZoom: 16});
+    }
+
     function onLocationFound(e) 
     {
         pathCoords.push(e.latlng);
@@ -72,7 +85,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
 
         map.fitBounds(pathLine.getBounds());
 
-        setInterval(locate, 5000);
+        setInterval(locate, 100000);
     }
     
     map.on('locationfound', onLocationFound);
@@ -99,9 +112,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
             }
         }
 
-        function locate() {
-          map.locate({setView: true, maxZoom: 16});
-        }
+        
     }
 
     var base_url = window.location.origin;
@@ -134,3 +145,4 @@ function topFunction() {
   document.body.scrollTop = 0; // For Safari
   document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 }
+

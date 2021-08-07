@@ -7,3 +7,4 @@ geopy
 ffmpeg-python
 picamera
 picamera[array]
+Pillow

@@ -45,7 +45,7 @@ function plot_map(lat, long, name, thumbnail_path, id) {
 
     var a = "/static/thumbnails/"+ thumbnail_path;
     
-    var marker_html = `<a href="${id}"> ${name} </a> <img src='${a}' height='150px' width='150px'/>`;
+    var marker_html = `<a href="/file/${id}"> ${name} </a> <img src='${a}' height='150px' width='150px'/>`;
 
     var does_exist = is_point_on_map(lat, long);
 

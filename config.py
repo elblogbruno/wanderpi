@@ -12,6 +12,8 @@ class Config:
     DEBUG = True
     # session加密秘钥
     SECRET_KEY = "fM3PEZwSRcbLkk2Ew82yZFffdAYsNgOddWoANdQo/U3VLZ/qNsOKLsQPYXDPon2t"
+
+    MAX_CONTENT_LENGTH  = 100 * 1024 * 1024
     # session过期时间
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

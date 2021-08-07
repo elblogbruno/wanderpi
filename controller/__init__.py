@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from config import config_dict, STATIC_FOLDER
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 
 
 # 设置日志(目的是将flask默认的日志和自定义的日志保存到文件中)
@@ -19,6 +20,7 @@ def setup_log(log_level):
     # 为全局的日志工具对象（flask app使用的）添加日志记录器
     logging.getLogger().addHandler(file_log_handler)
 
+socketio = SocketIO()
 
 # 工厂函数: 由外界提供物料, 在函数内部封装对象的创建过程
 def create_app(config_type):  # 封装web应用的创建过程
@@ -35,13 +37,17 @@ def create_app(config_type):  # 封装web应用的创建过程
     app.register_blueprint(home_blu)
     from controller.modules.user import user_blu
     app.register_blueprint(user_blu)
-    from controller.modules.video import video_blu
-    app.register_blueprint(video_blu)
+    # from controller.modules.video import video_blu
+    # app.register_blueprint(video_blu)
     from controller.modules.travel import travel_blu
     app.register_blueprint(travel_blu)
     from controller.modules.record import record_blu
     app.register_blueprint(record_blu)
+    from controller.modules.files import files_blu
+    app.register_blueprint(files_blu)
     # 设置日志
     setup_log(config_class.LOG_LEVEL)
+    
+    socketio.init_app(app)
 
     return app

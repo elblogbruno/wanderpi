@@ -3,7 +3,7 @@ var buttonStop = document.getElementById("stop");
 var statusBadgeContainer = document.getElementById("recording_status_container");
 var statusBadge = document.getElementById("recording_status");
 var downloadLink = document.getElementById("download_video");
-var saveButton = document.getElementById("save_video");
+var saveButton = document.getElementById("save_file");
 var saveButtonModal = document.getElementById("save_request_button");
 var cameraDropdown = document.querySelector('select#videoSource');
 
@@ -149,8 +149,9 @@ saveButtonModal.onclick = function () {
     var name_input = document.getElementById("name_input");
 
     var base_url = window.location.origin;
-    var url = new URL(base_url+"/save_video/"+ saveButton.value+'/');
+    var url = new URL(base_url+"/save_file/"+ saveButton.value+'/');
   
+    url.searchParams.set('is_image', false);
     url.searchParams.append('name', name_input.value);
     url.searchParams.append('lat', lat);
     url.searchParams.append('long', long);
@@ -273,6 +274,9 @@ function initializeMapAndLocator()
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
 
         map.fitBounds(pathLine.getBounds());
+
+        lat = e.latlng.lat;
+        long = e.latlng.lng;
     }
     
     map.on('locationfound', onLocationFound);

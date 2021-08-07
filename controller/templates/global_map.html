@@ -44,11 +44,14 @@
         <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
         </a>
-
-        <div class="d-flex align-items-center">
-                <button id="new_wanderpi" type="button" onclick="window.location.href='{{ url_for('home.record', travel_id='{{ travel.id }}') }}'" class="btn btn-primary me-3">New <i class="bi bi-plus-square"></i></button>
-                <button id="download_all_wanderpis" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" type="button"  class="btn btn-primary me-3"><i class="bi bi-file-earmark-arrow-down"></i></button>
-        </div>
+        <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
+        {% if wanderpis|length > 0 %} 
+                <div class="d-flex align-items-center">
+                    <button id="new_wanderpi" type="button" onclick="window.location.href='{{ url_for('home.record', travel_id='{{ travel.id }}') }}'" class="btn btn-primary me-3">New <i class="bi bi-plus-square"></i></button>
+                    <button id="download_all_wanderpis" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" type="button"  class="btn btn-primary me-3"><i class="bi bi-file-earmark-arrow-down"></i></button>
+                </div>
+        {% endif %}
+        
 
     </div>    
 </nav>

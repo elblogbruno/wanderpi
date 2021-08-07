@@ -76,20 +76,24 @@
           <div class="card h-100">
               <div class="card-body" >
                 {% block content %}  
-                <video class="player-overlay camera-view-responsive card-img-top" width="640" height="auto" controls>
-                      <source src="/static/videos/{{ video.id }}.mp4" type="video/mp4">
-                  </video>
                   
+                  {% if not file.is_image %}  
+                    <video class="player-overlay camera-view-responsive card-img-top" width="640" height="auto" controls>
+                      <source src="{{ file.file_path }}" type="video/mp4">
+                    </video>   
+                  {% else %}                  
+                    <img class="camera-view-responsive card-img-top" src="{{ file.file_thumbnail_path }}"></img>
+                  {% endif %}
                  
-                  <h5 class="card-title"> {{ video.name }} </h5>
-                  <a> {{ video.created_date }} {{  video.time_duration }} </a>
+                  <h5 class="card-title"> {{ file.name }} </h5>
+                  <a> {{ file.created_date }} {{  file.time_duration }} </a>
                   <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ video.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ file.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
                       <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                      <button id="delete_video" type="button"  onclick="window.location.href='/delete_video/{{ video.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                      <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                       <button id="edit_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
                   </div>
-                  {% endblock %}    
+                {% endblock %}    
               </div>
           </div>
         </div>
@@ -108,8 +112,8 @@
 </div>
 
 <script>
-    var lat = '{{ video.lat }}';
-    var long  = '{{ video.long }}';
+    var lat = '{{ file.lat }}';
+    var long  = '{{ file.long }}';
     console.log(lat ,long);
     showPosition(lat,long);
 </script>

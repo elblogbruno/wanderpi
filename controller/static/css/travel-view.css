@@ -1,0 +1,63 @@
+body {
+    background-color: #6F6F6F;
+}
+.btn-group-sm .btn-fab{
+    position: fixed !important;
+    right: 25px;
+}
+.btn-group .btn-fab{
+    position: fixed !important;
+    right: 25px;
+}
+
+.lg-icon-fab {   
+    font-size: 1.7rem;
+}
+
+@media only screen and (max-width: 600px) {
+    #header-buttons{
+        display: none;
+    }
+
+    #context-menu{
+        display: block;
+    }
+}
+
+@media only screen and (min-width: 600px)  {
+    #header-buttons {
+       display: block;
+    }
+
+    #context-menu {
+        display: none;
+    }
+}
+
+#go_up_button{
+    bottom: 10px;
+}
+
+#main{
+    bottom: 75px;
+}
+
+#new_wanderpi{
+    bottom: 145px
+}
+
+#upload_files{
+    bottom: 205px
+}
+
+#download_all_wanderpis_context{
+    bottom: 265px
+}
+
+#global_map{
+    bottom: 325px
+}
+
+#delete_travel{
+    bottom: 385px
+}
