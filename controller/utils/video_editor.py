@@ -1,3 +1,4 @@
+#from controller.modules.files.views import get_travel_folder_path
 from moviepy import *
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, concatenate_videoclips
 
@@ -5,7 +6,7 @@ import os
 class VideoEditor:
 
     @staticmethod
-    def AddTitleToVideo(video_path, video_id, title="My Holidays 2013"):
+    def AddTitleToVideo(video_path, video_id, travel_id, title="My Holidays 2013"):
         """
         Add a first clip to the video with the video title on the center of the screen
         """
@@ -33,16 +34,21 @@ class VideoEditor:
                                         max(5*h/6,int(100*t))))
 
         final = CompositeVideoClip([clip,txt_mov])
+        
+        path_temp = video_path.replace('.mp4', '-edited')
 
-        path_temp = './controller/static/videos/' + str(video_id) + '-edited.mp4'
+        if 'mp4' not in path_temp:
+            path_temp += '.mp4'
+        
+        #path_temp = './controller/static/videos/' + str(video_id) + '-edited.mp4'
 
-        final.write_videofile(path_temp, fps=25,codec='libx264') 
+        final.write_videofile(path_temp, codec='libx264') 
 
         os.remove(video_path)
         os.rename(path_temp, video_path)
     
     @staticmethod
-    def JoinVideos(videos_path, video_id):
+    def JoinVideos(videos_path, video_id, travel_id, video_path):
         video_clips = []
         for path in videos_path:
             #we use VideoFileClip() class create two video object, then we will merge them.
@@ -51,11 +57,23 @@ class VideoEditor:
 
         #Merge videos with concatenate_videoclips()
         final_video = concatenate_videoclips(video_clips)
+        
+       
+        file_id = str(video_id) + '-edited'
+        
+        path_temp = video_path.replace('.mp4', '-edited')
 
-        video_path = './controller/static/videos/' + str(video_id) + '.mp4'  
-        path_temp = './controller/static/videos/' + str(video_id) + '-edited.mp4'
+        if 'mp4' not in path_temp:
+            path_temp += '.mp4'
 
-        final_video.write_videofile(path_temp, fps=25,codec='libx264') 
-
-        os.remove(video_path)
+        final_video.write_videofile(path_temp, codec='libx264') 
+        
+        try:
+            if os.path.exists(video_path):
+                os.remove(video_path)
+        except PermissionError as e:
+            print(e)
+        
         os.rename(path_temp, video_path)
+
+        return video_path

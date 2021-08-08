@@ -65,7 +65,9 @@
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35" class="d-inline-block align-top" alt="">
         </a>
         <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
-
+        
+        <span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
+        
         <div class="d-flex align-items-center">       
             
             <div id="recording_status_container">
@@ -130,6 +132,9 @@
 <div class="top">
     <div class="recorder" id="recorder" align="center">
         <script type="text/javascript" src="/static/js/recorder.js"></script>
+        <script>
+            init("{{ travel.id }}");
+        </script>
     </div>
 </div>
 

@@ -9,8 +9,8 @@ var cameraDropdown = document.querySelector('select#videoSource');
 
 var gps = document.getElementById("gps_text");
 var map = L.map('map-container-google-1');
-var video_name = "";
-var travel_id = "";
+var file_name = "";
+var global_travel_id = "";
 
 saveButton.style.display = "none";
 downloadLink.style.display = "none";
@@ -19,9 +19,15 @@ statusBadgeContainer.style.display = "none";
 
 var lat = 0;
 var long = 0;
-var video_id = 0;
+var file_id = 0;
 
-//when camera dropdwon is changed, it will change the video source
+
+function init(travel_id) 
+{
+    global_travel_id = travel_id || "";
+}
+
+//when camera dropdown is changed, it will change the video source
 cameraDropdown.onchange = function () {
     var videoSource = cameraDropdown.options[cameraDropdown.selectedIndex].value;
     var player = document.getElementById("video");
@@ -115,16 +121,16 @@ buttonRecord.onclick = function () {
 
     var url = "/record_status";
 
-    console.log(video_id);
+    console.log(file_id);
 
-    if (video_id != 0) 
+    if (file_id != 0) 
     {
-        url = "/record_status?video_id="+video_id;
+        url = "/record_status?file_id="+file_id;
     } 
 
     xhr.open("POST",  url);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "true"}));
+    xhr.send(JSON.stringify({status: "true", travel_id: global_travel_id, is_image: false}));
 
 
     initializeMapAndLocator();
@@ -141,7 +147,7 @@ saveButtonModal.onclick = function () {
             console.log(xhr.responseText);
             var response = JSON.parse(xhr.responseText);
             if (response.status_code == 200) {
-                window.location.href = "/travel/"+travel_id;
+                window.location.href = "/travel/"+global_travel_id;
             }
         }
     }
@@ -155,7 +161,7 @@ saveButtonModal.onclick = function () {
     url.searchParams.append('name', name_input.value);
     url.searchParams.append('lat', lat);
     url.searchParams.append('long', long);
-    url.searchParams.append('travel_id', travel_id);
+    url.searchParams.append('travel_id', global_travel_id);
 
     xhr.open("POST", url.toString());
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -191,7 +197,7 @@ function setOnVideoStopUI(){
     }, 2000);
 
     var video_info_text = document.getElementById("video_info_text");
-    video_info_text.textContent = "Video name: " + video_name + " Duration: " + minutes + ":" + seconds;
+    video_info_text.textContent = "Video name: " + file_name + " Duration: " + minutes + ":" + seconds;
 }
 
 buttonStop.onclick = function () {
@@ -204,16 +210,16 @@ buttonStop.onclick = function () {
             obj = JSON.parse(xhr.responseText);
 
             if (obj.status_code == 200) {
-                video_id = obj.video_id;
-                
-                video_name = obj.video_name;
-                gps.innerHTML = video_name;
+                file_id = obj.file_id;
+                var file_path = obj.file_path;
+                file_name = obj.file_name;
+                gps.innerHTML = file_name;
 
                 saveButton.style.display = "inline";
-                saveButton.value = video_id;
+                saveButton.value = file_id;
                 downloadLink.style.display = "inline";
                 downloadLink.onclick = function () {
-                    window.location.href = "/uploads/" + video_id + '.mp4';
+                    window.location.href = "/uploads/"+ global_travel_id + "/" + file_id;
                 }
 
                 setOnVideoStopUI();
@@ -227,7 +233,7 @@ buttonStop.onclick = function () {
 
     xhr.open("POST", "/record_status");
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "false", lat: lat, long: long}));
+    xhr.send(JSON.stringify({status: "false", lat: lat, long: long, travel_id: global_travel_id, is_image: false}));
 };
 
 var saveWanderpiModal = document.getElementById('saveWanderpiModal')
@@ -237,9 +243,9 @@ saveWanderpiModal.addEventListener('show.bs.modal', function (event) {
   // Extract info from data-bs-* attributes
   var button = event.relatedTarget
   // Extract info from data-bs-* attributes
-  travel_id = button.getAttribute('data-bs-whatever')
+  global_travel_id = button.getAttribute('data-bs-whatever')
 
-  var recipient = video_name;
+  var recipient = file_name;
   // If necessary, you could initiate an AJAX request here
   // and then do the updating in a callback.
   //

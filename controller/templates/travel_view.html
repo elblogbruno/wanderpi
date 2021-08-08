@@ -21,10 +21,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     
     <script> 
-        $(function(){
-            $("#dinamic-modal-body").load("/static/html-templates/download_modal.html"); 
-            //$("#context-menu").load("/static/html-templates/context_menu.html"); 
-        });
+        // $(function(){
+        //     $("#dinamic-modal-body").load("/static/html-templates/download_modal.html"); 
+        //     //$("#context-menu").load("/static/html-templates/context_menu.html"); 
+        // });
 
         $(document).ready(function() { // this runs as soon as the page is ready (DOM is loaded)
             const script = document.createElement('script');
@@ -103,15 +103,6 @@
                     <li id="info-text"></li>
                     <li id="info-text-socket"></li>
                 </ul>
-                <!-- {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    <ul class=flashes>
-                    {% for message in messages %}
-                      <li>{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endwith %} -->
             </p>
             <form method="post" id="file_form" enctype="multipart/form-data">
                 <input id="file-input" name="files[]" type="file" class="form-control"  multiple>
@@ -123,7 +114,7 @@
                 <a id="info-text-socket"> </a> -->
                 <progress id="progress-bar"></progress>
             </div>
-            
+            <button id="process-upload-button" onclick="startProcessingUploadFolder('{{ travel.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
@@ -134,7 +125,9 @@
 </div>
 
 <div id="dinamic-modal-body">
-
+    {% with travel=travel %}
+        {% include "download_modal.html" %}
+    {% endwith %}
 </div>
 
 <div class="py-4">
@@ -168,7 +161,7 @@
                                     
 
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ post.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                                        <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
                                         <button id="share_video" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                                         <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                                     </div>
@@ -181,8 +174,20 @@
                         <div class="card h-100">
                                
                             <div class="card-body">
-                                <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5>
+                                <!-- <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
+                                <h5 class="card-title text-center"> New Wanderpi </h5> -->
+                            
+                                <div class="container">
+                                    <div class="row mb-2">
+                                        <button onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" type="button" class="btn btn-info me-3" style="height: 200px;" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
+                                            <i class="bi bi-plus-lg"> Record new Wanderpi</i>
+                                        </button>
+                                        <h3 class="text-center"> or </h3>
+                                        <button href="#" type="button" class="btn btn-success me-3" style="height: 200px;"  data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
+                                            <i class="bi bi-file-earmark-arrow-up"> Upload a Wanderpi</i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>    
                     </div>

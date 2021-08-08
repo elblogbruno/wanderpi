@@ -1,3 +1,4 @@
+from controller.modules.files.views import get_travel_folder_path
 import cv2
 import threading
 import uuid
@@ -14,7 +15,7 @@ except ImportError:
 import time # Provides time-related functions
 
 class RecordingThread(threading.Thread):
-    def __init__(self, name, camera, use_mjpg_cc = False):
+    def __init__(self, name, camera,path, use_mjpg_cc = False):
         threading.Thread.__init__(self)
         self.name = name
         self.isRunning = True
@@ -27,12 +28,13 @@ class RecordingThread(threading.Thread):
             print("Using FMP4 cc")
             fourcc = cv2.VideoWriter_fourcc(*'MP4V')
       
-        self.video_id = str(uuid.uuid4()) 
-        self.path = './controller/static/videos/' + str(self.video_id) + '.mp4'
-        self.path_rel = '/controller/static/videos/' + str(self.video_id) + '.mp4'
+        #self.video_id = str(uuid.uuid4()) 
+        #self.path = './controller/static/videos/' + str(self.video_id) + '.mp4'
         
+        self.path = path
+
         self.out = cv2.VideoWriter(self.path, fourcc, 25, (640, 480))
-        self.latest_frame = None
+        #self.latest_frame = None
 
     def run(self):
         sleep(0.5)
@@ -41,7 +43,7 @@ class RecordingThread(threading.Thread):
             ret, frame = self.cap.read()
             if ret:
                 self.out.write(frame)
-                self.latest_frame = frame
+                #self.latest_frame = frame
 
         self.out.release()
 
@@ -143,26 +145,28 @@ class VideoCamera(object):
                 print("Received unexpected status code {}".format(self.stream.status_code))
                 return None
 
-    def start_record(self):
+    def start_record(self, path, file_id):
+        self.file_id = file_id
         self.is_record = True
-        self.recording_thread = RecordingThread("Video Recording Thread", self.cap, self.use_mjpg_cc)
+        self.recording_thread = RecordingThread("Video Recording Thread", self.cap, path, self.use_mjpg_cc)
         self.recording_thread.start()
-        return self.recording_thread.video_id
+        return True
 
-    def stop_record(self):
+    def stop_record(self, travel_id):
         self.is_record = False
 
         if self.recording_thread != None:
             self.recording_thread.stop()
 
-        thumbnail_url = "./controller/static/thumbnails/thumbnail-%s.jpg" % str(self.recording_thread.video_id)
-        
-        if len(self.recording_thread.latest_frame) > 0:
-            cv2.imwrite(thumbnail_url, self.recording_thread.latest_frame)
-        else:
-            print("No frame to save")
-            return None
+        #thumbnail_url = "./controller/static/thumbnails/thumbnail-%s.jpg" % str(self.video_id)
+        # thumbnail_url = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=self.file_id, file_type='thumbnails')
 
-        return self.recording_thread.video_id
+        # if len(self.recording_thread.latest_frame) > 0:
+        #     cv2.imwrite(thumbnail_url, self.recording_thread.latest_frame)
+        # else:
+        #     print("No frame to save")
+        #     return None
+
+        return self.file_id
 
     

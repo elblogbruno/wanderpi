@@ -1,7 +1,7 @@
 from config import VIDEOS_FOLDER
 from os import name
 
-from flask import json, session, render_template, redirect, url_for, Response,request, jsonify,send_from_directory
+from flask import json, session, render_template, redirect, url_for, Response,request, jsonify
 from controller.modules.home import home_blu
 
 from controller.models.models import Wanderpi, Travel
@@ -73,10 +73,6 @@ def record(travel_id):
 
     travel = Travel.get_by_id(travel_id)
     return render_template("record.html", travel=travel)
-
-@home_blu.route('/uploads/<path:filename>', methods=['GET', 'POST'])
-def download_file(filename):
-    return send_from_directory(VIDEOS_FOLDER, filename, as_attachment=True)
 
 
 @home_blu.route('/latlong/<string:address>', methods=['GET', 'POST'])

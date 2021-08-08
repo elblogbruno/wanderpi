@@ -4,7 +4,7 @@ from datetime import timedelta
 
 UPLOAD_FOLDER = os.getcwd()+'/uploads/'
 STATIC_FOLDER = os.getcwd()+'/controller/static/'
-VIDEOS_FOLDER = os.getcwd()+'/controller/static/videos'
+VIDEOS_FOLDER = os.getcwd()+'/controller/static/wanderpis/'
 
 
 class Config:
@@ -13,7 +13,7 @@ class Config:
     # session加密秘钥
     SECRET_KEY = "fM3PEZwSRcbLkk2Ew82yZFffdAYsNgOddWoANdQo/U3VLZ/qNsOKLsQPYXDPon2t"
 
-    MAX_CONTENT_LENGTH  = 100 * 1024 * 1024
+    MAX_CONTENT_LENGTH  = 200 * 1024 * 1024
     # session过期时间
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

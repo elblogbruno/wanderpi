@@ -1,11 +1,13 @@
 
+from controller.modules.files.video_utils import VideoUtils
+import uuid
+from controller.modules.files.views import get_travel_folder_path, get_travel_folder_path_static
 from datetime import datetime
-from controller.utils.video_editor import VideoEditor
+
 from controller.utils.camera import VideoCamera
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.record import record_blu
 from flask import jsonify, request, redirect,Response
-from config import VIDEOS_FOLDER
 import os
 
 
@@ -31,14 +33,14 @@ def init_camera(camera_index = last_camera_index):
 
     if len(video_camera_objs) == 0:
         for camera in video_camera_ids:
-            
-            if camera["deviceId"].isnumeric():
-                camera["deviceId"] = int(camera["deviceId"])
+            device_id = camera["deviceId"]
+            if device_id.isnumeric():
+                device_id = int(device_id)
 
             if camera["auth_required"]:
-                video_camera_objs.append(VideoCamera(camera["deviceId"], camera["is_mjpg"], camera["is_picamera"],  camera["username"], camera["password"]))
+                video_camera_objs.append(VideoCamera(device_id, camera["is_mjpg"], camera["is_picamera"],  camera["username"], camera["password"]))
             else:
-                video_camera_objs.append(VideoCamera(camera["deviceId"], camera["is_mjpg"], camera["is_picamera"]))
+                video_camera_objs.append(VideoCamera(device_id, camera["is_mjpg"], camera["is_picamera"]))
             
         return video_camera_objs[camera_index]
     else:
@@ -112,41 +114,48 @@ def record_status():
     
     json = request.get_json()
 
-    print(json)
-
     status = json['status']
+    travel_id  = json['travel_id']  
+    boolean = json['is_image']
+    is_image = True if boolean == 'true' else False
+    file_type = 'images' if is_image else 'videos'  
 
     if status == "true":
         print("Start recording...")
-        video_id_1 = request.args.get('video_id', default=None)
+        file_id_1 = request.args.get('file_id', default=None)
 
-        if video_id_1:
-            print("Deleting video that was not saved on database with id: {0}".format(video_id_1))
-            p = VIDEOS_FOLDER + "/" + video_id_1 + ".mp4"
+        if file_id_1:
+            print("Deleting file that was not saved on database with id: {0}".format(file_id_1))
+            p =  get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id_1, file_type=file_type)
             if os.path.exists(p):
                 os.remove(p)
 
-        video_id = video_camera.start_record()
-        return jsonify(result="started", video_id=video_id)
+        file_id = str(uuid.uuid4()) 
+        destination_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
+        video_camera.start_record(destination_path, file_id)
+
+        return jsonify(result="started", file_id=file_id)
     else:
         print("Stop recording...")
+
+        file_id = video_camera.stop_record(travel_id)
+
+        if file_id is None:
+            return jsonify(result="failed", status_code=400)
+        
+        file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
+        abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type='thumbnails')
+        #static_file_path = get_travel_folder_path_static(travel_id=travel_id, file_type='thumbnails')
+        
+        if len(temp_video_to_join) > 0:
+            temp_video_to_join.append(file_path)
+            VideoEditor.JoinVideos(temp_video_to_join, file_id)
+
         lat = json['lat']
         lng = json['long']
+        
+        file_name = str(datetime.now()) + " at " + GeoCodeUtils.reverse_latlong(lat, lng)
 
-        video_id = video_camera.stop_record()
-
-        if video_id is None:
-            return jsonify(result="failed", status_code=400)
-
-        if len(temp_video_to_join) > 0:
-            p = './controller/static/videos/' + str(video_id) + '.mp4'
-            temp_video_to_join.append(p)
-            #video_id = video_id + "joined"
-            print(temp_video_to_join)
-            VideoEditor.JoinVideos(temp_video_to_join, video_id)
-
-        video_name = str(datetime.now()) + " at " + GeoCodeUtils.reverse_latlong(lat, lng)
-
-        VideoEditor.AddTitleToVideo(video_camera.recording_thread.path, video_id, video_name)
-
-        return jsonify(result="stopped", status_code=200, video_id=video_id, video_name=video_name)
+        VideoUtils.save_video_thumbnail(file_path, abs_file_path, file_id)
+        
+        return jsonify(result="stopped", status_code=200, file_id=file_id, file_name=file_name, file_path=file_path)

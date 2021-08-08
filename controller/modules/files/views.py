@@ -1,96 +1,121 @@
-import re
-import requests
-from config import VIDEOS_FOLDER
-import os
+from genericpath import isfile
+from config import  UPLOAD_FOLDER, VIDEOS_FOLDER
 
-from flask import Flask, jsonify, flash, request, redirect, render_template
+from flask import Flask, jsonify, flash, request, redirect, render_template,send_from_directory
 from werkzeug.utils import secure_filename
-import exifread
 
-
-from datetime import datetime
-from controller.modules.files import video_utils
 from controller.modules.files.video_utils import VideoUtils
 from controller.models.models import Wanderpi
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.files import files_blu
-from flask_socketio import emit, join_room, leave_room
+from controller.modules.files.utils import *
+from controller.utils.video_editor import VideoEditor
+
+from flask_socketio import emit
 from controller import socketio
+from os import listdir
+from os.path import isfile, join
+from time import sleep
 
 import uuid
-last_known_counter = 0
+import shutil
+number_of_files = 0
 counter = 0
-VIDEO_EXTENSIONS = set(['mp4'])
-IMAGE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
-# Allowed extension you can set your own
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'mp4'])
 
-def get_file_extension(filename):
-    return filename.rsplit('.', 1)[1].lower()
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-#convert degree minute second to degree decimal
-def dms_to_dd(dms):
-    dd = float(dms[0]) + float(dms[1])/60 + float(dms[2])/3600
-    return float(dd)
-
-def get_lat_long_tags(path_name):
-    f = open(path_name, 'rb')
-
-    tags = exifread.process_file(f, stop_tag='GPS')
+def create_folder_structure_for_travel(travel_id):
+    create_folder(VIDEOS_FOLDER + str(travel_id))
+    create_folder(VIDEOS_FOLDER + str(travel_id) + '/images')
+    create_folder(VIDEOS_FOLDER + str(travel_id) + '/videos')
+    create_folder(VIDEOS_FOLDER + str(travel_id) + '/thumbnails')
     
-    lat = 0
-    long = 0
+def get_travel_folder_path_static(travel_id, filename_or_file_id= None, file_type = 'images'):
+    if filename_or_file_id:
+        if file_type == 'images':
+            return STATIC_FOLDER + str(travel_id) + '/images/' + str(filename_or_file_id)
+        elif file_type == 'videos':
+            if '.mp4' in filename_or_file_id:
+                return STATIC_FOLDER + str(travel_id) + '/videos/' + str(filename_or_file_id)
+            else:
+                return STATIC_FOLDER + str(travel_id) + '/videos/' + str(filename_or_file_id) + '.mp4'
+        elif file_type == 'thumbnails':
+            return STATIC_FOLDER + str(travel_id) + '/thumbnails/thumbnail-%s.jpg' % str(filename_or_file_id)
 
-    for tag in tags.keys():
-        if tag == 'GPS GPSLatitude':
-            lat = dms_to_dd(tags[tag].values)
-        elif tag == 'GPS GPSLongitude':
-            long = dms_to_dd(tags[tag].values)
-    
-    if lat == 0 and long == 0:
-        lat = 0
-        long = 0
+    else:
+        if file_type == 'images':
+            return STATIC_FOLDER + str(travel_id) + '/images'
+        elif file_type == 'videos':
+            return STATIC_FOLDER + str(travel_id) + '/videos'
+        elif file_type == 'thumbnails':
+            return STATIC_FOLDER + str(travel_id) + '/thumbnails'
 
-    return lat, long
+def get_travel_folder_path(travel_id, filename_or_file_id= None, file_type='images'):
+    if filename_or_file_id:
+        if file_type == 'images':
+            return VIDEOS_FOLDER + str(travel_id) + '/images/' + str(filename_or_file_id)
+        elif file_type == 'videos':
+            if '.mp4' in filename_or_file_id:
+                return VIDEOS_FOLDER + str(travel_id) + '/videos/' + str(filename_or_file_id)
+            else:
+                return VIDEOS_FOLDER + str(travel_id) + '/videos/' + str(filename_or_file_id) + '.mp4'
+        elif file_type == 'thumbnails':
+            return VIDEOS_FOLDER + str(travel_id) + '/thumbnails/thumbnail-%s.jpg' % str(filename_or_file_id)
 
-def upload_file_to_database(file_path, filename, travel_id):
+    else:
+        if file_type == 'images':
+            return VIDEOS_FOLDER + str(travel_id) + '/images'
+        elif file_type == 'videos':
+            return VIDEOS_FOLDER + str(travel_id) + '/videos'
+        elif file_type == 'thumbnails':
+            return VIDEOS_FOLDER + str(travel_id) + '/thumbnails'
+        elif file_type == 'root':
+            return VIDEOS_FOLDER + str(travel_id)
+
+def upload_file_to_database(file_path, static_path , filename, travel_id):
     print("Adding file {0} to database".format(file_path))
     
     if (get_file_extension(file_path) in IMAGE_EXTENSIONS):
         # read the image data using PIL
         lat, long = get_lat_long_tags(file_path)
         file_id = str(uuid.uuid4()) 
-        file_thumbnail_path = "/static/videos/%s" % str(filename)
-        save_file_to_database(True, travel_id, filename, lat, long, file_id, file_thumbnail_path, file_path)
+        file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename)
+        save_file_to_database(True, travel_id, filename, lat, long, file_id, file_thumbnail_path, static_path)
         
     elif (get_file_extension(file_path) in VIDEO_EXTENSIONS):
         lat, long = get_lat_long_tags(file_path)
         file_id = str(uuid.uuid4()) 
-        file_thumbnail_path = VideoUtils.get_video_thumbnail(file_path, file_id)
-        save_file_to_database(False, travel_id, filename, lat, long, file_id, file_thumbnail_path, file_path, filename)
+        
+        abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type='thumbnails')
+
+        VideoUtils.save_video_thumbnail(file_path, abs_file_path, file_id)
+
+        static_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file_id, file_type='thumbnails')
+
+        save_file_to_database(False, travel_id, filename, lat, long, file_id, static_thumbnail_path, static_path, filename, True)
     else:
         print("File not supported")
 
-def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None,  filename=None):
+def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None, filename=None, edit_video=False):
     time_duration = 0
 
     if not is_image:
         if file_path is None:
-            video_file_path  = './controller/static/videos/' + str(file_id) + '.mp4'
-            file_path = '/static/videos/' + str(file_id) + '.mp4'
+            video_file_path  = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type='videos')
+            file_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type='videos')
         if filename:
-            video_file_path  = './controller/static/videos/' + str(filename)
-            file_path = '/static/videos/' + str(filename)
+            video_file_path  = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type='videos')
+            file_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type='videos')
+            if edit_video:
+                VideoEditor.AddTitleToVideo(video_file_path, filename, travel_id, name)
 
         if file_thumbnail_path is None:
-            file_thumbnail_path = "/static/thumbnails/thumbnail-%s.jpg" % str(file_id)
+            file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type='thumbnails')
+        
+        
         time_duration = VideoUtils.get_video_info(video_file_path)
 
     address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
-    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image)
+    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image, has_been_edited=edit_video)
     video.save()
 
     return "ok"
@@ -99,10 +124,8 @@ def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file
 def delete_file(file_id):
     video = Wanderpi.get_by_id(file_id)
     travel_id = video.travel_id
-    
-    #os.remove(video.file_path)
 
-    Wanderpi.delete(file_id)
+    video.delete()
 
     return redirect("/travel/"+travel_id, code=302)
 
@@ -123,7 +146,7 @@ def save_file(file_id): #todo get available video sources from database
     file_thumbnail_path = request.args.get('thumbnail_url', default=None)
     file_path = request.args.get('file_path', default=None)
 
-    save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path)
+    save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path, file_id)
 
     return jsonify(status_code = 200, message = "OK")
 
@@ -142,8 +165,28 @@ def get_video_info(video_id):
 def request_entity_too_large(error):
      return  jsonify(error= 1, message='File Too Large')
 
+@files_blu.route('/uploads/<string:travel_id>/<string:filename>', methods=['GET', 'POST'])
+def download_file(travel_id, filename):
+    file_type = 'images' if get_file_extension(filename) in IMAGE_EXTENSIONS else 'videos'
+    abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type=file_type)
+    file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
+    
+    if file_type == 'videos':
+        video = Wanderpi.get_by_id(filename)
+
+        if video and not video.has_been_edited:
+            #VideoEditor.AddTitleToVideo(file_path, filename, travel_id, video.name)
+            video.has_been_edited = True
+            video.save()
+    
+    if '.' not in filename: 
+        filename = file_path.split('/')[-1]
+    
+    return send_from_directory(abs_file_path, filename, as_attachment=True)
+
 @files_blu.route('/upload/<string:travel_id>', methods=['POST','GET'])
 def upload_file(travel_id):
+
     if request.method == 'POST':
         print(request.form)
         
@@ -153,25 +196,26 @@ def upload_file(travel_id):
             return  jsonify(error= 1, message="No files uploaded")
 
         files = request.files
-        global counter, last_known_counter
-        counter = len(files)
-        last_known_counter = counter
+        global counter, number_of_files
+        counter = 0
+        number_of_files = len(files)
         for key in files:
             file = files[key]
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                path = os.path.join(VIDEOS_FOLDER, filename)
-                file.save(path)
-
-                upload_file_to_database(path, filename, travel_id)
+                #path = os.path.join(VIDEOS_FOLDER, filename)
+                file_type = 'images' if get_file_extension(filename) in IMAGE_EXTENSIONS else 'videos'
+                path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
+                static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
                 
-                counter = counter - 1
-                # flash('File(s) successfully uploaded')
+                if not os.path.isfile(path):     
+                    file.save(path)
+                    upload_file_to_database(path,static_path, filename, travel_id)
+                
+                counter += 1
             else:
                 flash('File not allowed')
-                #return redirect(request.referrer)
 
-        #return redirect("/travel/"+travel_id, code=302)
         return jsonify(error= 0, message="File(s) successfully uploaded")
     else:
         if request.referrer:
@@ -181,10 +225,56 @@ def upload_file(travel_id):
 @socketio.on("update")
 def update(data):
     global counter
-    global  last_known_counter
-    print('Message from browser', data, counter, last_known_counter)
+    global  number_of_files
+    print('Message from browser', data, counter, number_of_files)
     
-    if counter < last_known_counter:
-        emit('update', 'File {0} successfully uploaded'.format(last_known_counter))
-        last_known_counter = counter
+    if counter < number_of_files:
+        emit('update', 'File {0} successfully uploaded'.format(counter+1))
     
+#@files_blu.route('/process_upload/<string:travel_id>', methods=['POST','GET'])
+
+@socketio.on("process_upload_folder_update")
+def process_upload(travel_id):
+    #for every file in the uploads folder, upload it to the database
+    
+    upload_files = [f for f in listdir(UPLOAD_FOLDER) if isfile(join(UPLOAD_FOLDER, f))]
+
+    for file in upload_files:
+        emit('process_upload_folder_update', 'Uploading file {0}'.format(file))
+        if (get_file_extension(file) in IMAGE_EXTENSIONS):
+            #move file to images folder
+            path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file, file_type='images')
+            static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type='images')
+            if not os.path.isfile(path):
+                shutil.move(UPLOAD_FOLDER+file, path)
+                upload_file_to_database(path, static_path, file, travel_id)
+                emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
+
+            else:
+                print("File already exists")
+                emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
+
+            
+        elif (get_file_extension(file) in VIDEO_EXTENSIONS):
+            #move file to videos folder
+            path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file, file_type='videos')
+            static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type='videos')
+            if not os.path.isfile(path):
+                shutil.move(UPLOAD_FOLDER+file, path)
+                upload_file_to_database(path, static_path, file, travel_id)
+                emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
+
+            else:
+                print("File already exists")
+                emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
+
+        else:
+            print("File not allowed")
+
+    
+    sleep(0.1)
+
+    emit('process_upload_folder_update', "200")
+    
+    return redirect("/travel/"+travel_id)
+
