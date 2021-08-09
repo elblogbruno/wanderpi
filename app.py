@@ -5,9 +5,10 @@ import db
 from controller.models.models import Wanderpi
 from controller import socketio
 from controller.utils.watcher import ImagesWatcher
-import threading
+from flask_dropzone import Dropzone
 
 app = create_app('dev')
+dropzone = Dropzone(app)
 
 if __name__ == '__main__':
     #app.run(threaded=True, host="0.0.0.0")

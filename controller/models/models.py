@@ -115,8 +115,12 @@ class Travel(db.Base):
         db.session.commit()
         return True
 
-    def get_all_wanderpis(self):
-        return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id).all()
+    def get_all_wanderpis(self, filter=None):
+        if filter:
+            is_image = (filter == 'image')
+            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id, Wanderpi.is_image == is_image).all()
+        else:
+            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id).all()
 
     def delete(self, id):
         if os.path.isdir(self.travel_folder_path):

@@ -2,7 +2,7 @@ from controller.models.models import Travel
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.travel import travel_blu
 from controller.modules.files.views import create_folder_structure_for_travel, get_travel_folder_path
-from flask import redirect, request, jsonify, send_from_directory,send_file
+from flask import redirect, request, jsonify, send_from_directory,send_file,render_template
 from datetime import *
 import uuid
 import shutil
@@ -98,3 +98,37 @@ def download_travel(travel_id):
     emit('travel_download_update', "200")
     
     return send_file(final_video_path, mimetype='video/mp4', as_attachment=True, attachment_filename=travel.name+'.mp4')
+
+
+@travel_blu.route('/search/<string:travel_id>/<string:query>', methods=['GET', 'POST'])
+def search(travel_id, query):
+    print("Searching")
+    travel = Travel.get_by_id(travel_id)
+    final_query = query
+    type_filter = False
+    files = []
+
+    if '%video' in final_query:
+        wanderpis = travel.get_all_wanderpis(filter='video')
+        final_query = final_query.replace('%video','')
+        type_filter = True
+    elif '%image' in query:
+        wanderpis = travel.get_all_wanderpis(filter='image')
+        final_query = final_query.replace('%image','')
+        type_filter = True
+    else:
+        wanderpis = travel.get_all_wanderpis()
+    
+    if len(final_query) > 0:   
+        for file in wanderpis:
+            if final_query.lower() in file.name.lower() or final_query.lower() in file.address.lower() or final_query.lower() in str(file.time_duration) or final_query.lower() in file.created_date.strftime("%m/%d/%Y, %H:%M:%S"):
+                files.append(file)
+
+    if len(files) == 0 and not type_filter:
+        files =  travel.get_all_wanderpis()
+        query == 'No results found'
+    else:
+        files = wanderpis
+
+    return render_template('travel_view.html', wanderpis=files, travel=travel, search_term=query)
+

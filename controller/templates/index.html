@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="../static/css/index.css" rel="stylesheet">
+    <link href="../static/css/maps.css" rel="stylesheet">
+    
     
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
@@ -34,6 +36,8 @@
 
     
     <script src="../static/js/index.js"></script>
+    
+    <script src="../static/js/map_utils.js"></script>
 
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
@@ -143,10 +147,22 @@
                                         <div class="col">
                                             <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ post.start_date }} - {{ post.end_date }}</span>
                                         </div>
+
+                                        
                                     </div>
                                     
                                     <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
+                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="travel-distance-{{ post.id }}" class="card-text d-inline-block"></span>
+                                    
+                                    <script>
+                                        {% for video in post.get_all_wanderpis() %}
+                                            loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ post.id }}");
+                                        {% endfor %}
+                                        getTravelDistance("{{ post.id }}");
+
+                                    </script>
+
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
                                         <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
                                         <button id="share_travel" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>

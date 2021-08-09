@@ -6,6 +6,7 @@ body {
     right: 25px;
 }
 .btn-group .btn-fab{
+    
     position: fixed !important;
     right: 25px;
 }
@@ -60,4 +61,9 @@ body {
 
 #delete_travel{
     bottom: 385px
+}
+
+.selected-wanderpi
+{
+    background-color: #c0c0c0;
 }

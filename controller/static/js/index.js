@@ -1,3 +1,4 @@
+
 //when document has loaded initmodal
 $(document).ready(function(){
     initModal();
@@ -67,7 +68,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
 { 
     var pathCoords = [];
     var map = L.map(`map-container-google-${travel_id}`);
-
+   
     googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
             maxZoom: 20,
             subdomains:['mt0','mt1','mt2','mt3']
@@ -99,7 +100,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
               var lat = response.lat;
               var long = response.long;
 
-              console.log(lat, long);
+              // console.log(lat, long);
           
               // call locate every 3 seconds... forever
               locate();

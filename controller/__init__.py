@@ -20,7 +20,7 @@ def setup_log(log_level):
     # 为全局的日志工具对象（flask app使用的）添加日志记录器
     logging.getLogger().addHandler(file_log_handler)
 
-socketio = SocketIO()
+socketio = SocketIO(async_mode='threading')
 
 # 工厂函数: 由外界提供物料, 在函数内部封装对象的创建过程
 def create_app(config_type):  # 封装web应用的创建过程

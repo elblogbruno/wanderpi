@@ -4,6 +4,9 @@ var map;
 var map_initiated = false;
 var markers;
 var gps = document.getElementById("gps_text");
+var oms;
+
+const OverlappingMarkerSpiderfier = window.OverlappingMarkerSpiderfier;
 
 function init_map()
 {
@@ -14,12 +17,13 @@ function init_map()
             subdomains:['mt0','mt1','mt2','mt3']
         }).addTo(map);
 
-    markers = new L.MarkerClusterGroup({ 
-        spiderfyOnMaxZoom: false, 
-        showCoverageOnHover: false, 
-        zoomToBoundsOnClick: false 
-    });
     
+
+    markers = new L.MarkerClusterGroup({ 
+        spiderfyOnMaxZoom: true, 
+        showCoverageOnHover: false, 
+        zoomToBoundsOnClick: true 
+    });
 
     map_initiated = true;
 }
@@ -35,6 +39,15 @@ function is_point_on_map(lat, long) {
     return false;
 }
 
+function plot_map_from_list(list) {
+    console.log(list);
+    for (var i = 0; i < list.length; i++) {
+        plot_map(list[i].lat, list[i].long, list[i].name, list[i].thumbnail_path, list[i].id);
+    }
+}
+
+
+
 
 function plot_map(lat, long, name, thumbnail_path, id) {
     if (!map_initiated) {
@@ -42,10 +55,8 @@ function plot_map(lat, long, name, thumbnail_path, id) {
     }
 
     map.setView([lat,long], 13);
-
-    var a = "/static/thumbnails/"+ thumbnail_path;
     
-    var marker_html = `<a href="/file/${id}"> ${name} </a> <img src='${a}' height='150px' width='150px'/>`;
+    var marker_html = `<a href="/file/${id}"> ${name} </a> <img src='${thumbnail_path}' height='150px' width='150px'/>`;
 
     var does_exist = is_point_on_map(lat, long);
 
@@ -64,4 +75,10 @@ function plot_map(lat, long, name, thumbnail_path, id) {
     }
     
     list_of_points.push(new L.LatLng(lat, long));
+
+    var pathLine = L.polyline(list_of_points, {color: 'red'}).addTo(map);
+
+    map.fitBounds(pathLine.getBounds());
+
+    document.getElementById('gps_text').innerHTML = getDistance(list_of_points) + " m";
 }
