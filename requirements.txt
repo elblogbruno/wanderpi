@@ -10,3 +10,4 @@ picamera[array]
 Pillow
 python-dateutil
 Flask-Dropzone
+flask-socketio
