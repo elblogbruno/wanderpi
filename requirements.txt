@@ -12,3 +12,5 @@ python-dateutil
 Flask-Dropzone
 flask-socketio
 ExifRead
+reverse_geocoder
+PyExifTool
