@@ -8,36 +8,30 @@
     <title>Wanderpi</title>
 
     <!-- CSS only -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-    crossorigin=""/>
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.Default.css')}}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
+
     <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-    crossorigin=""></script>
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
     
-    <link href="../static/css/index.css" rel="stylesheet">
-    <!-- <link href="../static/css/travel-view.css" rel="stylesheet"> -->
-    <link href="../static/css/maps.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
 
     <!-- JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-   
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster-src.js"></script>
-
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js')}}"></script>
+ 
     <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
     
-    <script src="../../node_modules/overlapping-marker-spiderfier-leaflet/dist/oms.js"></script>
-    <script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
-
-    <script src="../static/js/global_map.js"></script>
-    <script src="../static/js/map_utils.js"></script>
+    <script src="{{ url_for('static', filename='js/global_map.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+    
     <!-- <script src="../static/js/file_handler.js"></script> -->
 
     <!-- <script> 

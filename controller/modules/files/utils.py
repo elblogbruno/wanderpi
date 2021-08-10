@@ -1,7 +1,12 @@
 import os
 import exifread
 from datetime import datetime
-import dateutil.parser as dparser
+from dateutil import parser
+
+import exiftool 
+
+exif_Executable="./exiftool-exe/exiftool(-k).exe"    
+
 
 STATIC_FOLDER = '/static/wanderpis/'
 VIDEO_EXTENSIONS = set(['mp4'])
@@ -43,35 +48,37 @@ def get_image_tags(path_name, filename):
             creation_datetime = datetime.strptime(tags['EXIF DateTimeOriginal'].values, std_fmt)
     
     if creation_datetime == 0:
-        creation_datetime = dparser.parse(filename,fuzzy=True)
+        creation_datetime = parser.parse(filename,fuzzy=True)
 
     return lat, long, creation_datetime
 
 def get_video_tags(path_name, filename):
-    f = open(path_name, 'rb')
-
-    tags = exifread.process_file(f, stop_tag='GPS')
-    std_fmt = '%Y:%m:%d %H:%M:%S.%f'
-
-    lat = 0
-    long = 0
-    creation_datetime  = 0
-
-    for tag in tags.keys():
-        if tag == 'GPS GPSLatitude':
-            lat = dms_to_dd(tags[tag].values)
-        elif tag == 'GPS GPSLongitude':
-            long = dms_to_dd(tags[tag].values)
-        elif tag == 'EXIF DateTimeOriginal':
-            creation_datetime = datetime.strptime(tags['EXIF DateTimeOriginal'].values, std_fmt)
     
-    if creation_datetime == 0:
-        try: 
-            creation_datetime = dparser.parse(filename,fuzzy=True)
-        except:
-            creation_datetime = datetime.today()
+    with exiftool.ExifTool(executable_=exif_Executable) as et:
+        tags = et.get_metadata_batch([path_name])[0]
+        
+        std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
 
-    return lat, long, creation_datetime
+        lat = 0
+        long = 0
+        creation_datetime  = 0
+        duration = 0
+
+        if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
+            lat = tags['Composite:GPSLatitude']
+            long = tags['Composite:GPSLongitude']
+
+        duration = tags['QuickTime:MediaDuration']
+        create_date = str(tags['File:FileCreateDate'])
+        creation_datetime = parser.parse(create_date)
+    
+        if creation_datetime == 0:
+            try: 
+                creation_datetime = parser.parse(filename,fuzzy=True)
+            except:
+                creation_datetime = datetime.today()
+
+    return lat, long, creation_datetime, duration
 
 def create_folder(directory):
     try:

@@ -48,6 +48,7 @@ function startProcessingUploadFolder(travel_id)
 {
     downloading_file = true;
     disableButtons()
+    document.getElementById("progress-bar").style.display = "inline";
     socket.emit('process_upload_folder_update', travel_id)
 }
 
@@ -56,6 +57,7 @@ socket.on("process_upload_folder_update", function (data) {
   
   if (data == "200")
   {
+      document.getElementById("progress-bar").style.display = "none";
       enableButtons()
   }else{
       document.getElementById("info-text-socket").textContent = data;

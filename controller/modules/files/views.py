@@ -86,7 +86,7 @@ def upload_file_to_database(file_path, static_path , filename, travel_id):
         save_file_to_database(True, travel_id, filename, lat, long, file_id, file_thumbnail_path, static_path, created_date=created_date)
         
     elif (get_file_extension(file_path) in VIDEO_EXTENSIONS):
-        lat, long, created_date = get_video_tags(file_path,filename)
+        lat, long, created_date, duration = get_video_tags(file_path,filename)
         file_id = str(uuid.uuid4()) 
         
         abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type='thumbnails')
@@ -95,11 +95,11 @@ def upload_file_to_database(file_path, static_path , filename, travel_id):
 
         static_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file_id, file_type='thumbnails')
 
-        save_file_to_database(False, travel_id, filename, lat, long, file_id, static_thumbnail_path, static_path, filename, True, created_date=created_date)
+        save_file_to_database(False, travel_id, filename, lat, long, file_id, static_thumbnail_path, static_path, filename, True, created_date=created_date, video_duration=duration)
     else:
         print("File not supported")
 
-def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None, filename=None, edit_video=False, created_date=None):
+def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None, filename=None, edit_video=False, created_date=None, video_duration=None):
     time_duration = 0
 
     if not is_image:
@@ -115,8 +115,11 @@ def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file
         if file_thumbnail_path is None:
             file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type='thumbnails')
         
-        
-        time_duration = VideoUtils.get_video_info(video_file_path)
+        if video_duration:
+            if video_duration > 0:
+                time_duration = video_duration
+            else:
+                time_duration = VideoUtils.get_video_info(video_file_path)
 
     address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
     video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image, has_been_edited=edit_video, created_date=created_date)
@@ -242,17 +245,6 @@ def download_file(travel_id, filename):
 def upload_file(travel_id):
 
     if request.method == 'POST':
-        # print(request.form)
-        
-        # if len(request.files) == 0:
-        #     flash('No file part')
-        #     # {"error":0,"message":""}
-        #     return  jsonify(error= 1, message="No files uploaded")
-
-        # files = request.files
-        # global counter, number_of_files
-        # counter = 0
-        # number_of_files = len(files)
         for key, file in request.files.items():
             if key.startswith('file'):
                 if file and allowed_file(file.filename):
@@ -281,7 +273,11 @@ def upload_file(travel_id):
         if request.referrer:
             return redirect(request.referrer)
         return redirect("/travel/"+travel_id)
-        
+
+@files_blu.route('/completed')
+def completed():
+    return redirect('/', code=302)
+
 @socketio.on("update")
 def update(data):
     global counter
@@ -312,6 +308,7 @@ def process_upload(travel_id):
 
                 else:
                     print("File already exists")
+                    os.remove(join(UPLOAD_FOLDER, file))
                     emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
 
                 
@@ -326,6 +323,7 @@ def process_upload(travel_id):
 
                 else:
                     print("File already exists")
+                    os.remove(join(UPLOAD_FOLDER, file))
                     emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
 
             else:
@@ -337,6 +335,7 @@ def process_upload(travel_id):
         emit('process_upload_folder_update', "No files on the uploads folder")
         sleep(2)
         emit('process_upload_folder_update', "")
+        emit('process_upload_folder_update', "200")
 
     return redirect("/travel/"+travel_id)
 
