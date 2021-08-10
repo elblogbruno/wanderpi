@@ -9,20 +9,34 @@ from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.record import record_blu
 from flask import jsonify, request, redirect,Response
 import os
-
+import json
 
 #video_camera = None
 global_frame = None
 last_camera_index = 0
 current_camera_index = 0
 # {"index": 2, "deviceId" : "http://admin:manresa21@192.168.1.61/video.cgi?.mjpg", "deviceLabel" : "Jardin 2", "is_mjpg" : False, "is_picamera" : False, "auth_required": False, "username": "admin", "password": "manresa21" }
-video_camera_ids = [{"index": 0 ,"deviceId" : "0", "deviceLabel" : "Webcam", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}, {"index": 1, "deviceId" : "http://admin:manresa21@192.168.1.61/video.cgi?.mjpg", "deviceLabel" : "Jardin 2", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}]
+#video_camera_ids = [{"index": 0 ,"deviceId" : "0", "deviceLabel" : "Webcam", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}, {"index": 1, "deviceId" : "http://admin:manresa21@192.168.1.61/video.cgi?.mjpg", "deviceLabel" : "Jardin 2", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}]
+video_camera_ids = []
 video_camera_objs = []
 
 temp_video_to_join = []
 
+def load_json_file():
+    global video_camera_ids
+    if len(video_camera_ids) == 0:
+        #open cameras.json file and load
+        with open("./cameras.json", "r") as f:
+            video_camera_ids = json.load(f)['video_camera_ids']
+        print("Video sources loaded from json file")
+    else:
+        print("Video sources already loaded")
+
 @record_blu.route('/get_available_video_sources', methods=['GET', 'POST'])
 def get_available_video_sources(): #todo get available video sources from database
+    #if video camera ids is not initialized load from json file
+    load_json_file()
+    
     return jsonify(devices = video_camera_ids)
 
 def init_camera(camera_index = last_camera_index):
@@ -65,6 +79,8 @@ def video_stream(index):
 
     camera_id = video_camera_ids[int(index)]["deviceId"]
     
+    load_json_file()
+
     video_camera = init_camera(int(index))
 
     if video_camera.cap:
