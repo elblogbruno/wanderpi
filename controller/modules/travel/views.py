@@ -89,7 +89,7 @@ def download_travel(travel_id):
 
     video_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=final_video_id, file_type='videos')
         
-    final_video_path = VideoEditor.JoinVideos(video_paths, final_video_id, travel_id, video_path)
+    final_video_path = VideoEditor.JoinVideos(video_paths, final_video_id, video_path)
     
     finished_editing = True
     download_status = 'Travel video finished, it will download automatically or you can access it here: {0}'.format(final_video_path)

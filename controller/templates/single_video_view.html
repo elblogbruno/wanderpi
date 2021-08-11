@@ -10,8 +10,9 @@
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/recording-screen-style.css')}}" rel="stylesheet">
     
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
    
@@ -19,7 +20,13 @@
 
      <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/single-video-view.js')}}"></script>
+
+    <!-- jQuery library -->
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+    
+    <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
+
 
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
@@ -27,11 +34,11 @@
 <body>
 
 <!-- Modal -->
-<div class="modal fade" id="saveWanderpiModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="bulkEditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Save Wanderpi</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Edit Wanderpi</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -40,11 +47,20 @@
               <label for="recipient-name" class="col-form-label">Name:</label>
               <input id="name_input" type="text" class="form-control" id="recipient-name">
             </div>
+            <div class="container mx-auto">
+              <h4> Edit file location: </h4> 
+              
+              <div class="row">
+                <div id="map-container-global" style="height: 300px">
+              </div>
+
+              </div>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+          <button id="edit-file" onclick="editSelectedFiles('{{ file.travel_id }}')" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
         </div>
       </div>
     </div>
@@ -68,37 +84,45 @@
   <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
-          <div class="card h-100">
+          <div class="card h-55">
               <div class="card-body" >
                 {% block content %}  
                   
                   {% if not file.is_image %}  
-                    <video class="player-overlay camera-view-responsive card-img-top" width="640" height="auto" controls>
+                    <video class="player-overlay card-img-top" width="640" height="auto" controls>
                       <source src="{{ file.file_path }}" type="video/mp4">
                     </video>   
                   {% else %}                  
-                    <img class="camera-view-responsive card-img-top" src="{{ file.file_thumbnail_path }}"></img>
+                    <img class="camera-view-responsive card-img-top"  src="{{ file.file_thumbnail_path }}"></img>
                   {% endif %}
                  
                   <h5 class="card-title"> {{ file.name }} </h5>
                   <a> {{ file.created_date }} {{  file.time_duration }} </a>
                   <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ file.id }}.mp4'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{file.travel_id}}/{{ file.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
                       <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                       <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                      <button id="edit_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
+                      <button id="edit_video" type="button"  data-bs-toggle="modal" data-bs-target="#bulkEditModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
                   </div>
                 {% endblock %}    
               </div>
           </div>
         </div>
 
+
         <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
-          <div class="card h-100">
+          <div class="card h-55">
               <div class="card-body">
-                  <div id="map-container-google-1" class="z-depth-1-half map-responsive" style="height: 480px">
+                  <div id="file-map" class="camera-view-responsive" style="height: 480px">
                   </div>
-                  <a id="gps_text" > </a>
+
+                  <div class="col-md-2 col-xl-6 align-self-center">
+                      <h5 class="card-title"> GPS Information: </h3>
+                      <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block"></span>
+                      <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"></span>
+                      <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block"></span>
+                      <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block"></span>
+                  </div>  
               </div>
           </div>
         </div>
@@ -106,11 +130,25 @@
   </div>
 </div>
 
+<div>
+  <script src="/static/js/edit_files.js"> </script>
+</div>
+
 <script>
     var lat = '{{ file.lat }}';
     var long  = '{{ file.long }}';
-    console.log(lat ,long);
-    showPosition(lat,long);
+    var address  = '{{ file.address }}';
+
+    showPosition(lat,long, address);
+
+    {% for point in file.get_all_points() %}
+          loadPoints("{{ point.lat }}", "{{ point.long }}");
+          loadDistanceListFromPoints("{{ point.lat }}", "{{ point.long }}");
+    {% endfor %}
+
+    getDistance();
+
+    addCard("{{ file.id }}"); 
 </script>
 
 

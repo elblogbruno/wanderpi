@@ -41,6 +41,8 @@ def create_app(config_type):
     app.register_blueprint(record_blu)
     from controller.modules.files import files_blu
     app.register_blueprint(files_blu)
+    from controller.modules.files_utils import files_utils_blu
+    app.register_blueprint(files_utils_blu)
     setup_log(config_class.LOG_LEVEL)
     
     socketio.init_app(app)

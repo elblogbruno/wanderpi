@@ -2,7 +2,7 @@ import os
 import exifread
 from datetime import datetime
 from dateutil import parser
-
+import re
 import exiftool 
 
 exif_Executable="./exiftool-exe/exiftool(-k).exe"    
@@ -48,7 +48,12 @@ def get_image_tags(path_name, filename):
             creation_datetime = datetime.strptime(tags['EXIF DateTimeOriginal'].values, std_fmt)
     
     if creation_datetime == 0:
-        creation_datetime = parser.parse(filename,fuzzy=True)
+        match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+        if match_str:
+            creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
+        else:
+            creation_datetime = datetime.today()
+        print("Parsed datetime : " + str(creation_datetime))
 
     return lat, long, creation_datetime
 

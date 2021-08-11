@@ -58,7 +58,9 @@ class Wanderpi(db.Base):
         db.session.commit()
         return True
 
-
+    def get_all_points(self):
+        return db.session.query(Point).filter(Point.file_owner_id == self.id).all()
+        
     @staticmethod
     def get_by_id(id):
         return db.session.query(Wanderpi).get(id)
@@ -139,3 +141,41 @@ class Travel(db.Base):
     @staticmethod
     def get_all():
         return db.session.query(Travel).all()
+
+class Point(db.Base):
+    __tablename__ = 'points'
+    id = Column(String(256), primary_key=True)
+    file_owner_id = Column(String(256), nullable=False)
+    lat = Column(String(256), nullable=False)
+    long = Column(String(256), nullable=False)
+    
+
+    def __repr__(self):
+        return f'<Point {self.id}>'
+
+    def set_id(self, file_owner_id):
+        self.file_owner_id = file_owner_id
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        #self.save_json()
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    # this functions gets the object as a dictionary and saves it to a json file
+    def save_json(self):
+        #write json file on path where file is located
+        json_file_path = self.travel_folder_path + '/{0}-points.json'.format(self.id)
+
+        with open(json_file_path, 'w') as f:
+            json.dump(self.as_dict(), f)
+
+
+    @staticmethod
+    def get_by_id(id):
+        return db.session.query(Point).get(id)
+    
+    @staticmethod
+    def get_all():
+        return db.session.query(Point).all()

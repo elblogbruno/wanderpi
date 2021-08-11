@@ -1,5 +1,6 @@
 
 from controller.modules.files.video_utils import VideoUtils
+from controller.utils.video_editor import VideoEditor
 import uuid
 from controller.modules.files.views import get_travel_folder_path, get_travel_folder_path_static
 from datetime import datetime
@@ -11,6 +12,9 @@ from flask import jsonify, request, redirect,Response
 import os
 import json
 
+from flask_socketio import emit
+from controller import socketio
+
 #video_camera = None
 global_frame = None
 last_camera_index = 0
@@ -19,7 +23,7 @@ current_camera_index = 0
 #video_camera_ids = [{"index": 0 ,"deviceId" : "0", "deviceLabel" : "Webcam", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}, {"index": 1, "deviceId" : "http://admin:manresa21@192.168.1.61/video.cgi?.mjpg", "deviceLabel" : "Jardin 2", "is_mjpg" : False, "is_picamera" : False, "auth_required": False}]
 video_camera_ids = []
 video_camera_objs = []
-
+travel_id = ""
 temp_video_to_join = []
 
 def load_json_file():
@@ -38,6 +42,12 @@ def get_available_video_sources(): #todo get available video sources from databa
     load_json_file()
     
     return jsonify(devices = video_camera_ids)
+
+def start_record(video_camera, file_type):
+    file_id = str(uuid.uuid4()) 
+    destination_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
+    video_camera.start_record(destination_path, file_id)
+    return file_id
 
 def init_camera(camera_index = last_camera_index):
     global last_camera_index
@@ -64,22 +74,22 @@ def init_camera(camera_index = last_camera_index):
             video_camera_temp = video_camera_objs[int(last_camera_index)]
             
             if video_camera_temp.is_record:
+                video_camera_temp.cap.release()
                 video_camera_temp.stop_record()
                 temp_video_to_join.append(video_camera_temp.recording_thread.path)
-
+                start_record(video_camera_objs[camera_index], 'videos')
             last_camera_index = camera_index
         
-       
+
         return video_camera_objs[camera_index]
 
 def video_stream(index):
     print("Opening camera with index {0}".format(index))
 
     global global_frame
-
-    camera_id = video_camera_ids[int(index)]["deviceId"]
-    
     load_json_file()
+    
+    camera_id = video_camera_ids[int(index)]["deviceId"]
 
     video_camera = init_camera(int(index))
 
@@ -88,7 +98,11 @@ def video_stream(index):
             print("Camera {0} is opened".format(camera_id))
         else:
             print("Camera {0} is not opened".format(camera_id))
-            video_camera.cap.open(camera_id)
+            device_id = video_camera.camera_id
+            if isinstance(device_id, str) and device_id.isnumeric():
+                device_id = int(device_id)
+            video_camera.cap.open(video_camera.camera_id)
+            
 
     
         while video_camera.cap.isOpened():
@@ -118,9 +132,12 @@ def video_feed(camera_id):
     return Response(video_stream(camera_id),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
+
 @record_blu.route('/record_status', methods=['POST'])
 def record_status():
     global current_camera_index
+    global travel_id
 
     video_camera = video_camera_objs[current_camera_index]
 
@@ -146,15 +163,13 @@ def record_status():
             if os.path.exists(p):
                 os.remove(p)
 
-        file_id = str(uuid.uuid4()) 
-        destination_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
-        video_camera.start_record(destination_path, file_id)
+        file_id= start_record(video_camera, file_type)
 
         return jsonify(result="started", file_id=file_id)
     else:
         print("Stop recording...")
 
-        file_id = video_camera.stop_record(travel_id)
+        file_id = video_camera.stop_record()
 
         if file_id is None:
             return jsonify(result="failed", status_code=400)
@@ -165,7 +180,7 @@ def record_status():
         
         if len(temp_video_to_join) > 0:
             temp_video_to_join.append(file_path)
-            VideoEditor.JoinVideos(temp_video_to_join, file_id)
+            VideoEditor.JoinVideos(temp_video_to_join, file_id, file_path)
 
         lat = json['lat']
         lng = json['long']
@@ -175,3 +190,15 @@ def record_status():
         VideoUtils.save_video_thumbnail(file_path, abs_file_path, file_id)
         
         return jsonify(result="stopped", status_code=200, file_id=file_id, file_name=file_name, file_path=file_path)
+
+
+@socketio.on("record_update")
+def record_update(data):
+    global current_camera_index
+    video_camera = video_camera_objs[current_camera_index]
+    if data == "start":
+        if video_camera.recording_thread and video_camera.recording_thread.isRunning:
+            emit('record_update', video_camera.recording_thread.video_time)
+        else:
+            emit('record_update', 'error')
+    

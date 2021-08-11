@@ -28,7 +28,10 @@ class GeoCodeUtils:
             coordinates = "{0}, {1}".format(lat, long)
             location = locator.reverse(coordinates)
             print(location)
-            return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+            if 'town' in location.raw and 'country' in location.raw and 'state' in location.raw:
+                return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+            else:
+                return location.address
 
     @staticmethod
     def reverse_address(address):
@@ -44,6 +47,6 @@ class GeoCodeUtils:
         """Function that checks if the user has an internet connection"""
         try:
             urllib.request.urlopen('https://www.google.com/', timeout=1)
-            return False
+            return True
         except urllib.error.URLError as err:
             return False

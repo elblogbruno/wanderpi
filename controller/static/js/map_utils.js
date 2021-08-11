@@ -1,5 +1,5 @@
 //having a list of coordenates, calculates total distance
-function getDistance(list_of_points) {
+function calculateDistance(list_of_points) {
     var distance = 0;
     for (var i = 0; i < list_of_points.length - 1; i++) {
         distance += getDistanceBetweenPoints(list_of_points[i].lat, list_of_points[i].lng, list_of_points[i + 1].lat, list_of_points[i + 1].lng);
@@ -25,6 +25,7 @@ function deg2rad(p){
     return p * (Math.PI/180);
 }
 
+var singlePointsList = [];
 var acLatlong = {};
 
 function loadDistanceListFromWanderpis(lat, long, travel_id)
@@ -34,14 +35,35 @@ function loadDistanceListFromWanderpis(lat, long, travel_id)
     {
         acLatlong[travel_id] = []
     }
-    
+
     acLatlong[travel_id].push(new L.LatLng(lat, long)); 
 }
 
-function getTravelDistance(travel_id){
-    var distance = getDistance(acLatlong[travel_id]);
+function loadDistanceListFromPoints(lat, long)
+{
+    singlePointsList.push(new L.LatLng(lat, long)); 
+}
+
+function getDistance(){
+    var distance = calculateDistance(singlePointsList);
     
-    document.getElementById('travel-distance-'+travel_id).textContent = distance + ' km';
+    document.getElementById('distance-result').textContent = distance + ' km';
+
+    return distance;
+}
+
+function getDistanceByList(list_points){
+    var distance = calculateDistance(list_points);
+
+    return distance;
+}
+
+function getDistanceByTravelId(travel_id){
+    console.log(acLatlong);
+
+    var distance = calculateDistance(acLatlong[travel_id]);
+    
+    document.getElementById('distance-result-'+travel_id).textContent = distance + ' km';
 
     return distance;
 }

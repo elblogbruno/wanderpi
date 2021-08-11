@@ -1,9 +1,14 @@
 from controller.modules.files.views import get_travel_folder_path
 import cv2
 import threading
-import uuid
+import pyaudio
+import wave
 import numpy as np
 import requests
+import subprocess
+import os
+from moviepy.editor import *
+
 from time import sleep
 # import the necessary packages
 try:
@@ -15,44 +20,108 @@ except ImportError:
 import time # Provides time-related functions
 
 class RecordingThread(threading.Thread):
-    def __init__(self, name, camera,path, use_mjpg_cc = False):
+    def __init__(self, name, camera, path, use_mjpg_cc = False):
         threading.Thread.__init__(self)
+        self.isRunning = False
         self.name = name
-        self.isRunning = True
+        
         self.cap = camera
+        self.fps = 30            
         
         if use_mjpg_cc:
             print("Using mjpg cc")
-            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            self.fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         else:
             print("Using FMP4 cc")
-            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-      
-        #self.video_id = str(uuid.uuid4()) 
-        #self.path = './controller/static/videos/' + str(self.video_id) + '.mp4'
+            self.fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+
+        # self.cap.set(cv2.CAP_PROP_FOURCC,  cv2.VideoWriter_fourcc(*'MP4V'))
+        # self.cap.set(cv2.CAP_PROP_FPS, self.fps)
+        # self.cap.set(cv2.CAP_PROP_BUFFERSIZE,  3)
         
+        w = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        h = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  
+         
         self.path = path
+        self.out = cv2.VideoWriter(self.path, self.fourcc, self.fps, (int(w),int(h)))
+        
+        self.frame_counts = 1
+        self.start_time = time.time()
 
-        self.out = cv2.VideoWriter(self.path, fourcc, 25, (640, 480))
-        #self.latest_frame = None
-
+        
+        self.video_time = 0
+        self.isRunning = True
     def run(self):
-        sleep(0.5)
         while self.isRunning:
-            sleep(0.01)
-            ret, frame = self.cap.read()
-            if ret:
-                self.out.write(frame)
-                #self.latest_frame = frame
+            try:
+                # Capture frame-by-frame
+                ret, frame = self.cap.read()
+                if ret:
+                    self.out.write(frame)
+                    self.frame_counts += 1
+                    self.video_time =  time.time() - self.start_time
+            except Exception as e: 
+                print("Error recording {0}".format(str(e)))
+                self.stop()
 
-        self.out.release()
+        #self.out.release()
 
     def stop(self):
-        self.isRunning = False
+        "Finishes the video recording therefore the thread too"
+        if self.isRunning:
+            self.isRunning = False
+            #self.cap.release()
+            self.out.release()
 
     def __del__(self):
         self.out.release()
 
+class AudioRecorder():
+    "Audio class based on pyAudio and Wave"
+    def __init__(self, filename="temp_audio.wav", rate=44100, fpb=1024, channels=1):
+        self.open = True
+        self.rate = rate
+        self.frames_per_buffer = fpb
+        self.channels = channels
+        self.format = pyaudio.paInt16
+        self.audio_filename = filename
+        self.audio = pyaudio.PyAudio()
+        self.stream = self.audio.open(format=self.format,
+                                      channels=self.channels,
+                                      rate=self.rate,
+                                      input=True,
+                                      frames_per_buffer = self.frames_per_buffer)
+        self.audio_frames = []
+
+    def record(self):
+        "Audio starts being recorded"
+        self.stream.start_stream()
+        while self.open:
+            data = self.stream.read(self.frames_per_buffer) 
+            self.audio_frames.append(data)
+            if not self.open:
+                break
+
+    def stop(self):
+        "Finishes the audio recording therefore the thread too"
+        if self.open:
+            self.open = False
+            self.stream.stop_stream()
+            self.stream.close()
+            self.audio.terminate()
+            waveFile = wave.open(self.audio_filename, 'wb')
+            waveFile.setnchannels(self.channels)
+            waveFile.setsampwidth(self.audio.get_sample_size(self.format))
+            waveFile.setframerate(self.rate)
+            waveFile.writeframes(b''.join(self.audio_frames))
+            waveFile.close()
+        
+        pass
+
+    def start(self):
+        "Launches the audio recording function using a thread"
+        audio_thread = threading.Thread(target=self.record)
+        audio_thread.start()
 
 class VideoCamera(object):
     def __init__(self, camera_id=0, is_mjpeg=False, is_picamera=False, username="", password=""):
@@ -68,7 +137,7 @@ class VideoCamera(object):
                 self.cap = cv2.VideoCapture(camera_id, cv2.CAP_OPENCV_MJPEG)
                 self.use_mjpg_cc = True
             else:
-                self.cap = cv2.VideoCapture(camera_id, cv2.CAP_ANY)
+                self.cap = cv2.VideoCapture(camera_id)
                 self.use_mjpg_cc = False
         else:
             self.bytes = bytes()
@@ -81,6 +150,7 @@ class VideoCamera(object):
         self.is_record = False
         self.out = None
 
+        self.audio_thread = None
         self.recording_thread = None
 
     def init_picamera (self):
@@ -92,8 +162,8 @@ class VideoCamera(object):
         return camera, raw_capture
 
 
-    def __del__(self):
-        self.cap.release()
+    # def __del__(self):
+    #     #self.cap.release()
 
     def get_frame(self):
         if self.is_picamera:
@@ -115,15 +185,17 @@ class VideoCamera(object):
                 else:
                     return None
         elif not self.is_mjpeg:
-            self.ret, self.frame = self.cap.read()
+            try:
+                ret, frame = self.cap.read()
 
-            if self.ret:
-                ret1, jpeg = cv2.imencode('.jpg', self.frame)
+                if ret:
+                    ret1, jpeg = cv2.imencode('.jpg',frame)
 
-                if ret1:
-                    return jpeg.tobytes()
-
-            else:
+                    if ret1:
+                        return jpeg.tobytes()
+                else:
+                    return None
+            except:
                 return None
         else:
             if self.stream.status_code == 200:
@@ -145,27 +217,63 @@ class VideoCamera(object):
                 print("Received unexpected status code {}".format(self.stream.status_code))
                 return None
 
+    def file_manager(self):
+        "Required and wanted processing of final files"
+        local_path = os.getcwd()
+        if os.path.exists(str(local_path) + "/temp_audio.wav"):
+            os.remove(str(local_path) + "/temp_audio.wav")
+        # if os.path.exists(str(local_path) + "/temp_video.avi"):
+        #     os.remove(str(local_path) + "/temp_video.avi")
+        # if os.path.exists(str(local_path) + "/temp_video2.avi"):
+        #     os.remove(str(local_path) + "/temp_video2.avi")
+
     def start_record(self, path, file_id):
         self.file_id = file_id
         self.is_record = True
         self.recording_thread = RecordingThread("Video Recording Thread", self.cap, path, self.use_mjpg_cc)
+        self.audio_thread = AudioRecorder()
+
+        self.audio_thread.start()
         self.recording_thread.start()
         return True
 
-    def stop_record(self, travel_id):
+    def stop_record(self):
         self.is_record = False
 
+        if self.audio_thread != None:
+            self.audio_thread.stop()
+        
         if self.recording_thread != None:
             self.recording_thread.stop()
 
-        #thumbnail_url = "./controller/static/thumbnails/thumbnail-%s.jpg" % str(self.video_id)
-        # thumbnail_url = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=self.file_id, file_type='thumbnails')
+        frame_counts = self.recording_thread.frame_counts
+        elapsed_time = time.time() - self.recording_thread.start_time
+        recorded_fps = frame_counts / elapsed_time
 
-        # if len(self.recording_thread.latest_frame) > 0:
-        #     cv2.imwrite(thumbnail_url, self.recording_thread.latest_frame)
-        # else:
-        #     print("No frame to save")
-        #     return None
+        print("total frames " + str(frame_counts))
+        print("elapsed time " + str(elapsed_time))
+        print("recorded fps " + str(recorded_fps))
+
+        
+        video_path = self.recording_thread.path
+        path_temp = video_path.replace('.mp4', '-edited')
+
+        if 'mp4' not in path_temp:
+            path_temp += '.mp4'
+
+        
+        videoclip = VideoFileClip(video_path, audio=False)
+        audioclip = AudioFileClip("./temp_audio.wav")
+
+        new_audioclip = CompositeAudioClip([audioclip])
+        
+        videoclip.audio = new_audioclip
+        videoclip.write_videofile(path_temp, threads=4, audio_codec='aac')
+
+        os.remove(video_path)
+        os.rename(path_temp, video_path)
+
+        self.file_manager()
 
         return self.file_id
 

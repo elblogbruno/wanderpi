@@ -6,24 +6,28 @@ var downloadLink = document.getElementById("download_video");
 var saveButton = document.getElementById("save_file");
 var saveButtonModal = document.getElementById("save_request_button");
 var cameraDropdown = document.querySelector('select#videoSource');
+var socket = io();
 
 var gps = document.getElementById("gps_text");
 var map = L.map('map-container-google-1');
 var file_name = "";
 var global_travel_id = "";
 
-saveButton.style.display = "none";
-downloadLink.style.display = "none";
-buttonStop.disabled = true;
-statusBadgeContainer.style.display = "none";
 
+var update_socket = false;
 var lat = 0;
 var long = 0;
 var file_id = 0;
 
 
+
 function init(travel_id) 
 {
+    saveButton.style.display = "none";
+    downloadLink.style.display = "none";
+    buttonStop.disabled = true;
+    statusBadgeContainer.style.display = "none";
+
     global_travel_id = travel_id || "";
 }
 
@@ -34,6 +38,7 @@ cameraDropdown.onchange = function () {
     
     player.src =  `/video_feed/${videoSource}/`;
 }
+
 
 function initializeCameraView(){
     var card = document.getElementById("video-card-body");
@@ -79,35 +84,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
     initializeCameraView();
 });
 
-var stopTimerControl = false;
-var counter = 0;
-var timer = counter, minutes, seconds;
-
-function resetTimer(){
-    stopTimerControl = false;
-    counter = 0;
-}
-function stopTimer(){
-    stopTimerControl = true;
-    counter = 0;
-}
-function startTimer()  {  
-    
-    setInterval(function () {
-        if (!stopTimerControl) {
-            minutes = parseInt(timer / 60, 10)
-            seconds = parseInt(timer % 60, 10);
-
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            statusBadge.textContent = minutes + ":" + seconds;
-
-            timer++;
-        }
-    }, 1000);
-}
-
 buttonRecord.onclick = function () {
     setOnVideoStartUI();
 
@@ -134,38 +110,90 @@ buttonRecord.onclick = function () {
 
 
     initializeMapAndLocator();
-    
-    resetTimer();
-    startTimer();
+    update_socket = true;
+
+    start_socket();
+    // resetTimer();
+    // startTimer();
 };
 
+function start_socket(){
+    if (update_socket) {
+        socket.emit('record_update', 'start');
+    }
+}
+
+sending = setInterval(start_socket, 100);
+
+socket.on("record_update", function (data) {
+    console.log( "Data from python: " + data);
+    if (data == "error"){
+        update_socket = false;
+    }
+    statusBadge.textContent = data;
+});
+
+points = []
 saveButtonModal.onclick = function () {
     //makes a request to save the video and when it is done, it will redirect to the home page where the video is saved
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.responseText);
-            var response = JSON.parse(xhr.responseText);
-            if (response.status_code == 200) {
-                window.location.href = "/travel/"+global_travel_id;
-            }
-        }
-    }
+    // var xhr = new XMLHttpRequest();
+    // xhr.onreadystatechange = function () {
+    //     if (xhr.readyState == 4 && xhr.status == 200) {
+    //         console.log(xhr.responseText);
+    //         var response = JSON.parse(xhr.responseText);
+    //         if (response.status_code == 200) {
+    //             window.location.href = "/travel/"+global_travel_id;
+    //         }
+    //     }
+    // }
 
     var name_input = document.getElementById("name_input");
 
-    var base_url = window.location.origin;
-    var url = new URL(base_url+"/save_file/"+ saveButton.value+'/');
+    // var base_url = window.location.origin;
+    // var url = new URL(base_url+"/save_file/"+ saveButton.value+'/');
   
-    url.searchParams.set('is_image', false);
-    url.searchParams.append('name', name_input.value);
-    url.searchParams.append('lat', lat);
-    url.searchParams.append('long', long);
-    url.searchParams.append('travel_id', global_travel_id);
+    // url.searchParams.set('is_image', false);
+    // url.searchParams.append('name', name_input.value);
+    // url.searchParams.append('lat', lat);
+    // url.searchParams.append('long', long);
+    // url.searchParams.append('travel_id', global_travel_id);
+    // url.searchParams.append('points', points);
 
-    xhr.open("POST", url.toString());
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send();
+
+      var data = {
+        is_image : false,
+        name : name_input.value,
+        lat : lat,
+        long : long,
+        travel_id : global_travel_id,
+        points : points
+      };
+    
+      var js_data = JSON.stringify(data);
+      
+      console.log(js_data);
+
+      $.ajax({
+          url: "/save_file/"+ saveButton.value+'/',
+          type: "POST",
+          data: js_data,
+          contentType: 'application/json',
+          dataType : 'json',
+          error: function(xhr, status, err) {
+              console.log(xhr.responseText);
+              console.log(status);
+              console.log(err);
+          },
+          success: function(data) {
+                if (data.status_code == 200) {
+                    window.location.href = "/travel/"+global_travel_id;
+                }
+            }
+      });
+
+    // xhr.open("POST", url.toString());
+    // xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    // xhr.send();
 };
 
 function setOnVideoStartUI(){
@@ -184,6 +212,8 @@ function setOnVideoStartUI(){
 function setOnVideoStopUI(){
     buttonRecord.disabled = false;
     buttonStop.disabled = true;
+    
+    duration = statusBadge.textContent;
 
     statusBadge.innerHTML  = "Stopped";
 
@@ -197,11 +227,11 @@ function setOnVideoStopUI(){
     }, 2000);
 
     var video_info_text = document.getElementById("video_info_text");
-    video_info_text.textContent = "Video name: " + file_name + " Duration: " + minutes + ":" + seconds;
+    video_info_text.textContent = "Video name: " + file_name + " Duration: " + duration;
 }
 
 buttonStop.onclick = function () {
-    stopTimer();
+    update_socket = false;
     // XMLHttpRequest
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -257,6 +287,7 @@ saveWanderpiModal.addEventListener('show.bs.modal', function (event) {
   modalBodyInput.value = recipient
 })
 
+
 //function that inits leaflet map but shows text that says start recording to show map
 function initializeMapAndLocator()
 { 
@@ -275,6 +306,13 @@ function initializeMapAndLocator()
     
     function onLocationFound(e) 
     {
+        //web request to add a point to database
+        point = {
+            lat: e.latlng.lat,
+            long: e.latlng.lng,
+        }
+        points.push(point);
+
         pathCoords.push(e.latlng);
 
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);

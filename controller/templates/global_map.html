@@ -11,8 +11,8 @@
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
 
-    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.css')}}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.Default.css')}}" rel="stylesheet">
+    <!-- <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/MarkerCluster.Default.css')}}" rel="stylesheet"> -->
 
     <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
 
@@ -32,15 +32,7 @@
     <script src="{{ url_for('static', filename='js/global_map.js')}}"></script>
     <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     
-    <!-- <script src="../static/js/file_handler.js"></script> -->
-
-    <!-- <script> 
-        $(document).ready(function() { // this runs as soon as the page is ready (DOM is loaded)
-            const script = document.createElement('script');
-            script.src = '/static/js/header_control.js';
-            document.head.appendChild(script);
-        });
-    </script>  -->
+    
 
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
@@ -55,12 +47,7 @@
         </a>
         
         <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
-        <h4 id="gps_text"> </h4>
-        <!-- <div id="header-buttons">
-            {% with travel=travel , context=False %}
-                {% include "travel_header_buttons.html" %}
-            {% endwith %}
-        </div> -->
+        <h4 id="distance-result"> </h4>
 
     </div>    
 </nav>

@@ -4,3 +4,19 @@
     border-radius: 5px;
     margin-bottom: 12px;
 }
+
+.map-responsive{
+    position: relative;
+    /* padding-bottom: 75%; */
+    height: 0;
+    overflow: hidden;
+}
+
+.map-responsive iframe{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 5px;
+}

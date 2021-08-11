@@ -15,12 +15,16 @@
     
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
 
     <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
 
      <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
     <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
+
+    <!--Import SocketIO-->
+    <script src="/static/node_modules/socket.io/client-dist/socket.io.js"></script>
 
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
@@ -123,16 +127,15 @@
 </div>
 
 
-
-
 <div class="top">
-    <div class="recorder" id="recorder" align="center">
-        <script type="text/javascript" src="/static/js/recorder.js"></script>
-        <script>
-            init("{{ travel.id }}");
-        </script>
-    </div>
+  <div class="recorder" id="recorder" align="center">
+      <script type="text/javascript" src="/static/js/recorder.js"></script>
+      <script>
+          init("{{ travel.id }}");
+      </script>
+  </div>
 </div>
+
 
 
 </body>

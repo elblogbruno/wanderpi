@@ -48,7 +48,7 @@ class VideoEditor:
         os.rename(path_temp, video_path)
     
     @staticmethod
-    def JoinVideos(videos_path, video_id, travel_id, video_path):
+    def JoinVideos(videos_path, video_id, video_path):
         video_clips = []
         for path in videos_path:
             #we use VideoFileClip() class create two video object, then we will merge them.

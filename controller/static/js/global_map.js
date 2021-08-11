@@ -80,5 +80,5 @@ function plot_map(lat, long, name, thumbnail_path, id) {
 
     map.fitBounds(pathLine.getBounds());
 
-    document.getElementById('gps_text').innerHTML = getDistance(list_of_points) + " m";
+    document.getElementById('distance-result').innerHTML = getDistanceByList(list_of_points) + " m";
 }

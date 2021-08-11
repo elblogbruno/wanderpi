@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Wanderpi</title>
-
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
@@ -56,18 +57,6 @@
                 <label for="destination_input" class="col-form-label">Destination:</label>
                 <input id="destination_input" placeholder="Enter your address"  type="text" class="form-control">
             </div>
-            <div class="mb-3">
-                <input class="form-control" autocomplete="off" id="search" type="text" />
-            </div>
-            <script>
-                // var autocomplete = new kt.OsmNamesAutocomplete(
-                //     'search', 'http://172.26.144.84/');
-                var autocomplete = new kt.OsmNamesAutocomplete('search', undefined, 'dgb7TgC5zR0YpsAqbEgb', true);
-
-                autocomplete.registerCallback(function(item) {
-                  console.log(item);
-                });
-            </script>
 
             <div class="mb-3">
                 <label for="start_date_input" class="col-form-label">Start Date:</label>
@@ -158,14 +147,13 @@
                                     
                                     <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
-                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="travel-distance-{{ post.id }}" class="card-text d-inline-block"></span>
+                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span>
                                     
                                     <script>
                                         {% for video in post.get_all_wanderpis() %}
                                             loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ post.id }}");
                                         {% endfor %}
-                                        getTravelDistance("{{ post.id }}");
-
+                                        getDistanceByTravelId("{{ post.id }}");
                                     </script>
 
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">

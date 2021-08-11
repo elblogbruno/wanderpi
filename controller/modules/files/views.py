@@ -1,11 +1,11 @@
 from genericpath import isfile
 from config import  UPLOAD_FOLDER, VIDEOS_FOLDER
 
-from flask import Flask, json, jsonify, flash, request, redirect, render_template,send_from_directory,url_for
+from flask import session, jsonify, flash, request, redirect, render_template,send_from_directory,url_for
 from werkzeug.utils import secure_filename
 
 from controller.modules.files.video_utils import VideoUtils
-from controller.models.models import Travel, Wanderpi
+from controller.models.models import Point, Travel, Wanderpi
 from controller.modules.home import geocode_utils
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.files import files_blu
@@ -145,13 +145,16 @@ def bulk_edit_files():
         json = request.json
 
         files_to_edit = json['files_to_edit']
-        lat = json['lat']
-        long = json['long']
 
         for file in files_to_edit:
             file = Wanderpi.get_by_id(file)
+            lat = json['lat'] if 'lat' in json.keys() else file.lat #if we have a new lat for the file on the, update it
             file.lat = lat
+            long = json['long'] if 'long' in json.keys() else file.long #if we have a new long for the file on the, update it
             file.long = long
+            name = json['name'] if 'name' in json.keys() else file.name #if we have a new name for the file on the, update it
+            file.name = name
+            
             file.address = GeoCodeUtils.reverse_latlong(lat, long)
             file.save()
 
@@ -190,22 +193,39 @@ def delete_file(file_id):
 def save_file(file_id): #todo get available video sources from database
     print("Saving file {0}".format(file_id))
     
-    boolean = request.args.get('is_image')
-    is_image = True if boolean == 'true' else False
-    travel_id = request.args.get('travel_id')
-    
-    name = request.args.get('name', default=file_id)
-    if len(name) == 0:
-        name = file_id
+    if request.method == 'POST':
+        json = request.json
 
-    lat_coord = request.args.get('lat')
-    long_coord = request.args.get('long')
-    file_thumbnail_path = request.args.get('thumbnail_url', default=None)
-    file_path = request.args.get('file_path', default=None)
+        boolean = json['is_image']
+        is_image = True if boolean == 'true' else False
+        travel_id = json['travel_id']
+        
+        name = json['name'] if 'name' in json.keys() else file_id
+        if len(name) == 0:
+            name = file_id
 
-    save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path, file_id)
+        lat_coord = json['lat']
+        long_coord = json['long']
+        file_thumbnail_path = json['thumbnail_url'] if 'thumbnail_url' in json.keys() else None
+        file_path = json['file_path'] if 'file_path' in json.keys() else None
+        points = json['points']
 
-    return jsonify(status_code = 200, message = "OK")
+        for point in points:
+            print(point)
+            lat = point['lat']
+            long = point['long']
+            p = Point(id=str(uuid.uuid4()),lat=lat, long=long, file_owner_id=file_id)
+            p.save()
+
+        save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path, file_id)
+
+        return jsonify(status_code = 200, message = "OK")
+    else:
+        if request.referrer:
+            return redirect(request.referrer)
+        return redirect("/")
+
+@files_blu.route('/get_file_info/<string:file_id>')
 
 @files_blu.route('/get_video_info/<string:video_id>', methods=['GET', 'POST'])
 def get_video_info(video_id):
@@ -222,24 +242,6 @@ def get_video_info(video_id):
 def request_entity_too_large(error):
      return  jsonify(error= 1, message='File Too Large')
 
-@files_blu.route('/uploads/<string:travel_id>/<string:filename>', methods=['GET', 'POST'])
-def download_file(travel_id, filename):
-    file_type = 'images' if get_file_extension(filename) in IMAGE_EXTENSIONS else 'videos'
-    abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type=file_type)
-    file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
-    
-    if file_type == 'videos':
-        video = Wanderpi.get_by_id(filename)
-
-        if video and not video.has_been_edited:
-            #VideoEditor.AddTitleToVideo(file_path, filename, travel_id, video.name)
-            video.has_been_edited = True
-            video.save()
-    
-    if '.' not in filename: 
-        filename = file_path.split('/')[-1]
-    
-    return send_from_directory(abs_file_path, filename, as_attachment=True)
 
 @files_blu.route('/upload/<string:travel_id>', methods=['POST','GET'])
 def upload_file(travel_id):
@@ -276,6 +278,7 @@ def upload_file(travel_id):
 
 @files_blu.route('/completed')
 def completed():
+    print(request.referrer)
     return redirect('/', code=302)
 
 @socketio.on("update")

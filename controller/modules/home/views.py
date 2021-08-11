@@ -1,7 +1,7 @@
 from config import VIDEOS_FOLDER
 from os import name
 
-from flask import json, session, render_template, redirect, url_for, Response,request, jsonify
+from flask import json, session, render_template, redirect, url_for, Response,request, jsonify,send_from_directory
 from controller.modules.home import home_blu
 
 from controller.models.models import Wanderpi, Travel
@@ -10,8 +10,12 @@ from controller.utils.video_editor import VideoEditor
 
 from datetime import *
 
+import jinja2.exceptions
 
-
+@home_blu.route('/favicon.ico')
+def favicon():
+    return send_from_directory('./controller/static',
+                          'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @home_blu.route('/')
 def index():
@@ -32,12 +36,17 @@ def travel(travel_id):
     if not username:
         session["initialized"] = False
         return redirect(url_for("user.login"))
+
+    try:     
+        travel = Travel.get_by_id(travel_id)
+        if travel:
+            wanderpis = travel.get_all_wanderpis()
         
-    travel = Travel.get_by_id(travel_id)
-    if travel:
-        wanderpis = travel.get_all_wanderpis()
-    
-    return render_template("travel_view.html", wanderpis=wanderpis, travel=travel)  
+        session["current_travel_id"] = travel_id
+
+        return render_template("travel_view.html", wanderpis=wanderpis, travel=travel)  
+    except:
+        return redirect(url_for("home.index"))
 
 @home_blu.route('/global_map/<string:travel_id>')
 def global_map(travel_id):
@@ -47,10 +56,12 @@ def global_map(travel_id):
         session["initialized"] = False
         return redirect(url_for("user.login"))
         
-    print(travel_id)
-    travel = Travel.get_by_id(travel_id)
-    wanderpis = travel.get_all_wanderpis()
-    return render_template("global_map.html", wanderpis=wanderpis, travel=travel)   
+    try:   
+        travel = Travel.get_by_id(travel_id)
+        wanderpis = travel.get_all_wanderpis()
+        return render_template("global_map.html", wanderpis=wanderpis, travel=travel)
+    except:
+        return redirect(url_for("home.index"))   
 
 @home_blu.route('/file/<path:id>')
 def single_file(id):
@@ -58,10 +69,13 @@ def single_file(id):
     if not username:
         session["initialized"] = False
         return redirect(url_for("user.login"))
-        
-    wanderpi = Wanderpi.get_by_id(id)
-    return render_template("single_video_view.html", file=wanderpi)   
 
+    try: 
+        wanderpi = Wanderpi.get_by_id(id)
+        return render_template("single_video_view.html", file=wanderpi)   
+    except jinja2.exceptions.UndefinedError as e:
+        print(str(e))
+        return redirect(url_for("home.index"))
 
 @home_blu.route('/record/<string:travel_id>')
 def record(travel_id):
@@ -71,8 +85,11 @@ def record(travel_id):
         session["initialized"] = False
         return redirect(url_for("user.login"))
 
-    travel = Travel.get_by_id(travel_id)
-    return render_template("record.html", travel=travel)
+    try:
+        travel = Travel.get_by_id(travel_id)
+        return render_template("record.html", travel=travel)
+    except:
+        return redirect(url_for("home.index"))
 
 
 @home_blu.route('/latlong/<string:address>', methods=['GET', 'POST'])

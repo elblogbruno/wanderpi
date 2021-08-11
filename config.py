@@ -19,14 +19,14 @@ class Config:
     DROPZONE_MAX_FILES=30
     DROPZONE_PARALLEL_UPLOADS=3  # set parallel amount
     DROPZONE_UPLOAD_MULTIPLE=True  # enable upload multiple
-    DROPZONE_REDIRECT_VIEW='files.completed'  # set redirect view
+    #DROPZONE_REDIRECT_VIEW='files.completed'  # set redirect view
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-
+    UPLOAD_FOLDER = UPLOAD_FOLDER
 
 class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = logging.DEBUG
-    UPLOAD_FOLDER = UPLOAD_FOLDER
+    
 
 class ProductionConfig(Config):
     DEBUG = False

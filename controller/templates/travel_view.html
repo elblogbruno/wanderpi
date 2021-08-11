@@ -36,8 +36,11 @@
             script.src = '/static/js/header_control.js';
             const script1 = document.createElement('script');
             script1.src = '/static/js/file_handler.js';
+            const script2 = document.createElement('script');
+            script2.src = '/static/js/edit_files.js';
             document.head.appendChild(script);
             document.head.appendChild(script1);
+            document.head.appendChild(script2);
         });
     </script> 
 
@@ -138,7 +141,7 @@
         <div class="modal-footer">
           <button id="delete-selected-files" onclick="deleteSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Delete them</button> 
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
-          <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>  
+          <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
         </div>
       </div>
     </div>
@@ -212,7 +215,7 @@
 
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
                                         <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
-                                        <button id="share_video" type="button"  onclick="shareVideo('{{ post.id }}')" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="share_video" type="button"  onclick="window.location.href='/get_share_image/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                                         <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                                     </div>
 
