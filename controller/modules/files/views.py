@@ -5,7 +5,7 @@ from flask import session, jsonify, flash, request, redirect, render_template,se
 from werkzeug.utils import secure_filename
 
 from controller.modules.files.video_utils import VideoUtils
-from controller.models.models import Point, Travel, Wanderpi
+from controller.models.models import Point, Travel, Wanderpi, Stop
 from controller.modules.home import geocode_utils
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.files import files_blu
@@ -72,9 +72,10 @@ def get_travel_folder_path(travel_id, filename_or_file_id= None, file_type='imag
         elif file_type == 'root':
             return VIDEOS_FOLDER + str(travel_id)
 
-def upload_file_to_database(file_path, static_path , filename, travel_id):
+def upload_file_to_database(file_path, static_path , filename, travel_id, stop_id):
     print("Adding file {0} to database".format(file_path))
-    
+    #travel_id = Stop.get_by_id(stop_id).travel_id
+
     if (get_file_extension(file_path) in IMAGE_EXTENSIONS):
         # read the image data using PIL
         lat, long, created_date = get_image_tags(file_path, filename)
@@ -83,7 +84,7 @@ def upload_file_to_database(file_path, static_path , filename, travel_id):
         file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename)
 
         
-        save_file_to_database(True, travel_id, filename, lat, long, file_id, file_thumbnail_path, static_path, created_date=created_date)
+        save_file_to_database(True, travel_id, stop_id, filename, lat, long, file_id, file_thumbnail_path, static_path, created_date=created_date)
         
     elif (get_file_extension(file_path) in VIDEO_EXTENSIONS):
         lat, long, created_date, duration = get_video_tags(file_path,filename)
@@ -95,11 +96,11 @@ def upload_file_to_database(file_path, static_path , filename, travel_id):
 
         static_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file_id, file_type='thumbnails')
 
-        save_file_to_database(False, travel_id, filename, lat, long, file_id, static_thumbnail_path, static_path, filename, True, created_date=created_date, video_duration=duration)
+        save_file_to_database(False,travel_id, stop_id, filename, lat, long, file_id, static_thumbnail_path, static_path, filename, True, created_date=created_date, video_duration=duration)
     else:
         print("File not supported")
 
-def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None, filename=None, edit_video=False, created_date=None, video_duration=None):
+def save_file_to_database(is_image, travel_id, stop_id, name, lat_coord, long_coord, file_id, file_thumbnail_path= None, file_path = None, filename=None, edit_video=False, created_date=None, video_duration=None):
     time_duration = 0
 
     if not is_image:
@@ -122,7 +123,7 @@ def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file
                 time_duration = VideoUtils.get_video_info(video_file_path)
 
     address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
-    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image, has_been_edited=edit_video, created_date=created_date)
+    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, stop_id=stop_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image, has_been_edited=edit_video, created_date=created_date)
     video.save()
 
     return "ok"
@@ -130,11 +131,11 @@ def save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file
 def delete_file_from_database(file_id):
     try:
         video = Wanderpi.get_by_id(file_id)
-        travel_id = video.travel_id
+        stop_id = video.stop_id
 
         video.delete()
 
-        return travel_id
+        return stop_id
     except:
         return "error"
 
@@ -168,11 +169,13 @@ def bulk_edit_files():
 def bulk_delete_files():
     if request.method == 'POST':
         files_to_delete = request.json
+        try:
+            for file in files_to_delete:
+                stop_id = delete_file_from_database(file)
+        except: 
+            return jsonify(error = 0, message = "Error deleting file")
 
-        for file in files_to_delete:
-            travel_id = delete_file_from_database(file)
-
-        return jsonify({"error": 0})
+        return redirect(url_for('home.stop', stop_id=stop_id), code=302)
     else:
         if request.referrer:
             return redirect(request.referrer)
@@ -180,12 +183,10 @@ def bulk_delete_files():
 
 @files_blu.route('/delete_file/<string:file_id>')
 def delete_file(file_id):
-    travel_id = delete_file_from_database(file_id)
+    stop_id = delete_file_from_database(file_id)
     
-    travel = Travel.get_by_id(travel_id)
-    
-    if travel:
-        return redirect('/travel/'+ travel.id)
+    if stop_id:
+        return redirect(url_for('home.stop', stop_id=stop_id), code=302)
     else:
         return redirect('/')  
 
@@ -198,8 +199,10 @@ def save_file(file_id): #todo get available video sources from database
 
         boolean = json['is_image']
         is_image = True if boolean == 'true' else False
-        travel_id = json['travel_id']
+        stop_id = json['stop_id']
+        travel_id = Stop.get_by_id(stop_id).travel_id
         
+
         name = json['name'] if 'name' in json.keys() else file_id
         if len(name) == 0:
             name = file_id
@@ -217,7 +220,7 @@ def save_file(file_id): #todo get available video sources from database
             p = Point(id=str(uuid.uuid4()),lat=lat, long=long, file_owner_id=file_id)
             p.save()
 
-        save_file_to_database(is_image, travel_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path, file_id)
+        save_file_to_database(is_image,travel_id, stop_id, name, lat_coord, long_coord, file_id, file_thumbnail_path, file_path, file_id)
 
         return jsonify(status_code = 200, message = "OK")
     else:
@@ -243,10 +246,11 @@ def request_entity_too_large(error):
      return  jsonify(error= 1, message='File Too Large')
 
 
-@files_blu.route('/upload/<string:travel_id>', methods=['POST','GET'])
-def upload_file(travel_id):
+@files_blu.route('/upload/<string:stop_id>', methods=['POST','GET'])
+def upload_file(stop_id):
 
     if request.method == 'POST':
+        travel_id = Stop.get_by_id(stop_id).travel_id
         for key, file in request.files.items():
             if key.startswith('file'):
                 if file and allowed_file(file.filename):
@@ -257,7 +261,7 @@ def upload_file(travel_id):
                     
                     if not os.path.isfile(path):     
                         file.save(path)
-                        upload_file_to_database(path,static_path, filename, travel_id)
+                        upload_file_to_database(path, static_path, filename, travel_id, stop_id)
                     else:
                         return 'File already exists', 400
                     #counter += 1
@@ -293,9 +297,9 @@ def update(data):
 
 #@files_blu.route('/process_upload/<string:travel_id>', methods=['POST','GET'])
 @socketio.on("process_upload_folder_update")
-def process_upload(travel_id):
+def process_upload(stop_id):
     #for every file in the uploads folder, upload it to the database
-    
+    travel_id = Stop.get_by_id(stop_id).travel_id
     upload_files = [f for f in listdir(UPLOAD_FOLDER) if isfile(join(UPLOAD_FOLDER, f))]
     if len(upload_files) > 0:
         for file in upload_files:
@@ -306,7 +310,7 @@ def process_upload(travel_id):
                 static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type='images')
                 if not os.path.isfile(path):
                     shutil.move(UPLOAD_FOLDER+file, path)
-                    upload_file_to_database(path, static_path, file, travel_id)
+                    upload_file_to_database(path, static_path, file, travel_id,stop_id)
                     emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
 
                 else:
@@ -321,7 +325,7 @@ def process_upload(travel_id):
                 static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type='videos')
                 if not os.path.isfile(path):
                     shutil.move(UPLOAD_FOLDER+file, path)
-                    upload_file_to_database(path, static_path, file, travel_id)
+                    upload_file_to_database(path, static_path, file, travel_id,stop_id)
                     emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
 
                 else:
@@ -340,6 +344,6 @@ def process_upload(travel_id):
         emit('process_upload_folder_update', "")
         emit('process_upload_folder_update', "200")
 
-    return redirect("/travel/"+travel_id)
+    return redirect("/stop/"+stop_id)
 
 

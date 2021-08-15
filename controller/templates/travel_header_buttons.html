@@ -13,7 +13,7 @@
   <button href="#" type="button" class="btn btn-success btn-fab" data-bs-toggle="modal" data-bs-target="#uploadFileModal" id="upload_files">
     <i class="bi bi-file-earmark-arrow-up lg-icon-fab"></i>
   </button>
-  <button onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" type="button" class="btn btn-info btn-fab" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
+  <button onclick="window.location.href='{{ url_for('home.record', stop_id=stop.id) }}'" type="button" class="btn btn-info btn-fab" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
     <i class="bi bi-plus-lg lg-icon-fab"></i>
   </button>
 {% else %}
@@ -30,7 +30,7 @@
 <button href="#" type="button" class="btn btn-success btn-fab me-3" data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
     <i class="bi bi-file-earmark-arrow-up"></i>
 </button>
-<button onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" type="button" class="btn btn-info btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
+<button onclick="window.location.href='{{ url_for('home.record', stop_id=stop.id) }}'" type="button" class="btn btn-info btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
     <i class="bi bi-plus-lg"></i>
 </button>
 

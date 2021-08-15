@@ -1,36 +1,28 @@
-
-function AddTravel(){
+function add_stop(travel_id)
+{
     var name = document.getElementById("name_input").value;
-    var destination = document.getElementById("destination_input").value;
-    var startTime = document.getElementById("start_date_input").value;
-    var endTime = document.getElementById("end_date_input").value;
-    var notes = document.getElementById("travel_notes").value;
     var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-          if (xhr.readyState == 4 && xhr.status == 200) {
-              console.log(xhr.responseText);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.responseText);
 
-              //parse json response and see if status code is 200
-              var response = JSON.parse(xhr.responseText);
-              if (response.status_code == 200) {
-                  window.location.href = "/";
-              }
-          }
-      }
+            //parse json response and see if status code is 200
+            var response = JSON.parse(xhr.responseText);
+            if (response.status_code == 200) {
+                window.location.href = "/travel/"+travel_id;
+            }
+        }
+    }
 
-      var base_url = window.location.origin;
-      var url = new URL(base_url+"/save_travel/");
+    var base_url = window.location.origin;
+    var url = new URL(base_url+"/add_stop/"+travel_id);
     
-      url.searchParams.append('name', name);
-      url.searchParams.append('destination', destination);
-      url.searchParams.append('start_date', startTime);
-      url.searchParams.append('end_date', endTime);
-      url.searchParams.append('notes', notes);
-      
+    url.searchParams.append('name', name);
 
-      xhr.open("POST", url.toString());
-      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      xhr.send();
+    xhr.open("POST", url.toString());
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send();
+    
 }
 
 //function that inits leaflet map but shows text that says start recording to show map
@@ -46,7 +38,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
         }).addTo(map);
       
     function locate() {
-      map.locate({setView: true, maxZoom: 16});
+        map.locate({setView: true, maxZoom: 16});
     }
 
     function onLocationFound(e) 
@@ -90,11 +82,11 @@ function initializeMapAndLocator(travel_id, travel_destination)
     var base_url = window.location.origin;
     var url = new URL(base_url+"/latlong/"+ travel_destination);
     url.searchParams.append('travel_id', travel_id);
-
+    
     xhr.open("POST", url.toString());
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send();
     
 }
- 
+    
 

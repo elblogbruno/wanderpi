@@ -11,7 +11,7 @@ var socket = io();
 var gps = document.getElementById("gps_text");
 var map = L.map('map-container-google-1');
 var file_name = "";
-var global_travel_id = "";
+var global_stop_id = "";
 
 
 var update_socket = false;
@@ -28,7 +28,7 @@ function init(travel_id)
     buttonStop.disabled = true;
     statusBadgeContainer.style.display = "none";
 
-    global_travel_id = travel_id || "";
+    global_stop_id = travel_id || "";
 }
 
 //when camera dropdown is changed, it will change the video source
@@ -106,7 +106,7 @@ buttonRecord.onclick = function () {
 
     xhr.open("POST",  url);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "true", travel_id: global_travel_id, is_image: false}));
+    xhr.send(JSON.stringify({status: "true", stop_id: global_stop_id, is_image: false}));
 
 
     initializeMapAndLocator();
@@ -142,7 +142,7 @@ saveButtonModal.onclick = function () {
     //         console.log(xhr.responseText);
     //         var response = JSON.parse(xhr.responseText);
     //         if (response.status_code == 200) {
-    //             window.location.href = "/travel/"+global_travel_id;
+    //             window.location.href = "/travel/"+global_stop_id;
     //         }
     //     }
     // }
@@ -156,7 +156,7 @@ saveButtonModal.onclick = function () {
     // url.searchParams.append('name', name_input.value);
     // url.searchParams.append('lat', lat);
     // url.searchParams.append('long', long);
-    // url.searchParams.append('travel_id', global_travel_id);
+    // url.searchParams.append('travel_id', global_stop_id);
     // url.searchParams.append('points', points);
 
 
@@ -165,7 +165,7 @@ saveButtonModal.onclick = function () {
         name : name_input.value,
         lat : lat,
         long : long,
-        travel_id : global_travel_id,
+        stop_id : global_stop_id,
         points : points
       };
     
@@ -186,7 +186,7 @@ saveButtonModal.onclick = function () {
           },
           success: function(data) {
                 if (data.status_code == 200) {
-                    window.location.href = "/travel/"+global_travel_id;
+                    window.location.href = "/stop/"+global_stop_id;
                 }
             }
       });
@@ -249,7 +249,7 @@ buttonStop.onclick = function () {
                 saveButton.value = file_id;
                 downloadLink.style.display = "inline";
                 downloadLink.onclick = function () {
-                    window.location.href = "/uploads/"+ global_travel_id + "/" + file_id;
+                    window.location.href = "/uploads/"+ global_stop_id + "/" + file_id;
                 }
 
                 setOnVideoStopUI();
@@ -263,7 +263,7 @@ buttonStop.onclick = function () {
 
     xhr.open("POST", "/record_status");
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({status: "false", lat: lat, long: long, travel_id: global_travel_id, is_image: false}));
+    xhr.send(JSON.stringify({status: "false", lat: lat, long: long, stop_id: global_stop_id, is_image: false}));
 };
 
 var saveWanderpiModal = document.getElementById('saveWanderpiModal')
@@ -273,7 +273,7 @@ saveWanderpiModal.addEventListener('show.bs.modal', function (event) {
   // Extract info from data-bs-* attributes
   var button = event.relatedTarget
   // Extract info from data-bs-* attributes
-  global_travel_id = button.getAttribute('data-bs-whatever')
+  global_stop_id = button.getAttribute('data-bs-whatever')
 
   var recipient = file_name;
   // If necessary, you could initiate an AJAX request here

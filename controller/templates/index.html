@@ -37,6 +37,29 @@
 
 <body>
 
+<!-- Modal -->
+<div class="modal fade" id="addNotesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Travel Notes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+                <label for="travel_notes">Notes</label>
+                <textarea class="form-control" id="travel_notes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 <!-- Modal -->
@@ -66,11 +89,15 @@
                 <label for="end_date_input" class="col-form-label">End Date:</label>
                 <input id="end_date_input" type="date" class="form-control">
             </div>
+            <div class="mb-3">
+                <label for="travel_notes">Notes</label>
+                <textarea class="form-control" id="travel_notes" rows="3"></textarea>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+          <button type="button" onclick=AddTravel() class="btn btn-primary">Save <i class="bi bi-save"></i></button>
         </div>
       </div>
     </div>
@@ -124,46 +151,55 @@
             {% block content %}
                 {% if travels|length > 0 %}     
                 <div class="row">
-                    {% for post in travels %}
+                    {% for travel in travels %}
                         <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
                             <div class="card h-100">
                     
                                 <div class="card-body">
-                                    <div id="map-container-google-{{ post.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div>
+                                    <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div>
 
-                                    <h5 class="card-title" href="travel/{{ post.id }}"> {{ post.name }} </h5>
+                                    <h5 class="card-title" href="travel/{{ travel.id }}"> {{ travel.name }} </h5>
 
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ post.destination }}</span>
+                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ travel.destination }}</span>
                                         </div>
 
                                         <div class="col">
-                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ post.start_date }} - {{ post.end_date }}</span>
+                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
                                         </div>
 
                                         
                                     </div>
                                     
-                                    <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
+                                    <div class="col-md-2 col-xl-6 align-self-center">
+                                    <p class="card-text float-right bi bi-calendar4-event"></i><span> {{ travel.created_date }}</span>
                                     
-                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span>
+                                    <p class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ travel.id }}" class="card-text d-inline-block"></span>
                                     
-                                    <script>
-                                        {% for video in post.get_all_wanderpis() %}
-                                            loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ post.id }}");
-                                        {% endfor %}
-                                        getDistanceByTravelId("{{ post.id }}");
-                                    </script>
-
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
-                                        <button id="share_travel" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                                    <!-- <p class="mr-5 float-right bi-card-text"></i>{{ travel.notes }} <span  class="card-text d-inline-block"></span> -->
                                     </div>
 
                                     <script>
-                                        initializeMapAndLocator("{{ post.id }}","{{ post.destination }}",);
+                                        {% if travel.get_all_wanderpis()|length > 0 %}  
+                                        {% for video in travel.get_all_wanderpis() %}
+                                            loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ travel.id }}");
+                                        {% endfor %}
+                                        getDistanceByTravelId("{{ travel.id }}");
+                                        {% endif  %}
+                                        
+                                    </script>
+
+                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+                                        <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
+                                        <button id="share_travel" type="button"  onclick="shareVideo({{ travel.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                                        <button id="edit_travel_notes" type="button" data-bs-whatever="{{ travel.id }}"  value="{{ travel.notes }}" data-bs-toggle="modal" data-bs-target="#addNotesModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-card-text"></i></button>
+                                        <button id="travel_calendar" type="button" onclick="window.location.href='{{ url_for('home.travel_calendar', travel_id = travel.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-calendar3-range"></i></button>
+                                    </div>
+
+                                    <script>
+                                        initializeMapAndLocator("{{ travel.id }}","{{ travel.destination }}",);
                                     </script>
 
                                 </div>
@@ -198,11 +234,11 @@
     </div>
 </div>
 
-<div class="top">
+<!-- <div class="top">
     <div class="recorder" id="recorder" align="center">
         <script type="text/javascript" src="/static/js/index.js"></script>
     </div>
-</div>
+</div> -->
 
 
 </body>

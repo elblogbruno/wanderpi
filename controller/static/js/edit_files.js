@@ -81,9 +81,6 @@ function deleteSelectedFiles(travel_id){
             if (data.error == 1){
                 document.getElementById("info-text").textContent = data.message;
             }
-            if (data.error == 0){
-                window.location.href = "/travel/"+ travel_id;
-            }
         }
     });
   

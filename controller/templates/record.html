@@ -64,9 +64,9 @@
         <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35" class="d-inline-block align-top" alt="">
         </a>
-        <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
+        <h1 class=" mt-2 mt-lg-0">{{ stop.name }}</h1>
         
-        <span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
+        <!-- <span class="card-text d-inline-block"> {{ stop.start_date }} - {{ stop.end_date }}</span> -->
         
         <div class="d-flex align-items-center">       
             
@@ -76,7 +76,7 @@
               </span>
             </div>
 
-            <button id="save_file"  type="button" class="navbar-btn btn btn-outline-success mr-3" data-bs-toggle="modal" data-bs-target="#saveWanderpiModal" data-bs-whatever="{{ travel.id }}" >Save Wanderpi <i class="bi bi-save"></i></button>
+            <button id="save_file"  type="button" class="navbar-btn btn btn-outline-success mr-3" data-bs-toggle="modal" data-bs-target="#saveWanderpiModal" data-bs-whatever="{{ stop.id }}" >Save Wanderpi <i class="bi bi-save"></i></button>
         </div>
   </div>    
 </nav>
@@ -131,7 +131,7 @@
   <div class="recorder" id="recorder" align="center">
       <script type="text/javascript" src="/static/js/recorder.js"></script>
       <script>
-          init("{{ travel.id }}");
+          init("{{ stop.id }}");
       </script>
   </div>
 </div>

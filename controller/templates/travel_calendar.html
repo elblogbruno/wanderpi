@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Wanderpi</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- CSS only -->
+    <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/travel-calendar.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
+    
+    
+    
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+   
+    <script src="https://osmnames.org/api/v1/autocomplete.js"></script>
+    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" />
+
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
+    <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.repeatable.js')}}"></script>
+
+    <script src="{{ url_for('static', filename='js/calendar_notes_handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+
+    <add name="Access-Control-Allow-Headers" value="*" />
+</head>
+
+<body>
+
+
+<script type="text/template" id="input-money">
+  <div class="field-group" id="field-group-{?}">
+    <div id="input-money-field-{?}" class="input_money_field input-group mb-3">
+      <input id="input-price-name-{?}" type="text" class="form-control" placeholder="EX: Peaje">
+      <input id="input-price-value-{?}"  type="text" class="form-control" placeholder="EX: Peaje 1.5 euros">
+      <input id="input-price-id-{?}"  type="text" class="d-none" >
+      <span class="input-group-text">€</span>
+      <!-- <button class="add btn btn-outline-secondary" onclick=clone() type="button">+</button> -->
+      <button class="delete btn btn-outline-danger"  value="Remove" type="button">-</button>
+    </div>
+  </div>
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="noteTitle" aria-hidden="true">
+    
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="noteTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+                <label for="note_content">Notes</label>
+                <textarea class="form-control"  id="note_content" rows="3"></textarea>
+            </div>
+            <label class="control-label" for="fields">Costs</label>
+            <!-- <div id="fields">
+              <div id="input-money-field-1" class="input_money_field input-group mb-3">
+                  <input id="input-price-name-1" type="text" class="form-control" placeholder="EX: Peaje">
+                  <input id="input-price-value-1" type="text" class="form-control" placeholder="EX: Peaje 1.5 euros">
+                  <input id="input-price-id-1" type="text" class="d-none" value='notavailable'>
+                  <span class="input-group-text">€</span>
+                  <button class="add-more btn btn-outline-secondary" onclick=clone() type="button">+</button>
+                  <button class="add-more btn btn-outline-danger" onclick=remove(this.parentElement.id) type="button">-</button>
+              </div>
+            </div>
+            <small>Press + to add another form field :)</small> -->
+            <fieldset class="input-money">
+
+              <div class="repeatable"></div>
+          
+              <input type="button" class="add btn btn-outline-primary" value="Add">
+          
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
+    <div class="container-fluid">
+        <a class="navbar-brand mt-2 mt-lg-0" href="/">
+            <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
+        </a>
+
+        <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
+
+
+        <div class="d-flex align-items-center">
+                
+                <button id="new_travel" type="button" data-bs-toggle="modal" data-bs-target="#addTravelModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+                
+                {% if travels|length > 0 %} 
+                    <form class="d-flex input-group w-auto">
+                        <input
+                          type="search"
+                          class="form-control"
+                          placeholder="Type query"
+                          aria-label="Search"
+                        />
+                        <button
+                          class="btn btn-outline-primary"
+                          type="button"
+                          data-mdb-ripple-color="dark"
+                        >
+                          Search
+                        </button>
+                      </form>
+                {% endif %}
+
+                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-link px-3 me-2">Logout</button>
+
+        </div>
+
+    </div>    
+</nav>
+
+
+<div class="py-4">
+    <div class="container-fluid">
+      <div class="row">
+        {% block content %}  
+          {% for note in notes %}
+              <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
+                  <div class="card h-100">
+                      <div class="card-body">
+                          <h5 data-bs-toggle="modal" data-bs-target="#addNoteModal" data-bs-content='{{ note.content }}' data-bs-travel='{{ note.travel_id }}' data-bs-note-id='{{ note.id }}' data-bs-day='{{ note.day }}' class="card-title"> {{ note.day }} </h5>
+
+                          <div class="row mb-2">
+                              <div class="col">
+                                <i class="mr-2 card-text float-right bi bi-journal-check"></i><span class="card-text d-inline-block"> {{ note.content }}</span>
+                              </div>
+                              <div class="col">
+                                  <i class="mr-2 card-text float-right bi bi-currency-euro"></i><span class="card-text d-inline-block"> {{ note.total_price }}</span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>    
+              </div>
+          {% endfor %}
+      </div>
+		</div>
+    </div>
+</div>
+{% endblock %}  
+<div class="top">
+    <div class="recorder" id="recorder" align="center">
+        <script type="text/javascript" src="/static/js/calendar_notes_handler.js"></script>
+    </div>
+</div>
+
+
+</body>
+</html>

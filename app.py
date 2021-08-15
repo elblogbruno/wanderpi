@@ -9,7 +9,7 @@ from controller import socketio
 from flask_dropzone import Dropzone
 
 app = create_app('dev')
-dropzone = Dropzone(app)
+droppzone = Dropzone(app)
 
 
 

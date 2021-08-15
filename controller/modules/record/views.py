@@ -1,6 +1,7 @@
 
 from controller.modules.files.video_utils import VideoUtils
 from controller.utils.video_editor import VideoEditor
+from controller.models.models import Stop
 import uuid
 from controller.modules.files.views import get_travel_folder_path, get_travel_folder_path_static
 from datetime import datetime
@@ -44,6 +45,7 @@ def get_available_video_sources(): #todo get available video sources from databa
     return jsonify(devices = video_camera_ids)
 
 def start_record(video_camera, file_type):
+    global travel_id
     file_id = str(uuid.uuid4()) 
     destination_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
     video_camera.start_record(destination_path, file_id)
@@ -148,7 +150,8 @@ def record_status():
     json = request.get_json()
 
     status = json['status']
-    travel_id  = json['travel_id']  
+    stop_id  = json['stop_id']
+    travel_id = Stop.get_by_id(stop_id).travel_id  
     boolean = json['is_image']
     is_image = True if boolean == 'true' else False
     file_type = 'images' if is_image else 'videos'  

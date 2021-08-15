@@ -6,223 +6,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Wanderpi</title>
-
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/travel-view.css')}}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet"> 
-  
+    <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
     
-    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
-
-    {{ dropzone.load_css() }}
-
+    
+    
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
    
-    <!-- jQuery library -->
-    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
-    
-    <script src="{{ url_for('static', filename='js/page_utils.js')}}"></script>
+    <script src="https://osmnames.org/api/v1/autocomplete.js"></script>
+    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" />
 
-    <!--Import SocketIO-->
-    <script src="{{ url_for('static', filename='node_modules/socket.io/client-dist/socket.io.js')}}"></script>
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
 
-
-    <script> 
-        $(document).ready(function() { // this runs as soon as the page is ready (DOM is loaded)
-            const script = document.createElement('script');
-            script.src = '/static/js/header_control.js';
-            const script1 = document.createElement('script');
-            script1.src = '/static/js/file_handler.js';
-            const script2 = document.createElement('script');
-            script2.src = '/static/js/edit_files.js';
-            document.head.appendChild(script);
-            document.head.appendChild(script1);
-            document.head.appendChild(script2);
-        });
-    </script> 
-
-    
     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
+    <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+
+    <script src="{{ url_for('static', filename='js/stops_handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     
-
-    <!-- JavaScript Bundle with Popper -->
-    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js')}}"></script>
-
+    <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
 <body>
 
 
 
+<!-- Modal -->
+<div class="modal fade" id="addStopModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">New Stop</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+                <label for="name_input" class="col-form-label">Name:</label>
+                <input id="name_input" type="text" class="form-control">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="save_request_button" onclick=add_stop("{{ travel.id }}") type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
     <div class="container-fluid">
-        
         <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
         </a>
 
-        <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
-
-        {% if search_term %}
-        <button onclick="window.location.href='/travel/{{ travel.id }}'" class="mt-2 mt-lg-0 btn btn-info">{{ search_term }}<i class="bi bi-x"></i></button>
+        {% if stops|length > 0 %} 
+        <h1 class=" mt-2 mt-lg-0">{{ stops|length }} stops</h1>
+        {% else %}
+        <h1 class=" mt-2 mt-lg-0">No stops</h1>
         {% endif %}
 
-        <div class="d-flex align-items-center"> 
-            <button data-bs-toggle="modal" data-bs-target="#bulkEditModal" type="button" id="bulk-edit-button" class="btn btn-primary btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
-                <i class="bi bi-pencil"></i>
-            </button>
-                   
-                <div id="header-buttons">
-                    
-                    {% with travel=travel , context=False %}
-                        {% include "travel_header_buttons.html" %}
-                    {% endwith %}
-                </div>
-                {% if wanderpis|length > 0 %} 
+        <div class="d-flex align-items-center">
                 
+                <button id="new_stop" type="button" data-bs-toggle="modal" data-bs-target="#addStopModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+                
+                {% if stops|length > 0 %} 
                     <form class="d-flex input-group w-auto">
                         <input
                           type="search"
-                          id="search-input"
                           class="form-control"
-                          {% if search_term %}
-                          placeholder="{{ search_term }}"
-                          value="{{ search_term }}"
-                          {% else %}
                           placeholder="Type query"
-                          {% endif %}
                           aria-label="Search"
                         />
                         <button
                           class="btn btn-outline-primary"
-                          id="search-button"
-                          onclick="searchWanderpis('{{ travel.id }}')"
                           type="button"
                           data-mdb-ripple-color="dark"
                         >
                           Search
                         </button>
-                    </form>
+                      </form>
                 {% endif %}
+
+                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-link px-3 me-2">Logout</button>
+
         </div>
 
     </div>    
 </nav>
 
-<div class="modal fade" id="bulkEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalCenterTitle">What would you like to do?</h5>
-        </div>
-        <div class="modal-body">
-            <div class="container mx-auto">
-                <h4> Edit info: </h4> 
-                
-                <div class="row">
-                <div id="map-container-global" style="height: 300px">
-                </div>
-
-                <!-- <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text" id="inputGroup-sizing-sm">Location</span>
-                    </div>
-                    <input id="new-location-input" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                </div> -->
-                <button id="edit-selected-files" onclick="editSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Edit them</button>                  
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-          <button id="delete-selected-files" onclick="deleteSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Delete them</button> 
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
-          <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
-        </div>
-      </div>
-    </div>
-</div>
-
-{% block content %}
-<div class="modal fade" id="uploadFileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalCenterTitle">Upload file</h5>
-        </div>
-        <div class="modal-body">
-            <a id="info-text-socket"> </a>
-            <label class="form-label" for="customFile">You can upload video and images</label>
-            
-                {{ dropzone.create('/upload/' + travel.id) }}
-                    
-                {{ dropzone.load_js() }}
-                
-                {{ dropzone.config() }}
-              
-            <div class="container mx-auto">
-                <progress id="progress-bar"></progress>
-            </div>
-        </div>
-        <div class="modal-footer">
-          <button id="process-upload-button" onclick="startProcessingUploadFolder('{{ travel.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
-          <button id="close-button" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
-          <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
-        </div>
-      </div>
-    </div>
-</div>
-
-<div id="dinamic-modal-body">
-    {% with travel=travel %}
-        {% include "download_modal.html" %}
-    {% endwith %}
-</div>
 
 <div class="py-4">
     <div class="container-fluid">
         <!-- <div class="row hidden-md-up"> -->
-           
-                {% if wanderpis|length > 0 %}     
+            {% block content %}
+                {% if stops|length > 0 %}     
                 <div class="row">
-                    {% for post in wanderpis %}
+                    {% for post in stops %}
                         <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div id="{{ post.id }}" class="card h-100">
-                                   
+                            <div class="card h-100">
+                    
                                 <div class="card-body">
-                                    <a href="/file/{{ post.id }}"> <img class="camera-view-responsive card-img-top" src="{{ post.file_thumbnail_path }}"></img></a>
+                                    <div id="map-container-google-{{ post.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div>
 
-                                    <h5 class="card-title" href="/file/{{ post.id }}"> {{ post.name }} </h5>
-                                    
+                                    <h5 class="card-title" href="stop/{{ post.id }}"> {{ post.name }} </h5>
+
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.address }}</span>
+                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ post.destination }}</span>
                                         </div>
+
+                                        <div class="col">
+                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ post.start_date }} - {{ post.end_date }}</span>
+                                        </div>
+
                                         
-                                        {% if not post.is_image %}     
-                                            <div class="col">
-                                                <i class="card-text pull-right bi bi-stopwatch"></i><span> {{ post.time_duration }}</span>
-                                            </div>
-                                        {% endif %}
                                     </div>
                                     
-                                    <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
+                                    <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
+                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span>
+                                
 
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
-                                        <button id="share_video" type="button"  onclick="window.location.href='/get_share_image/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                                        <button id="open_stop" type="button"  onclick="window.location.href='{{ url_for( 'home.stop', stop_id = post.id ) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
+                                        <button id="share_stop" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="delete_stop" type="button"  onclick="window.location.href='/delete_stop/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                                     </div>
 
-                                    
-                                    <div class="form-check">
-                                        <input class="form-check-input" id="card-selection-button-{{ post.id }}" onclick="selectCard('{{ post.id }}')" type="checkbox" value="">
-                                    </div>
+                                    <script>
+                                        initializeMapAndLocator("{{ post.id }}","{{ post.name }}");
+                                    </script>
+
                                 </div>
                             </div>    
                         </div>
@@ -232,65 +156,29 @@
                         <div class="card h-100">
                                
                             <div class="card-body">
-                                <!-- <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5> -->
-                            
-                                <div class="container">
-                                    <div class="row mb-2">
-                                        <button onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" type="button" class="btn btn-info me-3" style="height: 200px;" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
-                                            <i class="bi bi-plus-lg"> Record new Wanderpi</i>
-                                        </button>
-                                        <h3 class="text-center"> or </h3>
-                                        <button href="#" type="button" class="btn btn-success me-3" style="height: 200px;"  data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
-                                            <i class="bi bi-file-earmark-arrow-up"> Upload a Wanderpi</i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <a data-bs-toggle="modal" data-bs-target="#addStopModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
+                                <h5 class="card-title text-center"> New Stop </h5>
                             </div>
                         </div>    
                     </div>
                 </div>
                 {% else %}
+                    
                     <div class="col-md d-flex"> 
                         <div class="card mx-auto h-100">
                                
                             <div class="card-body">
-                                <!-- <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5> -->
-                            
-                                <div class="container">
-                                    <div class="row mb-2">
-                                        <button onclick="window.location.href='{{ url_for('home.record', travel_id=travel.id) }}'" type="button" class="btn btn-info me-3" style="height: 200px;" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
-                                            <i class="bi bi-plus-lg"> Record new Wanderpi</i>
-                                        </button>
-                                        <h3 class="text-center"> or </h3>
-                                        <button href="#" type="button" class="btn btn-success me-3" style="height: 200px;"  data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
-                                            <i class="bi bi-file-earmark-arrow-up"> Upload a Wanderpi</i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <a data-bs-toggle="modal" data-bs-target="#addStopModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
+                                <h5 class="card-title text-center"> New Stop </h5>
                             </div>
                         </div>    
                     </div>
                 {% endif %} 
-           
+            {% endblock %}    
         <!-- </div> -->
     </div>
 </div>
 
-{% endblock %}    
-
-<div id="context-menu">
-    {% with travel=travel %}
-        {% include "travel_context_menu.html" %}
-    {% endwith %}
-</div>
-
-<div class="btn-group">
-    <a onclick="topFunction()" class="btn btn-primary btn-fab" id="go_up_button">
-      <i class="bi bi-arrow-up-short lg-icon-fab"></i>
-    </a>
-</div>
 
 </body>
 </html>
