@@ -38,24 +38,24 @@
 <body>
 
 <!-- Modal -->
-<div class="modal fade" id="addNotesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="editTravelModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Travel Notes</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Edit Travel</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form>
             <div class="mb-3">
-                <label for="travel_notes">Notes</label>
-                <textarea class="form-control" id="travel_notes" rows="3"></textarea>
+                <label for="name_input" class="col-form-label">Name:</label>
+                <input id="name_input" type="text" class="form-control">
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button id="save_request_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+          <button id="edit_travel_button" type="button" class="btn btn-primary">Edit <i class="bi bi-save"></i></button>
         </div>
       </div>
     </div>
@@ -177,7 +177,6 @@
                                     
                                     <p class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ travel.id }}" class="card-text d-inline-block"></span>
                                     
-                                    <!-- <p class="mr-5 float-right bi-card-text"></i>{{ travel.notes }} <span  class="card-text d-inline-block"></span> -->
                                     </div>
 
                                     <script>
@@ -194,7 +193,7 @@
                                         <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
                                         <button id="share_travel" type="button"  onclick="shareVideo({{ travel.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                                         <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                        <button id="edit_travel_notes" type="button" data-bs-whatever="{{ travel.id }}"  value="{{ travel.notes }}" data-bs-toggle="modal" data-bs-target="#addNotesModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-card-text"></i></button>
+                                        <button id="edit_travel" type="button" data-bs-travel="{{ travel.id }}"  data-bs-name="{{ travel.name }}" data-bs-toggle="modal" data-bs-target="#editTravelModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
                                         <button id="travel_calendar" type="button" onclick="window.location.href='{{ url_for('home.travel_calendar', travel_id = travel.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-calendar3-range"></i></button>
                                     </div>
 

@@ -84,7 +84,7 @@ class Travel(db.Base):
     created_date = Column(DateTime, default=datetime.utcnow)
     start_date = Column(Date)
     end_date = Column(Date)
-    notes = Column(String(256), nullable=False)
+    # notes = Column(String(256), nullable=False)
     
     def __repr__(self):
         return f'<User {self.id}>'
@@ -132,6 +132,14 @@ class Travel(db.Base):
 
     def get_all_notes(self):
         return db.session.query(Note).filter(Note.travel_id == self.id).all()
+
+    def get_total_price(self):
+        total = 0
+
+        notes = self.get_all_notes()
+        for note in notes:
+            total += note.total_price
+        return total
 
     def get_all_wanderpis(self, filter=None):
         if filter:
@@ -251,7 +259,6 @@ class Stop(db.Base):
     @staticmethod
     def get_all():
         return db.session.query(Stop).all()
-
 
 class Note(db.Base):
     __tablename__ = 'notes'

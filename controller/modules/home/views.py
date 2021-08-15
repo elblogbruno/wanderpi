@@ -61,10 +61,11 @@ def travel_calendar(travel_id):
     travel = Travel.get_by_id(travel_id)
     if travel:
         notes = travel.get_all_notes()
+        total_price = travel.get_total_price()
     else:
         notes = []
     session["current_travel_id"] = travel_id
-    return render_template("travel_calendar.html", travel=travel, notes=notes)  
+    return render_template("travel_calendar.html", travel=travel, notes=notes, total_price=total_price)  
     # except:
     #     return redirect(url_for("home.index"))
 

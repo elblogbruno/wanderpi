@@ -42,11 +42,12 @@ def toDate(dateString):
 
 @travel_blu.route('/edit_travel/<string:travel_id>', methods=['POST'])
 def edit_travel(travel_id):
-    notes = request.args.get('notes')
+    json = request.json
+    name = json['name']
     travel = Travel.get_by_id(travel_id)
-    travel.notes = notes
+    travel.name = name
     travel.save()
-    return jsonify(error=0)
+    return jsonify(status_code=200)
 
 @travel_blu.route('/add_note_to_travel/<string:travel_id>', methods=['POST'])
 def add_note_to_travel(travel_id):
@@ -85,6 +86,7 @@ def add_note_to_travel(travel_id):
             cost.value = value
             cost.save()
     
+    total_price = round(total_price, 2)
     note = Note.get_by_id(note_id)
     if not note:
         note = Note(id=note_id, travel_id=travel_id, content=note_content, total_price=total_price)
@@ -109,6 +111,7 @@ def get_note_info(note_id):
         return jsonify(status_code=200, note_id=note_id, travel_id=note.travel_id, note_content=note.content, total_price=note.total_price, day=note.day, price_input=price_input)
     else:
         return jsonify(note_id="0", travel_id="0", note_content="No content", total_price=0.0, day=None, price_input=[])
+
 @travel_blu.route('/save_travel/', methods=['GET', 'POST'])
 def save_travel(): #todo get available video sources from database
     print("Saving travel")
@@ -117,14 +120,14 @@ def save_travel(): #todo get available video sources from database
     destination = request.args.get('destination')
     start_date = request.args.get('start_date', type=toDate)
     end_date = request.args.get('end_date', type=toDate)
-    notes = request.args.get('notes', default="No notes")
+    # notes = request.args.get('notes', default="No notes")
     travel_id = str(uuid.uuid4())
 
     create_folder_structure_for_travel(travel_id)
 
     travel_folder_path = get_travel_folder_path(travel_id=travel_id, file_type='root') 
 
-    travel = Travel(id=travel_id, name=name, lat="0", long="0", travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date,notes=notes)
+    travel = Travel(id=travel_id, name=name, lat="0", long="0", travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date)
     travel.save()
     travel.init_calendar()
     return jsonify(status_code = 200, message = "OK")

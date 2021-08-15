@@ -104,7 +104,11 @@
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
         </a>
 
-        <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
+        <h1 class="card-text d-inline-block"> {{ travel.name }} </h1>
+        
+        <i class="mr-2 card-text float-right bi bi-currency-euro"></i><span class="card-text d-inline-block"> {{ total_price }}</span>
+
+        <span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
 
 
         <div class="d-flex align-items-center">
