@@ -3,9 +3,9 @@ import os
 from datetime import timedelta
 
 UPLOAD_FOLDER = os.getcwd()+'/uploads/'
-#STATIC_FOLDER = "C:\\Users\\elblo\\Desktop"+'/controller/static/'
+CUSTOM_STATIC_FOLDER = "D:\wanderpi"+'/controller/static/'
 STATIC_FOLDER = os.getcwd()+'/controller/static/'
-VIDEOS_FOLDER = STATIC_FOLDER+'wanderpis/'
+VIDEOS_FOLDER = CUSTOM_STATIC_FOLDER+'wanderpis/'
 
 
 class Config:
