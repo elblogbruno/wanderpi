@@ -28,10 +28,13 @@ class GeoCodeUtils:
             coordinates = "{0}, {1}".format(lat, long)
             location = locator.reverse(coordinates)
             print(location)
-            if 'town' in location.raw and 'country' in location.raw and 'state' in location.raw:
-                return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+            if location:
+                if 'town' in location.raw and 'country' in location.raw and 'state' in location.raw:
+                    return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+                else:
+                    return location.address
             else:
-                return location.address
+                return "Location unknown"
 
     @staticmethod
     def reverse_address(address):
@@ -40,7 +43,10 @@ class GeoCodeUtils:
         locator = Nominatim(user_agent="openmapquest")
         location = locator.geocode(address)
         print(location)
-        return location.latitude, location.longitude
+        if location:
+            return location.latitude, location.longitude
+        else:
+            return 0,0
 
     @staticmethod
     def has_internet_connection():

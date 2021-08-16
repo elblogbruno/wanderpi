@@ -11,6 +11,8 @@
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet">
+    
     <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
     
@@ -29,7 +31,10 @@
     <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
 
+    <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script>
+
     <script src="{{ url_for('static', filename='js/index.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/card_map_handler.js')}}"></script>
     <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     
     <add name="Access-Control-Allow-Headers" value="*" />
@@ -89,10 +94,10 @@
                 <label for="end_date_input" class="col-form-label">End Date:</label>
                 <input id="end_date_input" type="date" class="form-control">
             </div>
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="travel_notes">Notes</label>
                 <textarea class="form-control" id="travel_notes" rows="3"></textarea>
-            </div>
+            </div> -->
           </form>
         </div>
         <div class="modal-footer">
@@ -154,10 +159,11 @@
                     {% for travel in travels %}
                         <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
                             <div class="card h-100">
-                    
+                                
                                 <div class="card-body">
-                                    <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div>
-
+                                    <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px">
+                                        
+                                    </div>
                                     <h5 class="card-title" href="travel/{{ travel.id }}"> {{ travel.name }} </h5>
 
                                     <div class="row mb-2">
@@ -198,6 +204,9 @@
                                     </div>
 
                                     <script>
+                                        {% for stop in travel.get_all_stops() %}
+                                            initializeStopsList("{{ stop.lat }}", "{{ stop.long}}");
+                                        {% endfor %}
                                         initializeMapAndLocator("{{ travel.id }}","{{ travel.destination }}",);
                                     </script>
 

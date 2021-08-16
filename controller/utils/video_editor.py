@@ -1,6 +1,6 @@
 #from controller.modules.files.views import get_travel_folder_path
 from moviepy import *
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, concatenate_videoclips
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, ImageClip, concatenate_videoclips
 
 import os
 class VideoEditor:
@@ -54,6 +54,40 @@ class VideoEditor:
             #we use VideoFileClip() class create two video object, then we will merge them.
             video_1 = VideoFileClip(path)
             video_clips.append(video_1)
+
+        #Merge videos with concatenate_videoclips()
+        final_video = concatenate_videoclips(video_clips)
+        
+       
+        file_id = str(video_id) + '-edited'
+        
+        path_temp = video_path.replace('.mp4', '-edited')
+
+        if 'mp4' not in path_temp:
+            path_temp += '.mp4'
+
+        final_video.write_videofile(path_temp, codec='libx264') 
+        
+        try:
+            if os.path.exists(video_path):
+                os.remove(video_path)
+        except PermissionError as e:
+            print(e)
+        
+        os.rename(path_temp, video_path)
+
+        return video_path
+
+    @staticmethod
+    def JoinVideosAndImages(wanderpis, video_id, video_path):
+        video_clips = []
+        for wanderpi in wanderpis:
+            #we use VideoFileClip() class create two video object, then we will merge them.
+            if wanderpi.is_image:
+                clip_1 = ImageClip('./controller/'+wanderpi.file_path, duration=10)
+            else:
+                video_1 = VideoFileClip('./controller/'+wanderpi.file_path)
+                video_clips.append(video_1)
 
         #Merge videos with concatenate_videoclips()
         final_video = concatenate_videoclips(video_clips)

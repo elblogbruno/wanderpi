@@ -11,6 +11,8 @@
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet">
+    
     <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
     
@@ -28,8 +30,11 @@
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
     <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script>
+
 
     <script src="{{ url_for('static', filename='js/stops_handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/card_map_handler.js')}}"></script>
     <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     
     <add name="Access-Control-Allow-Headers" value="*" />
@@ -122,19 +127,13 @@
 
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ post.destination }}</span>
+                                            <span class="card-text d-inline-block"> {{ post.get_all_wanderpis()|length  }} wanderpis</span>
                                         </div>
-
-                                        <div class="col">
-                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ post.start_date }} - {{ post.end_date }}</span>
-                                        </div>
-
-                                        
                                     </div>
                                     
-                                    <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
+                                    <!-- <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
                                     
-                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span>
+                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span> -->
                                 
 
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">

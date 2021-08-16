@@ -155,8 +155,10 @@ def bulk_edit_files():
             file.long = long
             name = json['name'] if 'name' in json.keys() else file.name #if we have a new name for the file on the, update it
             file.name = name
-            
-            file.address = GeoCodeUtils.reverse_latlong(lat, long)
+            stop_id = json['stop_id'] if 'stop_id' in json.keys() else file.stop_id #if we have a new name for the file on the, update it
+            file.stop_id = stop_id
+            if lat and long:
+                file.address = GeoCodeUtils.reverse_latlong(lat, long)
             file.save()
 
         return jsonify({"error": 0})

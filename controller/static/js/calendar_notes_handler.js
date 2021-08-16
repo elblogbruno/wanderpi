@@ -151,7 +151,8 @@ function get_costs(note_id){
 
 function instantiateCosts(note_input_prices){
     console.log(note_input_prices);
-    
+    var cost_container  = document.querySelector(".repeatable");
+    cost_container.innerHTML = ''
     if (note_input_prices.length >= 1){
         console.log("We need to add existing costs");
         for (let index = 0; index < note_input_prices.length; index++) {
@@ -162,6 +163,7 @@ function instantiateCosts(note_input_prices){
             clone(name, value,id);
         }
     }else{
+        
         console.log("Adding no costs")
     }
 }

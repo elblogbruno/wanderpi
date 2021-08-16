@@ -129,7 +129,14 @@
                 <div class="row">
                 <div id="map-container-global" style="height: 300px">
                 </div>
-
+                
+                <div class="gap-5 mx-auto pb-5"> 
+                    <select class="form-select" id="stopsSelect">
+                    {% for stop in travel.get_all_stops() %}
+                        <option class="dropdown-item" value="{{ stop.id }}"> {{ stop.name }} </option>
+                    {% endfor %}   
+                    </select>
+                </div> 
                 <!-- <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
                       <span class="input-group-text" id="inputGroup-sizing-sm">Location</span>

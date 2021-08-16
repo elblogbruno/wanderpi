@@ -89,11 +89,14 @@ function deleteSelectedFiles(travel_id){
 function editSelectedFiles(travel_id){
   var url = "/bulk_edit_files";
 
+  var stop = document.getElementById('stopsSelect').value;
+  console.log(stop);
   var name_input = document.getElementById('name_input');
   var data = {
     files_to_edit: selectedCards,
     lat: map.getCenter().lat,
     long: map.getCenter().lng,
+    stop_id: stop,
   };
 
   if (name_input) {
@@ -103,11 +106,13 @@ function editSelectedFiles(travel_id){
             lat: map.getCenter().lat,
             long: map.getCenter().lng,
             name: name_input.value,
+            stop_id: stop,
         };
       }else{
             data = {
                 files_to_edit: selectedCards,
                 name: name_input.value,
+                stop_id: stop,
             };
       }
   }

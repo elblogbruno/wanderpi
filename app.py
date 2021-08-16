@@ -7,11 +7,16 @@ import db
 from controller.models.models import Wanderpi
 from controller import socketio
 from flask_dropzone import Dropzone
-
+from flask import send_from_directory
+from config import STATIC_FOLDER
 app = create_app('dev')
 droppzone = Dropzone(app)
 
 
+@app.route("/static/<path:path>")
+def static_dir(path):
+    print(path)
+    return send_from_directory(STATIC_FOLDER, path)
 
 
 if __name__ == '__main__':
