@@ -32,9 +32,9 @@ def get_share_image(travel_id, filename):
         filename = file.file_path.split('/')[-1]
 
     new_name = filename.split('.')[0] + '_share_image.png'
-    new_name_path = './controller'+file.file_path.replace(filename, new_name)
+    new_name_path = file.file_path.replace(filename, new_name)
 
-    size  = ImageEditor.get_image_size('./controller'+file.file_path)
+    size  = ImageEditor.get_image_size(file.file_path)
 
     fixed_height = round(500 / float(size[1]))
     if fixed_height == 0:

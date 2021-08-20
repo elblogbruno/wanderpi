@@ -75,10 +75,9 @@
         {% endif %}
 
         <div class="d-flex align-items-center"> 
-            <button data-bs-toggle="modal" data-bs-target="#bulkEditModal" type="button" id="bulk-edit-button" class="btn btn-primary btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
-                <i class="bi bi-pencil"></i>
-            </button>
-                   
+				<button data-bs-toggle="modal" data-bs-target="#bulkEditModal" type="button" id="bulk-edit-button" class="btn btn-primary btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
+					<i class="bi bi-pencil"></i>
+				</button>
                 <div id="header-buttons">
                     
                     {% with travel=travel, stop=stop , context=False %}
@@ -187,7 +186,7 @@
 </div>
 
 <div id="dinamic-modal-body">
-    {% with travel=travel, stop=stop %}
+    {% with travel=travel, stop=stop, is_travel=False %}
         {% include "download_modal.html" %}
     {% endwith %}
 </div>

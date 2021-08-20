@@ -1,4 +1,6 @@
+
 {% block content %}
+{% if is_travel == True %}
 <div class="modal fade" id="downloadWanderpisModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -20,4 +22,29 @@
       </div>
     </div>
   </div>
-  {% endblock %}    
+{% else %}
+
+<div class="modal fade" id="downloadWanderpisModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Download {{ stop.name }}</h5>
+        </div>
+        <div class="modal-body">
+          <p> It will download a single video of the Stop with all videos and photos.</p>
+          <p>
+              <ul class=flashes>
+                  <li id="info-text-socket-travel-download"></li>
+              </ul>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="close-button"  class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" id="download-button" onclick="startDownloadingTravelVideo('{{ travel.id }}')" class="btn btn-primary">Go ahead</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endif %}
+{% endblock %}   

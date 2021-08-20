@@ -10,10 +10,9 @@ async  function shareVideo(id){
 
   await navigator.share(shareData)
 }
+var socket = io()
 
 var uploading_file = false, downloading_file = false;
-
-var socket = io()
 
 function disableButtons(){
   // document.getElementById('file-input').disabled = true;
@@ -52,27 +51,7 @@ socket.on("process_upload_folder_update", function (data) {
 document.getElementById("progress-bar").style.display = "none";
 document.getElementById("bulk-edit-button").style.display = "none";
 
-//Download modal
-function startDownloadingTravelVideo(travel_id)
-{
-    downloading_file = true;
-    //disable button
-    document.getElementById('download-button').disabled = true;
-    document.getElementById('close-button').disabled = true;
-    socket.emit('travel_download_update', travel_id)
-}
 
-socket.on("travel_download_update", function (data) {
-    console.log( "Data from python: " + data);
-    
-    if (data == "200")
-    {
-        document.getElementById('close-button').disabled = false;
-        document.getElementById('download-button').disabled = false;
-    }else{
-      document.getElementById("info-text-socket-travel-download").textContent = data;
-    }
-});
 
 
 //search

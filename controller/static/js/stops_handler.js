@@ -24,3 +24,4 @@ function add_stop(travel_id)
     xhr.send();
     
 }
+

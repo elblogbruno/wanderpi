@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
-from config import config_dict, STATIC_FOLDER
+from config import config_dict, load_custom_video_folder, STATIC_FOLDER
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 
@@ -23,9 +23,9 @@ socketio = SocketIO(async_mode='threading')
 
 def create_app(config_type):  
     config_class = config_dict[config_type]
-
+    CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER, UPLOAD_FOLDER  = load_custom_video_folder()
     app = Flask(__name__, static_folder=STATIC_FOLDER)
-    
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     app.config.from_object(config_class)
     

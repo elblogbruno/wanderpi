@@ -6,6 +6,7 @@ import os
 import json
 import shutil
 import uuid
+import random
 from datetime import *
 
 def datetime_parser(o):
@@ -25,6 +26,7 @@ class Wanderpi(db.Base):
     travel_id = Column(String(256), nullable=False)
     stop_id  = Column(String(256), nullable=False)
     is_image = Column(Boolean)
+    is_360 = Column(Boolean)
     has_been_edited = Column(Boolean, default=False)
 
     def __repr__(self):
@@ -231,9 +233,11 @@ class Stop(db.Base):
     def __repr__(self):
         return f'<Stop {self.id}>'
 
-    def delete(self):
+    def delete(self, path=None):
         db.session.query(Stop).filter(Stop.id == self.id).delete()
         db.session.commit()
+        # if path and os.path.exists(path):
+            # os.path.removedir(path)
         return True
 
     def save(self):
@@ -251,7 +255,13 @@ class Stop(db.Base):
         else:
             return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id).all()
     
-    
+    def get_random_thumbnail(self):
+        wanderpis  = self.get_all_wanderpis()
+        if len(wanderpis) > 0:
+            i = random.randint(0, len(wanderpis)-1)
+            return wanderpis[i].file_thumbnail_path
+        else:
+            return '/static/wanderpi-icon.svg'
     @staticmethod
     def get_by_id(id):
         return db.session.query(Stop).get(id)

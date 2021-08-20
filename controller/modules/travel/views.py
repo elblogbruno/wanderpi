@@ -1,7 +1,7 @@
 from controller.models.models import Travel, Stop, MoneyInput, Note
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.travel import travel_blu
-from controller.modules.files.views import create_folder_structure_for_travel, get_travel_folder_path
+from controller.modules.files.views import get_stop_upload_path, create_folder_structure_for_travel,create_folder_structure_for_stop, get_travel_folder_path
 from flask import redirect, request, jsonify, send_from_directory,send_file,render_template
 from datetime import *
 
@@ -25,7 +25,8 @@ def datetime_parser(o):
 def delete_stop(stop_id):
     stop = Stop.get_by_id(stop_id)
     travel_id = stop.travel_id
-    stop.delete()
+    path = get_stop_upload_path(stop.name)
+    stop.delete(path=path)
     return redirect("/travel/"+travel_id, code=302)
 
 @travel_blu.route('/delete_travel/<string:travel_id>')
@@ -139,6 +140,8 @@ def add_stop(travel_id): #todo get available video sources from database
     name = request.args.get('name')
     stop_id = str(uuid.uuid4())
 
+    create_folder_structure_for_stop(name=name)
+
     stop = Stop(id=stop_id, travel_id=travel_id, name=name, lat="0", long="0")
     stop.save()
 
@@ -152,7 +155,6 @@ def make_archive(source, destination):
     archive_to = os.path.basename(source.strip(os.sep))
     shutil.make_archive(name, format, archive_from, archive_to)
     shutil.move('%s.%s'%(name,format), destination)
-
 
 # A function that returns the length of the value:
 def myFunc(e):
@@ -169,7 +171,7 @@ def download_travel(travel_id):
     travel = Travel.get_by_id(travel_id)
     travel_folder_path = travel.travel_folder_path
 
-    videos = travel.get_all_wanderpis()
+    videos = travel.get_all_wanderpis(filter='video')
     videos.sort(key=myFunc)
     video_paths = []
     for video in videos:

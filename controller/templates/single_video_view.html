@@ -27,7 +27,6 @@
     
     <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
 
-
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
@@ -89,11 +88,24 @@
                 {% block content %}  
                   
                   {% if not file.is_image %}  
-                    <video class="player-overlay card-img-top" width="640" height="auto" controls>
+                    <video class="player-overlay card-img-top" id="my-video" width="640" height="auto" controls>
                       <source src="{{ file.file_path }}" type="video/mp4">
                     </video>   
-                  {% else %}                  
+					
+                    <!-- <script>
+                      var player = videojs('my-video');
+
+                      player.vr();
+                    </script> -->
+                  {% else %}    
+                    {% if not file.is_360 %}                
                     <img class="camera-view-responsive card-img-top"  src="{{ file.file_thumbnail_path }}"></img>
+                    {% else %}    
+                    {% with file=file %}
+                        {% include "panorama.html" %}
+                    {% endwith %}
+                    {% endif %}
+
                   {% endif %}
                  
                   <h5 class="card-title"> {{ file.name }} </h5>

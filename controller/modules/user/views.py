@@ -2,7 +2,7 @@ from flask import session, redirect, url_for, request, render_template
 
 from controller.modules.user import user_blu
 from controller.utils.camera import VideoCamera
-
+import os
 # 登录
 @user_blu.route("/login", methods=["GET", "POST"])
 def login():
@@ -38,3 +38,7 @@ def logout():
     return redirect(url_for("user.login"))
 
 
+# 退出登录
+@user_blu.route("/shutdown")
+def shutdown():
+    os.system("sudo shutdown now")

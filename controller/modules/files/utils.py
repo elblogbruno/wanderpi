@@ -4,15 +4,33 @@ from datetime import datetime
 from dateutil import parser
 import re
 import exiftool 
+import io
+import os
 
 exif_Executable="./exiftool-exe/exiftool(-k).exe"    
-
+exif_executable_raspberry = "exiftool"
 
 STATIC_FOLDER = '/static/wanderpis/'
 VIDEO_EXTENSIONS = set(['mp4'])
 IMAGE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 # Allowed extension you can set your own
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'mp4'])
+
+def is_raspberrypi():
+    if os.name != 'posix':
+        return False
+    chips = ('BCM2708','BCM2709','BCM2711','BCM2835','BCM2836')
+    try:
+        with io.open('/proc/cpuinfo', 'r') as cpuinfo:
+            for line in cpuinfo:
+                if line.startswith('Hardware'):
+                    _, value = line.strip().split(':', 1)
+                    value = value.strip()
+                    if value in chips:
+                        return True
+    except Exception:
+        pass
+    return False
 
 def get_file_extension(filename):
     if '.' in filename:
@@ -30,65 +48,67 @@ def dms_to_dd(dms):
     return float(dd)
 
 def get_image_tags(path_name, filename):
-    f = open(path_name, 'rb')
+    try:
+        ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
+        with exiftool.ExifTool(executable_=ex_path) as et:
+            tags = et.get_metadata_batch([path_name])[0]
+            print(tags)
+            std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
+            is_360 = 'XMP:ProjectionType' in tags
+            lat = 0
+            long = 0
+            creation_datetime  = 0
+            duration = 0
 
-    tags = exifread.process_file(f, stop_tag='GPS')
-    std_fmt = '%Y:%m:%d %H:%M:%S'
+            if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
+                lat = tags['Composite:GPSLatitude']
+                long = tags['Composite:GPSLongitude']
 
-    lat = 0
-    long = 0
-    creation_datetime  = 0
+            create_date = str(tags['File:FileCreateDate'])
+            creation_datetime = parser.parse(create_date)
+        
+            if creation_datetime == 0:
+                match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+                if match_str:
+                    creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
+                else:
+                    creation_datetime = datetime.today()
+                print("Parsed datetime : " + str(creation_datetime))
 
-    for tag in tags.keys():
-        if tag == 'GPS GPSLatitude':
-            lat = dms_to_dd(tags[tag].values)
-        elif tag == 'GPS GPSLongitude':
-            long = dms_to_dd(tags[tag].values)
-        elif tag == 'EXIF DateTimeOriginal':
-            creation_datetime = datetime.strptime(tags['EXIF DateTimeOriginal'].values, std_fmt)
-    
-    if creation_datetime == 0:
-        match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
-        if match_str:
-            creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
-        else:
-            creation_datetime = datetime.today()
-        print("Parsed datetime : " + str(creation_datetime))
-
-    return lat, long, creation_datetime
+        return lat, long, creation_datetime, is_360
+    except:
+        return 0, 0, datetime.today(), False
 
 def get_video_tags(path_name, filename):
-    
-    with exiftool.ExifTool(executable_=exif_Executable) as et:
-        tags = et.get_metadata_batch([path_name])[0]
-        
-        std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
-
-        lat = 0
-        long = 0
-        creation_datetime  = 0
-        duration = 0
-
-        if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
-            lat = tags['Composite:GPSLatitude']
-            long = tags['Composite:GPSLongitude']
-
-        duration = tags['QuickTime:MediaDuration']
-        create_date = str(tags['File:FileCreateDate'])
-        creation_datetime = parser.parse(create_date)
-    
-        if creation_datetime == 0:
-            try: 
-                creation_datetime = parser.parse(filename,fuzzy=True)
-            except:
-                creation_datetime = datetime.today()
-
-    return lat, long, creation_datetime, duration
-
-def create_folder(directory):
     try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
+        ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
+        with exiftool.ExifTool(executable_=ex_path) as et:
+            tags = et.get_metadata_batch([path_name])[0]
+            print(tags)
+            std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
+            is_360 = 'XMP:ProjectionType' in tags
+            lat = 0
+            long = 0
+            creation_datetime  = 0
+            duration = 0
+
+            if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
+                lat = tags['Composite:GPSLatitude']
+                long = tags['Composite:GPSLongitude']
+
+            duration = tags['QuickTime:MediaDuration']
+            create_date = str(tags['File:FileCreateDate'])
+            creation_datetime = parser.parse(create_date)
+        
+            if creation_datetime == 0:
+                match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+                if match_str:
+                    creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
+                else:
+                    creation_datetime = datetime.today()
+                print("Parsed datetime : " + str(creation_datetime))
+
+        return lat, long, creation_datetime, duration, is_360
+    except:
+        return 0, 0, datetime.today(), 0, False
 

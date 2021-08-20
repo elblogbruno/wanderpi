@@ -141,9 +141,9 @@
                         </button>
                       </form>
                 {% endif %}
-
-                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-link px-3 me-2">Logout</button>
-
+				<button id="shutdown" type="button" onclick="window.location.href='{{ url_for('user.shutdown') }}'" class="btn btn-link px-3 me-2">Shutdown</button>
+                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+              
         </div>
 
     </div>    

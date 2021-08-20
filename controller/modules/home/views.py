@@ -1,4 +1,3 @@
-from config import VIDEOS_FOLDER
 from os import name
 
 from flask import json, session, render_template, redirect, url_for, Response,request, jsonify,send_from_directory
@@ -38,16 +37,16 @@ def travel(travel_id):
         session["initialized"] = False
         return redirect(url_for("user.login"))
 
-    try:     
-        travel = Travel.get_by_id(travel_id)
-        if travel:
-            stops = travel.get_all_stops()
-        
-        session["current_travel_id"] = travel_id
+    #try:     
+    travel = Travel.get_by_id(travel_id)
+    if travel:
+        stops = travel.get_all_stops()
+    
+    session["current_travel_id"] = travel_id
 
-        return render_template("travel_view.html", stops=stops, travel=travel)  
-    except:
-        return redirect(url_for("home.index"))
+    return render_template("travel_view.html", stops=stops, travel=travel)  
+    # except:
+    #     return redirect(url_for("home.index"))
 
 @home_blu.route('/travel_calendar/<string:travel_id>')
 def travel_calendar(travel_id):

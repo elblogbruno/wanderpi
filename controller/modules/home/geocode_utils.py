@@ -26,27 +26,36 @@ class GeoCodeUtils:
         else:
             locator = Nominatim(user_agent="openmapquest")
             coordinates = "{0}, {1}".format(lat, long)
-            location = locator.reverse(coordinates)
-            print(location)
-            if location:
-                if 'town' in location.raw and 'country' in location.raw and 'state' in location.raw:
-                    return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+            try:
+                location = locator.reverse(coordinates)
+                print(location)
+                if location:
+                    if 'town' in location.raw and 'country' in location.raw and 'state' in location.raw:
+                        return location.raw['address']['town'] + ", " + location.raw['address']['state'] + ", " + location.raw['address']['country']
+                    else:
+                        return location.address
                 else:
-                    return location.address
-            else:
-                return "Location unknown"
+                    return "Location unknown"
+            except geopy.exc.GeocoderUnavailable as e:
+                return GeoCodeUtils.reverse_search_offline(lat, long)
+
+                
 
     @staticmethod
     def reverse_address(address):
         """Function that having an adress translates it to a lat and long values"
         """
         locator = Nominatim(user_agent="openmapquest")
-        location = locator.geocode(address)
-        print(location)
-        if location:
-            return location.latitude, location.longitude
-        else:
-            return 0,0
+        try:
+            location = locator.geocode(address)
+            print(location)
+            if location:
+                return location.latitude, location.longitude
+            else:
+                return 0,0
+        except geopy.exc.GeocoderUnavailable as e:
+                return 0,0
+
 
     @staticmethod
     def has_internet_connection():
