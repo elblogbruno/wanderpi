@@ -35,6 +35,10 @@ function startProcessingUploadFolder(travel_id)
     socket.emit('process_upload_folder_update', travel_id)
 }
 
+socket.on('process_upload_folder_update_counter', function(data){
+    document.getElementById("info-text-socket-counter").innerHTML = data;
+})
+
 socket.on("process_upload_folder_update", function (data) {
   console.log( "Data from python: " + data);
   

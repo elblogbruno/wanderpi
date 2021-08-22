@@ -339,7 +339,8 @@ def process_upload(stop_id):
     try:
 
         upload_files = [f for f in listdir(final_folder_path) if isfile(join(final_folder_path, f))]
-
+        total_files = len(upload_files)
+        counter = 0
         if len(upload_files) > 0:
             for file in upload_files:
                 emit('process_upload_folder_update', 'Uploading file {0}'.format(file))
@@ -364,6 +365,12 @@ def process_upload(stop_id):
                     print("File already exists")
                     os.remove(join(final_folder_path, file))
                     emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
+                
+                if counter < total_files:
+                    counter += 1
+                    emit('process_upload_folder_update_counter', 'File {0} out of {1}'.format(counter, total_files))
+                else:
+                    print("Done")
 
             sleep(0.1)
             emit('process_upload_folder_update', "200")
