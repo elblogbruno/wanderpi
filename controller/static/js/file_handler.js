@@ -1,5 +1,4 @@
 
-
 async  function shareVideo(id){
   console.log(id);
   const shareData = {
@@ -55,12 +54,12 @@ document.getElementById("bulk-edit-button").style.display = "none";
 
 
 //search
-function searchWanderpis(travel_id)
+function searchWanderpis(stop_id)
 {
   var query = document.getElementById('search-input');
 
   if (query.value.length > 0) {
-    var url = "/search/"+travel_id+"/"+query.value;
+    var url = "/stop/"+stop_id+"/?query="+query.value;
 
     window.location.href = url;
   }

@@ -7,6 +7,7 @@ from controller.models.models import Wanderpi, Travel, Stop
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.utils.video_editor import VideoEditor
 from controller.modules.home.pagination import Pagination
+from controller.modules.travel.views import search_wanderpis
 from datetime import *
 
 import jinja2.exceptions
@@ -70,8 +71,8 @@ def travel_calendar(travel_id):
     # except:
     #     return redirect(url_for("home.index"))
 
-@home_blu.route('/stop/<string:stop_id>', defaults={'page': None})
-@home_blu.route('/stop/<string:stop_id>/<int:page>')
+@home_blu.route('/stop/<string:stop_id>/', defaults={'page': None})
+@home_blu.route('/stop/<string:stop_id>/<int:page>/')
 def stop(stop_id, page):
     print(stop_id)
     global per_page
@@ -79,16 +80,20 @@ def stop(stop_id, page):
     # if not username:
     #     session["initialized"] = False
     #     return redirect(url_for("user.login"))
-
-    stop = Stop.get_by_id(stop_id)
     
+    query = request.args.get('query', default=None, type=str)
+    stop = Stop.get_by_id(stop_id)
+    wanderpis = []
+    travel = None
     if stop:
         travel = Travel.get_by_id(stop.travel_id)
-        wanderpis = stop.get_all_wanderpis()
+        if not query:
+            wanderpis = stop.get_all_wanderpis()
+        else:
+            wanderpis = search_wanderpis(stop, query)
     
     session["current_stop_id"] = stop_id
 
-    pagination = Pagination(1, per_page=per_page, total_count=len(wanderpis))
     
     if not page:
         page = 1
@@ -98,9 +103,14 @@ def stop(stop_id, page):
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
 
     wanderpis = wanderpis[(page-1)*per_page:page*per_page]
+    if travel:
+        if query:
+            return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, search_term=query)  
 
-    return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
-
+        return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
+    else:
+        return redirect(url_for("home.index"))
+        
 @home_blu.route('/global_map/<string:travel_id>')
 def global_map(travel_id):
     # 模板渲染

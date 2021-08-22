@@ -1,11 +1,18 @@
-{% macro render_pagination(pagination, id, endpoint) %}
+{% macro render_pagination(pagination, id, endpoint, query) %}
 
   <ul class="pagination">
 	{% if pagination.has_prev %}
       <li>
+        {% if query %}
+        <li class="page-item"><a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=pagination.prev_num) }}?query={{ query}}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+        {% else %}
         <li class="page-item"><a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=pagination.prev_num) }}" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
         </a>
+        {% endif %}
+
 		</li>
       </li>
     {% endif %}
@@ -14,11 +21,20 @@
       {% if p %}
         {% if p != pagination.page %}
           <li class="page-item">
+            {% if query %}
+            <a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=p) }}?query={{ query}}">{{ p }}</a>
+            {% else %}
             <a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=p) }}">{{ p }}</a>
+            {% endif %}
           </li>
         {% else %}
           <li class="page-item active">
+            {% if query %}
+            <a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=p) }}?query={{ query}}">{{ p }}</a>
+            {% else %}
             <a class="page-link" href="{{ url_for(endpoint,stop_id=id, page=p) }}">{{ p }}</a>
+            {% endif %}
+
           </li>
         {% endif %}
       {% else %}
@@ -30,9 +46,15 @@
 
     {% if pagination.has_next %}
       <li class="page-item">
+        {% if query %}
+        <a class="page-link"  href="{{ url_for(endpoint, stop_id=id, page=pagination.next_num) }}?query={{ query}}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+        {% else %}
         <a class="page-link"  href="{{ url_for(endpoint, stop_id=id, page=pagination.next_num) }}" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
         </a>
+        {% endif %}
       </li>
     {% endif %}
 

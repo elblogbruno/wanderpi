@@ -107,7 +107,7 @@
                         <button
                           class="btn btn-outline-primary"
                           id="search-button"
-                          onclick="searchWanderpis('{{ travel.id }}')"
+                          onclick="searchWanderpis('{{ stop.id }}')"
                           type="button"
                           data-mdb-ripple-color="dark"
                         >
@@ -120,9 +120,13 @@
                 {% endif %}
 				
 				{% if total_count > per_page %} 
-				<ul class="nav me-3">
+				<ul class="nav me-3 mx-3">
 					<li class="nav-item">
-					{{ render_pagination(pagination, stop.id, 'home.stop') }}
+                        {% if search_term %}
+                        {{ render_pagination(pagination, stop.id, 'home.stop', search_term) }}
+                        {% else %}
+                        {{ render_pagination(pagination, stop.id, 'home.stop') }}
+                        {% endif %}
 					</li>
 				</ul>
 				{% endif %}

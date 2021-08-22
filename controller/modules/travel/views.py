@@ -15,6 +15,8 @@ from flask_socketio import emit
 from controller import socketio
 from controller.utils.video_editor import VideoEditor
 
+files = []
+last_search = ""
 finished_editing = False
 download_status = 'Started creating video of your trip...'
 def datetime_parser(o):
@@ -200,35 +202,46 @@ def download_travel(travel_id):
     return send_file(final_video_path, mimetype='video/mp4', as_attachment=True, attachment_filename=travel.name+'.mp4')
 
 
-@travel_blu.route('/search/<string:travel_id>/<string:query>', methods=['GET', 'POST'])
-def search(travel_id, query):
-    print("Searching")
-    travel = Travel.get_by_id(travel_id)
+def search_wanderpis(stop, query):
+    print("Searching this: {0}".format(query.lower()))
     final_query = query
     type_filter = False
-    files = []
+    global files
+    global last_search
+    if final_query.lower() != last_search:
+        last_search = final_query.lower()
+        files = []
+    else:
+        print("Searching same query")
+        return files
+        
+    per_page=5
 
     if '%video' in final_query:
-        wanderpis = travel.get_all_wanderpis(filter='video')
+        wanderpis = stop.get_all_wanderpis(filter='video')
         final_query = final_query.replace('%video','')
         type_filter = True
     elif '%image' in query:
-        wanderpis = travel.get_all_wanderpis(filter='image')
+        wanderpis = stop.get_all_wanderpis(filter='image')
         final_query = final_query.replace('%image','')
         type_filter = True
     else:
-        wanderpis = travel.get_all_wanderpis()
+        wanderpis = stop.get_all_wanderpis()
     
     if len(final_query) > 0:   
         for file in wanderpis:
-            if final_query.lower() in file.name.lower() or final_query.lower() in file.address.lower() or final_query.lower() in str(file.time_duration) or final_query.lower() in file.created_date.strftime("%m/%d/%Y, %H:%M:%S"):
+            if final_query.lower() in file.name.lower() or final_query.lower() in file.address.lower():
+                print(file.name, file.address)
                 files.append(file)
 
     if len(files) == 0 and not type_filter:
-        files =  travel.get_all_wanderpis()
+        files =  stop.get_all_wanderpis()
         query == 'No results found'
-    else:
+    elif len(files) == 0 and type_filter:
         files = wanderpis
 
-    return render_template('travel_view.html', wanderpis=files, travel=travel, search_term=query)
+    
+    return files
+    #return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, search_term=query)  
+    #return render_template('travel_view.html', wanderpis=files, travel=travel, search_term=query)
 
