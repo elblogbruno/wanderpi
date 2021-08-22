@@ -117,7 +117,7 @@
                   <h5 class="card-title"> {{ file.name }} {{ file.is_360 }}</h5>
                   <h6 class="card-text"> {{ file.created_date }} {{  file.time_duration }} </h6>
                   <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                      <button id="download_video" type="button" onclick="window.location.href='/uploads/{{file.travel_id}}/{{ file.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                      <button id="download_video" type="button" onclick="window.location.href='{{ url_for('files_utils.download_file',travel_id=file.travel_id, filename=file.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
                       <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                       <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                       <button id="edit_video" type="button"  data-bs-toggle="modal" data-bs-target="#bulkEditModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
