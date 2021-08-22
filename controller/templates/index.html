@@ -1,3 +1,6 @@
+{% from "add_button.html" import render_add_card with context %}
+{% from "travel_card.html" import render_travel_card with context %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,9 +23,9 @@
     
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
-   
+   <!-- 
     <script src="https://osmnames.org/api/v1/autocomplete.js"></script>
-    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" />
+    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" /> -->
 
     <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
 
@@ -43,11 +46,11 @@
 <body>
 
 <!-- Modal -->
-<div class="modal fade" id="editTravelModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="editTravelModal" tabindex="-1" aria-labelledby="editTravelModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Edit Travel</h5>
+          <h5 class="modal-title" id="editTravelModalLabel">Edit Travel</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -124,7 +127,7 @@
                 
                 <button id="new_travel" type="button" data-bs-toggle="modal" data-bs-target="#addTravelModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
                 
-                {% if travels|length > 0 %} 
+                <!-- {% if travels|length > 0 %} 
                     <form class="d-flex input-group w-auto">
                         <input
                           type="search"
@@ -140,10 +143,11 @@
                           Search
                         </button>
                       </form>
-                {% endif %}
-				<button id="shutdown" type="button" onclick="window.location.href='{{ url_for('user.shutdown') }}'" class="btn btn-link px-3 me-2">Shutdown</button>
-                <button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+                {% endif %} -->
+				<button id="logout" type="button" onclick="window.location.href='{{ url_for('user.logout') }}'" class="btn btn-primary me-3"><i class="bi bi-door-open"></i></button>
               
+				<button id="shutdown" type="button" onclick="window.location.href='{{ url_for('user.shutdown') }}'" class="btn btn-danger px-3 me-3 mx-3"><i class="bi bi-slash-circle"></i></button>
+                
         </div>
 
     </div>    
@@ -157,97 +161,18 @@
                 {% if travels|length > 0 %}     
                 <div class="row">
                     {% for travel in travels %}
-                        <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div class="card h-100">
-                                
-                                <div class="card-body">
-                                    <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px">
-                                        
-                                    </div>
-                                    <h5 class="card-title" href="travel/{{ travel.id }}"> {{ travel.name }} </h5>
-
-                                    <div class="row mb-2">
-                                        <div class="col">
-                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ travel.destination }}</span>
-                                        </div>
-
-                                        <div class="col">
-                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
-                                        </div>
-
-                                        
-                                    </div>
-                                    
-                                    <div class="col-md-2 col-xl-6 align-self-center">
-                                    <p class="card-text float-right bi bi-calendar4-event"></i><span> {{ travel.created_date }}</span>
-                                    
-                                    <p class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ travel.id }}" class="card-text d-inline-block"></span>
-                                    
-                                    </div>
-
-                                    <script>
-                                        {% if travel.get_all_wanderpis()|length > 0 %}  
-                                        {% for video in travel.get_all_wanderpis() %}
-                                            loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ travel.id }}");
-                                        {% endfor %}
-                                        getDistanceByTravelId("{{ travel.id }}");
-                                        {% endif  %}
-                                        
-                                    </script>
-
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
-                                        <button id="share_travel" type="button"  onclick="shareVideo({{ travel.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                        <button id="edit_travel" type="button" data-bs-travel="{{ travel.id }}"  data-bs-name="{{ travel.name }}" data-bs-toggle="modal" data-bs-target="#editTravelModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
-                                        <button id="travel_calendar" type="button" onclick="window.location.href='{{ url_for('home.travel_calendar', travel_id = travel.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-calendar3-range"></i></button>
-                                    </div>
-
-                                    <script>
-                                        {% for stop in travel.get_all_stops() %}
-                                            initializeStopsList("{{ stop.lat }}", "{{ stop.long}}");
-                                        {% endfor %}
-                                        initializeMapAndLocator("{{ travel.id }}","{{ travel.destination }}",);
-                                    </script>
-
-                                </div>
-                            </div>    
-                        </div>
+                    {{ render_travel_card(travel) }}
                     {% endfor %}
+                    {{ render_add_card("#addTravelModal", "New Travel") }}
                     
-                    <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                        <div class="card h-100">
-                               
-                            <div class="card-body">
-                                <a data-bs-toggle="modal" data-bs-target="#addTravelModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Travel </h5>
-                            </div>
-                        </div>    
-                    </div>
-                </div>
                 {% else %}
-                    
-                    <div class="col-md d-flex"> 
-                        <div class="card mx-auto h-100">
-                               
-                            <div class="card-body">
-                                <a data-bs-toggle="modal" data-bs-target="#addTravelModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Travel </h5>
-                            </div>
-                        </div>    
-                    </div>
+                    {{ render_add_card("#addTravelModal", "New Travel") }}
+
                 {% endif %} 
             {% endblock %}    
         <!-- </div> -->
     </div>
 </div>
-
-<!-- <div class="top">
-    <div class="recorder" id="recorder" align="center">
-        <script type="text/javascript" src="/static/js/index.js"></script>
-    </div>
-</div> -->
-
 
 </body>
 </html>

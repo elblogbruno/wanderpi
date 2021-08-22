@@ -1,12 +1,10 @@
 
 {% block content %}
 {% if context == True %}
-<button id="delete_travel" type="button"  onclick="window.location.href='{{ url_for('travel.delete_travel', travel_id=travel.id) }}'" data-bs-toggle="tooltip" data-bs-placement="left" title="Delete travel" class="btn btn-danger btn-fab">
+<button id="delete_travel" type="button"  onclick="window.location.href='{{ url_for('travel.delete_stop', stop_id=stop.id) }}'" data-bs-toggle="tooltip" data-bs-placement="left" title="Delete stop" class="btn btn-danger btn-fab">
     <i class="bi bi-trash lg-icon-fab"> </i>
   </button>
-  <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-primary btn-fab" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
-    <i class="bi bi-map lg-icon-fab"></i>
-  </button>
+
   <button href="#" type="button" class="btn btn-warning btn-fab" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal" id="download_all_wanderpis_context">
     <i class="bi bi-file-earmark-arrow-down lg-icon-fab"></i>
   </button>
@@ -18,12 +16,10 @@
   </button>
 {% else %}
 
-<button id="delete_travel" type="button"  onclick="window.location.href='{{ url_for('travel.delete_travel', travel_id=travel.id) }}'" data-bs-toggle="tooltip" data-bs-placement="left" title="Delete travel" class="btn btn-danger btn-fab me-3">
+<button id="delete_travel" type="button"  onclick="window.location.href='{{ url_for('travel.delete_stop', stop_id=stop.id) }}'" data-bs-toggle="tooltip" data-bs-placement="left" title="Delete stop" class="btn btn-danger btn-fab me-3">
     <i class="bi bi-trash"> </i>
 </button>
-<button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-primary btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
-    <i class="bi bi-map"></i>
-</button>
+
 <button href="#" type="button" class="btn btn-warning btn-fab me-3" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal"  id="download_all_wanderpis_context">
     <i class="bi bi-file-earmark-arrow-down"></i>
 </button>

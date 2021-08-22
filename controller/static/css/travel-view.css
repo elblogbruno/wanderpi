@@ -55,13 +55,18 @@ body {
     bottom: 265px
 }
 
-#global_map{
+/* #global_map{
+    bottom: 325px
+} */
+
+#delete_travel{
     bottom: 325px
 }
 
-#delete_travel{
-    bottom: 385px
-}
+
+/* #delete_travel{
+    bottom: 385px 
+} */
 
 .selected-wanderpi
 {

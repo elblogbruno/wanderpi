@@ -1,3 +1,5 @@
+{% from "add_button.html" import render_add_card with context %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -82,7 +84,8 @@
         <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
         </a>
-
+		
+		<h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
         {% if stops|length > 0 %} 
         <h1 class=" mt-2 mt-lg-0">{{ stops|length }} stops</h1>
         {% else %}
@@ -96,6 +99,14 @@
 				<button href="#" type="button" class="btn btn-warning btn-fab" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal" id="download_all_wanderpis_context">
 					<i class="bi bi-file-earmark-arrow-down lg-icon-fab"></i>
 				  </button>
+				 
+				  <!-- <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-primary btn-fab" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
+					<i class="bi bi-map lg-icon-fab"></i>
+				  </button> -->
+				 
+				<button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-info btn-fab mx-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
+					<i class="bi bi-map"></i>
+				</button>
         </div>
 
     </div>    
@@ -150,28 +161,9 @@
                             </div>    
                         </div>
                     {% endfor %}
-                    
-                    <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                        <div class="card h-100">
-                               
-                            <div class="card-body">
-                                <a data-bs-toggle="modal" data-bs-target="#addStopModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Stop </h5>
-                            </div>
-                        </div>    
-                    </div>
-                </div>
+                    {{ render_add_card("#addStopModal", "New Stop") }}
                 {% else %}
-                    
-                    <div class="col-md d-flex"> 
-                        <div class="card mx-auto h-100">
-                               
-                            <div class="card-body">
-                                <a data-bs-toggle="modal" data-bs-target="#addStopModal"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Stop </h5>
-                            </div>
-                        </div>    
-                    </div>
+					{{ render_add_card("#addStopModal", "New Stop") }}
                 {% endif %} 
             {% endblock %}    
         <!-- </div> -->

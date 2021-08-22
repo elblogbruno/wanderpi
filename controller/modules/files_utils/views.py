@@ -8,8 +8,9 @@ from controller.modules.files_utils import files_utils_blu
 from controller.utils.video_editor import VideoEditor
 from controller.utils.image_editor import ImageEditor
 
-@files_utils_blu.route('/uploads/<string:travel_id>/<string:filename>', methods=['GET', 'POST'])
+@files_utils_blu.route('/download_file/<string:travel_id>/<string:filename>', methods=['GET'])
 def download_file(travel_id, filename):
+    print(travel_id, filename)
     file = Wanderpi.get_by_id(filename)
     file_type = 'images' if file.is_image else 'videos'
     abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type=file_type)
@@ -18,8 +19,11 @@ def download_file(travel_id, filename):
     if '.' not in filename: 
         filename = file.file_path.split('/')[-1]
     
-    return send_from_directory(abs_file_path, filename, as_attachment=True)
-
+    try:
+        return send_from_directory(abs_file_path, filename, as_attachment=True)
+    except:
+        print("Error sending from directory")
+        return "File not available"
 
 @files_utils_blu.route('/get_share_image/<string:travel_id>/<string:filename>', methods=['GET', 'POST'])
 def get_share_image(travel_id, filename):

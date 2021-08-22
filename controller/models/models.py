@@ -236,8 +236,11 @@ class Stop(db.Base):
     def delete(self, path=None):
         db.session.query(Stop).filter(Stop.id == self.id).delete()
         db.session.commit()
-        # if path and os.path.exists(path):
-            # os.path.removedir(path)
+        if path and os.path.exists(path):
+            print("Deleting stop folder")
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            print("Can't delete stop folder")
         return True
 
     def save(self):

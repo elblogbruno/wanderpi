@@ -6,11 +6,13 @@ from controller.modules.home import home_blu
 from controller.models.models import Wanderpi, Travel, Stop
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.utils.video_editor import VideoEditor
-
+from controller.modules.home.pagination import Pagination
 from datetime import *
 
 import jinja2.exceptions
 import geopy
+
+per_page=5
 
 @home_blu.route('/favicon.ico')
 def favicon():
@@ -20,10 +22,10 @@ def favicon():
 @home_blu.route('/')
 def index():
     # 模板渲染
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
         
     travels = Travel.get_all()
     
@@ -32,10 +34,10 @@ def index():
 @home_blu.route('/travel/<string:travel_id>')
 def travel(travel_id):
     print(travel_id)
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
 
     #try:     
     travel = Travel.get_by_id(travel_id)
@@ -51,10 +53,10 @@ def travel(travel_id):
 @home_blu.route('/travel_calendar/<string:travel_id>')
 def travel_calendar(travel_id):
     print(travel_id)
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
 
     # try:     
     travel = Travel.get_by_id(travel_id)
@@ -68,33 +70,44 @@ def travel_calendar(travel_id):
     # except:
     #     return redirect(url_for("home.index"))
 
-@home_blu.route('/stop/<string:stop_id>')
-def stop(stop_id):
+@home_blu.route('/stop/<string:stop_id>', defaults={'page': None})
+@home_blu.route('/stop/<string:stop_id>/<int:page>')
+def stop(stop_id, page):
     print(stop_id)
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    global per_page
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
 
-    #try:     
     stop = Stop.get_by_id(stop_id)
-    travel = Travel.get_by_id(stop.travel_id)
+    
     if stop:
+        travel = Travel.get_by_id(stop.travel_id)
         wanderpis = stop.get_all_wanderpis()
     
     session["current_stop_id"] = stop_id
 
-    return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel)  
-    # except:
-    #     return redirect(url_for("home.index"))
+    pagination = Pagination(1, per_page=per_page, total_count=len(wanderpis))
+    
+    if not page:
+        page = 1
+
+    total_count = len(wanderpis)
+
+    pagination = Pagination(page, per_page=per_page, total_count=total_count)
+
+    wanderpis = wanderpis[(page-1)*per_page:page*per_page]
+
+    return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
 
 @home_blu.route('/global_map/<string:travel_id>')
 def global_map(travel_id):
     # 模板渲染
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
         
     try:   
         travel = Travel.get_by_id(travel_id)
@@ -105,10 +118,10 @@ def global_map(travel_id):
 
 @home_blu.route('/file/<path:id>')
 def single_file(id):
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
 
     try: 
         wanderpi = Wanderpi.get_by_id(id)
@@ -123,10 +136,10 @@ def single_file(id):
 @home_blu.route('/record/<string:stop_id>')
 def record(stop_id):
     # 模板渲染
-    username = session.get("username")
-    if not username:
-        session["initialized"] = False
-        return redirect(url_for("user.login"))
+    # username = session.get("username")
+    # if not username:
+    #     session["initialized"] = False
+    #     return redirect(url_for("user.login"))
 
     #try:
     stop = Stop.get_by_id(stop_id)

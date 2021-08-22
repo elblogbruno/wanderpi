@@ -23,8 +23,11 @@
 
     <!-- jQuery library -->
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
-    
+    <script src="{{ url_for('static', filename='node_modules/marzipano.js')}}"></script>
+
+	<script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/360_handler.js')}}"></script>
+
     <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
 
     <add name="Access-Control-Allow-Headers" value="*" />
@@ -86,7 +89,7 @@
           <div class="card h-55">
               <div class="card-body" >
                 {% block content %}  
-                  
+                  <!-- <div class="column"> -->
                   {% if not file.is_image %}  
                     <video class="player-overlay card-img-top" id="my-video" width="640" height="auto" controls>
                       <source src="{{ file.file_path }}" type="video/mp4">
@@ -99,25 +102,29 @@
                     </script> -->
                   {% else %}    
                     {% if not file.is_360 %}                
-                    <img class="camera-view-responsive card-img-top"  src="{{ file.file_thumbnail_path }}"></img>
+                    <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.file_thumbnail_path }}"></img>
                     {% else %}    
                     {% with file=file %}
-                        {% include "panorama.html" %}
+                        <div class="camera-view-responsive card-img-top" id="pano"></div>
+						<script>
+						load_360_image("{{ file.file_thumbnail_path }}")
+						</script>
                     {% endwith %}
                     {% endif %}
 
                   {% endif %}
                  
-                  <h5 class="card-title"> {{ file.name }} </h5>
-                  <a> {{ file.created_date }} {{  file.time_duration }} </a>
+                  <h5 class="card-title"> {{ file.name }} {{ file.is_360 }}</h5>
+                  <h6 class="card-text"> {{ file.created_date }} {{  file.time_duration }} </h6>
                   <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
                       <button id="download_video" type="button" onclick="window.location.href='/uploads/{{file.travel_id}}/{{ file.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
                       <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
                       <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                       <button id="edit_video" type="button"  data-bs-toggle="modal" data-bs-target="#bulkEditModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
                   </div>
+				  </div>
                 {% endblock %}    
-              </div>
+              <!-- </div> -->
           </div>
         </div>
 

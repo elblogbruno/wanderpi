@@ -55,6 +55,7 @@ def get_image_tags(path_name, filename):
             print(tags)
             std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
             is_360 = 'XMP:ProjectionType' in tags
+            print("Image is 360? " + str(is_360))
             lat = 0
             long = 0
             creation_datetime  = 0
@@ -64,10 +65,10 @@ def get_image_tags(path_name, filename):
                 lat = tags['Composite:GPSLatitude']
                 long = tags['Composite:GPSLongitude']
 
-            create_date = str(tags['File:FileCreateDate'])
-            creation_datetime = parser.parse(create_date)
-        
-            if creation_datetime == 0:
+            if 'File:FileCreateDate' in tags:
+                create_date = str(tags['File:FileCreateDate'])
+                creation_datetime = parser.parse(create_date)
+            else:
                 match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
                 if match_str:
                     creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
@@ -77,6 +78,7 @@ def get_image_tags(path_name, filename):
 
         return lat, long, creation_datetime, is_360
     except:
+        print("Error")
         return 0, 0, datetime.today(), False
 
 def get_video_tags(path_name, filename):

@@ -18,11 +18,7 @@
     
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
-    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
 
-    <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
-    <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/jquery.repeatable.js')}}"></script>
 
@@ -144,8 +140,8 @@
           {% for note in notes %}
               <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
                   <div class="card h-100">
-                      <div class="card-body">
-                          <h5 data-bs-toggle="modal" data-bs-target="#addNoteModal" data-bs-content='{{ note.content }}' data-bs-travel='{{ note.travel_id }}' data-bs-note-id='{{ note.id }}' data-bs-day='{{ note.day }}' class="card-title"> {{ note.day }} </h5>
+                      <div data-bs-toggle="modal" data-bs-target="#addNoteModal" data-bs-content='{{ note.content }}' data-bs-travel='{{ note.travel_id }}' data-bs-note-id='{{ note.id }}' data-bs-day='{{ note.day }}' class="card-body">
+                          <h5  class="card-title"> {{ note.day }} </h5>
 
                           <div class="row mb-2">
                               <div class="col">

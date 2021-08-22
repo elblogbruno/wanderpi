@@ -10,7 +10,7 @@ function initializeMapAndLocator(travel_id, travel_destination)
     var map = L.map(`map-container-google-${travel_id}`);
     map.addControl(new L.Control.Fullscreen());
     
-    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+    googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
             maxZoom: 20,
             subdomains:['mt0','mt1','mt2','mt3']
         }).addTo(map);

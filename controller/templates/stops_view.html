@@ -1,3 +1,8 @@
+{% from "pagination_macros.html" import render_pagination with context %}
+{% from "wanderpi_card.html" import render_wanderpi_card with context %}
+{% from "options_card.html" import render_options_card with context %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,8 +54,6 @@
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
     
 
-    <!-- JavaScript Bundle with Popper -->
-    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js')}}"></script>
 
 </head>
@@ -78,14 +81,16 @@
 				<button data-bs-toggle="modal" data-bs-target="#bulkEditModal" type="button" id="bulk-edit-button" class="btn btn-primary btn-fab me-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
 					<i class="bi bi-pencil"></i>
 				</button>
-                <div id="header-buttons">
-                    
+				
+                <div id="header-buttons">    
                     {% with travel=travel, stop=stop , context=False %}
                         {% include "travel_header_buttons.html" %}
                     {% endwith %}
                 </div>
+				
                 {% if wanderpis|length > 0 %} 
-                
+				<ul class="nav">
+					<li class="nav-item">	
                     <form class="d-flex input-group w-auto">
                         <input
                           type="search"
@@ -108,10 +113,23 @@
                         >
                           Search
                         </button>
+						
                     </form>
+					</li>
+				</ul>
                 {% endif %}
-        </div>
+				
+				{% if total_count > per_page %} 
+				<ul class="nav me-3">
+					<li class="nav-item">
+					{{ render_pagination(pagination, stop.id, 'home.stop') }}
+					</li>
+				</ul>
+				{% endif %}
 
+        </div>
+		
+		
     </div>    
 </nav>
 
@@ -123,13 +141,14 @@
         </div>
         <div class="modal-body">
             <div class="container mx-auto">
-                <h4> Edit info: </h4> 
+                <h5> Edit info: </h5> 
                 
                 <div class="row">
                 <div id="map-container-global" style="height: 300px">
                 </div>
                 
                 <div class="gap-5 mx-auto pb-5"> 
+					<h5> Change stop: </h5> 
                     <select class="form-select" id="stopsSelect">
                     {% for stop in travel.get_all_stops() %}
                         <option class="dropdown-item" value="{{ stop.id }}"> {{ stop.name }} </option>
@@ -198,88 +217,13 @@
                 {% if wanderpis|length > 0 %}     
                 <div class="row">
                     {% for post in wanderpis %}
-                        <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div id="{{ post.id }}" class="card h-100">
-                                   
-                                <div class="card-body">
-                                    <a href="/file/{{ post.id }}"> <img class="camera-view-responsive card-img-top" src="{{ post.file_thumbnail_path }}"></img></a>
-
-                                    <h5 class="card-title" href="/file/{{ post.id }}"> {{ post.name }} </h5>
-                                    
-                                    <div class="row mb-2">
-                                        <div class="col">
-                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.address }}</span>
-                                        </div>
-                                        
-                                        {% if not post.is_image %}     
-                                            <div class="col">
-                                                <i class="card-text pull-right bi bi-stopwatch"></i><span> {{ post.time_duration }}</span>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
-                                    
-
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="download_video" type="button" onclick="window.location.href='/uploads/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
-                                        <button id="share_video" type="button"  onclick="window.location.href='/get_share_image/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                    </div>
-
-                                    
-                                    <div class="form-check">
-                                        <input class="form-check-input" id="card-selection-button-{{ post.id }}" onclick="selectCard('{{ post.id }}')" type="checkbox" value="">
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>
+                       {{ render_wanderpi_card(post) }}
                     {% endfor %}
                     
-                    <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                        <div class="card h-100">
-                               
-                            <div class="card-body">
-                                <!-- <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5> -->
-                            
-                                <div class="container">
-                                    <div class="row mb-2">
-                                        <button onclick="window.location.href='{{ url_for('home.record', stop_id=stop.id) }}'" type="button" class="btn btn-info me-3" style="height: 200px;" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
-                                            <i class="bi bi-plus-lg"> Record new Wanderpi</i>
-                                        </button>
-                                        <h3 class="text-center"> or </h3>
-                                        <button href="#" type="button" class="btn btn-success me-3" style="height: 200px;"  data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
-                                            <i class="bi bi-file-earmark-arrow-up"> Upload a Wanderpi</i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>    
-                    </div>
+                    {{ render_options_card(stop) }}
                 </div>
                 {% else %}
-                    <div class="col-md d-flex"> 
-                        <div class="card mx-auto h-100">
-                               
-                            <div class="card-body">
-                                <!-- <a onclick="window.location.href='/record/{{ travel.id }}'"> <img class="camera-view-responsive mx-auto d-block card-img-top" width="200" height="200" src="/static/images/add-more-icon.svg"></img></a>
-                                <h5 class="card-title text-center"> New Wanderpi </h5> -->
-                            
-                                <div class="container">
-                                    <div class="row mb-2">
-                                        <button onclick="window.location.href='{{ url_for('home.record', stop_id=stop.id) }}'" type="button" class="btn btn-info me-3" style="height: 200px;" data-bs-toggle="tooltip" data-bs-placement="left" title="New Wanderpi" id="new_wanderpi">
-                                            <i class="bi bi-plus-lg"> Record new Wanderpi</i>
-                                        </button>
-                                        <h3 class="text-center"> or </h3>
-                                        <button href="#" type="button" class="btn btn-success me-3" style="height: 200px;"  data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
-                                            <i class="bi bi-file-earmark-arrow-up"> Upload a Wanderpi</i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>    
-                    </div>
+                    {{ render_options_card(stop) }}
                 {% endif %} 
            
         <!-- </div> -->

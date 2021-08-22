@@ -21,6 +21,9 @@ class GeoCodeUtils:
         """Function that having a lat and long translates it to a posiblea ddress"
         """
         #check if user has internet connection
+        if lat == 0 and long == 0:
+            return "Location unknown"
+            
         if not GeoCodeUtils.has_internet_connection():
             return GeoCodeUtils.reverse_search_offline(lat, long)
         else:
@@ -64,4 +67,6 @@ class GeoCodeUtils:
             urllib.request.urlopen('https://www.google.com/', timeout=1)
             return True
         except urllib.error.URLError as err:
+            return False
+        except socket.timeout as err:
             return False

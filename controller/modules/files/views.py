@@ -148,7 +148,7 @@ def save_file_to_database(is_image, travel_id, stop_id, name, lat_coord, long_co
                 time_duration = video_duration
             else:
                 time_duration = VideoUtils.get_video_info(video_file_path)
-
+    
     address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
     video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, stop_id=stop_id, address=address, time_duration=time_duration, file_path=file_path, is_image=is_image, has_been_edited=edit_video, created_date=created_date, is_360=is_360)
     video.save()
@@ -335,41 +335,47 @@ def process_upload(stop_id):
     CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER, UPLOAD_FOLDER = load_custom_video_folder()
     
     final_folder_path = UPLOAD_FOLDER + stop_name + "/"
-    upload_files = [f for f in listdir(final_folder_path) if isfile(join(final_folder_path, f))]
 
-    if len(upload_files) > 0:
-        for file in upload_files:
-            emit('process_upload_folder_update', 'Uploading file {0}'.format(file))
-            path_to_move_file = final_folder_path+file
-            if (get_file_extension(file) in IMAGE_EXTENSIONS):
-                #move file to images folder
-                file_type = 'images'
-            elif (get_file_extension(file) in VIDEO_EXTENSIONS):
-                #move file to videos folder
-                file_type = 'videos'
-            else:
-                print("File not allowed")
+    try:
 
-            path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file, file_type=file_type)
-            static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type=file_type)
-            
-            if not os.path.isfile(path):
-                shutil.move(path_to_move_file, path)
-                upload_file_to_database(path, static_path, file, travel_id,stop_id)
-                emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
-            else:
-                print("File already exists")
-                os.remove(join(final_folder_path, file))
-                emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
+        upload_files = [f for f in listdir(final_folder_path) if isfile(join(final_folder_path, f))]
 
-        sleep(0.1)
-        emit('process_upload_folder_update', "200")
-    else:
-        emit('process_upload_folder_update', "No files on the uploads folder")
+        if len(upload_files) > 0:
+            for file in upload_files:
+                emit('process_upload_folder_update', 'Uploading file {0}'.format(file))
+                path_to_move_file = final_folder_path+file
+                if (get_file_extension(file) in IMAGE_EXTENSIONS):
+                    #move file to images folder
+                    file_type = 'images'
+                elif (get_file_extension(file) in VIDEO_EXTENSIONS):
+                    #move file to videos folder
+                    file_type = 'videos'
+                else:
+                    print("File not allowed")
+
+                path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file, file_type=file_type)
+                static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file, file_type=file_type)
+                
+                if not os.path.isfile(path):
+                    shutil.move(path_to_move_file, path)
+                    upload_file_to_database(path, static_path, file, travel_id,stop_id)
+                    emit('process_upload_folder_update', 'File {0} successfully uploaded'.format(file.encode('utf-8')))
+                else:
+                    print("File already exists")
+                    os.remove(join(final_folder_path, file))
+                    emit('process_upload_folder_update', 'File {0} already exists'.format(file.encode('utf-8')))
+
+            sleep(0.1)
+            emit('process_upload_folder_update', "200")
+        else:
+            emit('process_upload_folder_update', "No files on the uploads folder")
+            sleep(2)
+            emit('process_upload_folder_update', "")
+            emit('process_upload_folder_update', "200")
+
+        return redirect("/stop/"+stop_id)
+    except OSError as e:
+        emit('process_upload_folder_update', str(e))
         sleep(2)
-        emit('process_upload_folder_update', "")
         emit('process_upload_folder_update', "200")
-
-    return redirect("/stop/"+stop_id)
-
 
