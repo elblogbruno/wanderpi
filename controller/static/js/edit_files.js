@@ -4,17 +4,40 @@ var map_modified = false;
 
 function init_map_for_editing()
 {
-    console.log("initialized map to edit");
+    if (map_initiated == false)
+    {
+        console.log("initialized map to edit");
 
-    map = L.map('map-container-global');
-
-    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-            maxZoom: 15,
-            subdomains:['mt0','mt1','mt2','mt3']
-        }).addTo(map);
+        map = L.map('map-container-global');
+        map.addControl(new L.Control.Fullscreen());
     
-    map.setView([46.244553376495,-9.43842451847176], 2);
-    map_initiated = true;
+        googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+                maxZoom: 15,
+                subdomains:['mt0','mt1','mt2','mt3']
+            }).addTo(map);
+        
+        map.setView([46.244553376495,-9.43842451847176], 2);
+
+        map.on('click', function(e){
+            var coord = e.latlng;
+            var lat = coord.lat;
+            var lng = coord.lng;
+            console.log("You clicked the map at latitude: " + lat + " and longitude: " + lng);
+        
+            var radius = 2;
+            console.log("The radius is: " + e.accuracy);
+            lat = e.latitude;
+            long = e.longitude;
+            L.marker(e.latlng).addTo(map).bindPopup("You are within " + radius + " meters from this point").openPopup();
+            L.circle(e.latlng, radius).addTo(map);
+        
+            map.setView(e.latlng, 15);
+            map_modified = true;
+          });
+
+        
+        map_initiated = true;
+    }
 }
 
 
@@ -163,30 +186,9 @@ function getRandomLatLng(map) {
 
 var bulkEditModal = document.getElementById("bulkEditModal");
 var map1 = false;
-bulkEditModal.addEventListener('show.bs.modal', function (event) {
-  console.log(map1);
-  if (map1 == false) {
-      console.log("initialized map to edit");
-      init_map_for_editing();
-      map1 = true;
-  }
-
-  
-  map.on('click', function(e){
-    var coord = e.latlng;
-    var lat = coord.lat;
-    var lng = coord.lng;
-    console.log("You clicked the map at latitude: " + lat + " and longitude: " + lng);
-
-    var radius = 2;
-    console.log("The radius is: " + e.accuracy);
-    lat = e.latitude;
-    long = e.longitude;
-    L.marker(e.latlng).addTo(map).bindPopup("You are within " + radius + " meters from this point").openPopup();
-    L.circle(e.latlng, radius).addTo(map);
-
-    map.setView(e.latlng, 15);
-    map_modified = true;
-  });
-
+bulkEditModal.addEventListener('shown.bs.modal', function (event) {
+    init_map_for_editing();
+    setTimeout(function() {
+        map.invalidateSize();
+   }, 1);
 });

@@ -47,7 +47,7 @@ def dms_to_dd(dms):
     dd = float(dms[0]) + float(dms[1])/60 + float(dms[2])/3600
     return float(dd)
 
-def get_image_tags(path_name, filename):
+def get_file_tags(path_name, filename, file_type='image'):
     try:
         ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
         with exiftool.ExifTool(executable_=ex_path) as et:
@@ -60,6 +60,9 @@ def get_image_tags(path_name, filename):
             long = 0
             creation_datetime  = 0
             duration = 0
+            
+            if file_type == 'video':
+                duration = tags['QuickTime:MediaDuration']
 
             if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
                 lat = tags['Composite:GPSLatitude']
@@ -76,41 +79,47 @@ def get_image_tags(path_name, filename):
                     creation_datetime = datetime.today()
                 print("Parsed datetime : " + str(creation_datetime))
 
-        return lat, long, creation_datetime, is_360
+        if file_type == 'image':
+            return lat, long, creation_datetime, is_360
+        else:
+            return lat, long, creation_datetime, duration, is_360
     except:
         print("Error")
-        return 0, 0, datetime.today(), False
+        if file_type == 'image':
+            return 0, 0, datetime.today(), False
+        else:
+            return 0, 0, datetime.today(), 0, False
 
-def get_video_tags(path_name, filename):
-    try:
-        ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
-        with exiftool.ExifTool(executable_=ex_path) as et:
-            tags = et.get_metadata_batch([path_name])[0]
-            print(tags)
-            std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
-            is_360 = 'XMP:ProjectionType' in tags
-            lat = 0
-            long = 0
-            creation_datetime  = 0
-            duration = 0
+# def get_video_tags(path_name, filename):
+#     try:
+#         ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
+#         with exiftool.ExifTool(executable_=ex_path) as et:
+#             tags = et.get_metadata_batch([path_name])[0]
+#             print(tags)
+#             std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
+#             is_360 = 'XMP:ProjectionType' in tags
+#             lat = 0
+#             long = 0
+#             creation_datetime  = 0
+#             duration = 0
 
-            if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
-                lat = tags['Composite:GPSLatitude']
-                long = tags['Composite:GPSLongitude']
+#             if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
+#                 lat = tags['Composite:GPSLatitude']
+#                 long = tags['Composite:GPSLongitude']
 
-            duration = tags['QuickTime:MediaDuration']
-            create_date = str(tags['File:FileCreateDate'])
-            creation_datetime = parser.parse(create_date)
+#             duration = tags['QuickTime:MediaDuration']
+#             create_date = str(tags['File:FileCreateDate'])
+#             creation_datetime = parser.parse(create_date)
         
-            if creation_datetime == 0:
-                match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
-                if match_str:
-                    creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
-                else:
-                    creation_datetime = datetime.today()
-                print("Parsed datetime : " + str(creation_datetime))
+#             if creation_datetime == 0:
+#                 match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+#                 if match_str:
+#                     creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
+#                 else:
+#                     creation_datetime = datetime.today()
+#                 print("Parsed datetime : " + str(creation_datetime))
 
-        return lat, long, creation_datetime, duration, is_360
-    except:
-        return 0, 0, datetime.today(), 0, False
+#         return lat, long, creation_datetime, duration, is_360
+#     except:
+#         return 0, 0, datetime.today(), 0, False
 

@@ -25,10 +25,15 @@
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/marzipano.js')}}"></script>
 
-	<script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+	  <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     <script src="{{ url_for('static', filename='js/360_handler.js')}}"></script>
 
     <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
+
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
+
+    <script src="{{ url_for('static', filename='node_modules/videojs-vr/dist/videojs-vr.min.js')}}"></script>
 
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
@@ -91,10 +96,66 @@
                 {% block content %}  
                   <!-- <div class="column"> -->
                   {% if not file.is_image %}  
-                    <video class="player-overlay card-img-top" id="my-video" width="640" height="auto" controls>
+                    <!-- <video class="player-overlay card-img-top" id="my-video" width="640" height="auto" controls>
                       <source src="{{ file.file_path }}" type="video/mp4">
                     </video>   
-					
+                    -->
+                    {% if not file.is_360 %}     
+                    <video
+                      id="my-video"
+                      class="player-overlay card-img-top video-js"
+                      controls
+                      preload="auto"
+                      width="640"
+                      height="264"
+                      poster="{{ file.file_thumbnail_path }}"
+                      data-setup="{}"
+                    >
+                      <source src="{{ file.file_path }}" type="video/mp4" />
+                      <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank"
+                          >supports HTML5 video</a
+                        >
+                      </p>
+                    </video>
+                    {% else %}   
+                    <video
+                      id="videojs-vr-player"
+                      class="player-overlay card-img-top video-js"
+                      controls
+                      preload="auto"
+                      width="640"
+                      height="264"
+                      poster="{{ file.file_thumbnail_path }}"
+                      data-setup="{}"
+                    >
+                      <source src="{{ file.file_path }}" type="video/mp4" />
+                      <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank"
+                          >supports HTML5 video</a
+                        >
+                      </p>
+                    </video>
+                    <script>
+                      (function(window, videojs) {
+                        var player = window.player = videojs('videojs-vr-player');
+                        player.mediainfo = player.mediainfo || {};
+                        player.mediainfo.projection = '360';
+                  
+                        // AUTO is the default and looks at mediainfo
+                        var vr = window.vr = player.vr({
+                          projection: 'AUTO',
+                          debug: true,
+                          forceCardboard: false,
+                          sphereDetail: 64,
+                        });
+                      }(window, window.videojs));
+                    </script>
+                    {% endif %}
                     <!-- <script>
                       var player = videojs('my-video');
 
@@ -102,13 +163,13 @@
                     </script> -->
                   {% else %}    
                     {% if not file.is_360 %}                
-                    <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.file_thumbnail_path }}"></img>
+                    <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.file_path }}"></img>
                     {% else %}    
                     {% with file=file %}
                         <div class="camera-view-responsive card-img-top" id="pano"></div>
-						<script>
-						load_360_image("{{ file.file_thumbnail_path }}")
-						</script>
+                        <script>
+                        load_360_image("{{ file.file_path }}")
+                        </script>
                     {% endwith %}
                     {% endif %}
 

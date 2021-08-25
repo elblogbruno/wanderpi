@@ -106,7 +106,7 @@ def upload_file_to_database(file_path, static_path , filename, travel_id, stop_i
 
     if (get_file_extension(file_path) in IMAGE_EXTENSIONS):
         # read the image data using PIL
-        lat, long, created_date,is_360 = get_image_tags(file_path, filename)
+        lat, long, created_date,is_360 = get_file_tags(file_path, filename)
         print(created_date)
         file_id = str(uuid.uuid4()) 
         #file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename)
@@ -120,7 +120,7 @@ def upload_file_to_database(file_path, static_path , filename, travel_id, stop_i
         save_file_to_database(True, travel_id, stop_id, filename, lat, long, file_id, file_thumbnail_path, abs_file_path, created_date=created_date, is_360=is_360)
         
     elif (get_file_extension(file_path) in VIDEO_EXTENSIONS):
-        lat, long, created_date, duration, is_360 = get_video_tags(file_path,filename)
+        lat, long, created_date, duration, is_360 = get_file_tags(file_path,filename, file_type='video')
         file_id = str(uuid.uuid4()) 
         
         abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type='thumbnails')

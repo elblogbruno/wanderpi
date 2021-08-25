@@ -20,7 +20,8 @@
   
     
     <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
-
+    <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet">
+    
     {{ dropzone.load_css(css_url=url_for('static', filename='node_modules/dropzone/dist/dropzone.css')) }}
 
     <!-- JavaScript Bundle with Popper -->
@@ -33,6 +34,13 @@
 
     <!--Import SocketIO-->
     <script src="{{ url_for('static', filename='node_modules/socket.io/client-dist/socket.io.js')}}"></script>
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
+    
+    <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script>
+
+    <script src="{{ url_for('static', filename='node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js')}}"></script>
 
 
     <script> 
@@ -50,12 +58,7 @@
     </script> 
 
     
-    <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
     
-
-    <script src="{{ url_for('static', filename='node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js')}}"></script>
-
 </head>
 
 <body>
@@ -148,9 +151,11 @@
                 <h5> Edit info: </h5> 
                 
                 <div class="row">
-                <div id="map-container-global" style="height: 300px">
+                    <div id="map-container-global" style="height: 300px">
                 </div>
-                
+                <!-- <script>
+                    init_map_for_editing();
+                </script> -->
                 <div class="gap-5 mx-auto pb-5"> 
 					<h5> Change stop: </h5> 
                     <select class="form-select" id="stopsSelect">
