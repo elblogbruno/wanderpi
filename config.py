@@ -12,20 +12,18 @@ UPLOAD_FOLDER = None
 CUSTOM_STATIC_FOLDER = None
 VIDEOS_FOLDER = None
 
-def load_custom_video_folder():
+def load_custom_video_folder(custom_folder_path=None):
     global CUSTOM_STATIC_FOLDER
     global VIDEOS_FOLDER
     global UPLOAD_FOLDER
     print(CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER)
 
-    if not CUSTOM_STATIC_FOLDER:
-        #open cameras.json file and load
-        with open("./settings.json", "r") as f:
-            CUSTOM_STATIC_FOLDER = json.load(f)['custom_folder']
-            VIDEOS_FOLDER = CUSTOM_STATIC_FOLDER+'wanderpis/'
-            create_folder(VIDEOS_FOLDER)
-            UPLOAD_FOLDER = CUSTOM_STATIC_FOLDER+'uploads/'
-            create_folder(UPLOAD_FOLDER)
+    if custom_folder_path:
+        CUSTOM_STATIC_FOLDER = custom_folder_path
+        VIDEOS_FOLDER = CUSTOM_STATIC_FOLDER+'wanderpis/'
+        create_folder(VIDEOS_FOLDER)
+        UPLOAD_FOLDER = CUSTOM_STATIC_FOLDER+'uploads/'
+        create_folder(UPLOAD_FOLDER)
         print("Custom folder from json file")
         return CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER, UPLOAD_FOLDER
     else:

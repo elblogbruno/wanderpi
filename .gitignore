@@ -6,3 +6,10 @@ logs/log*
 *.jpg
 *.mp4
 *.sqlite
+*.mp4
+*.mp3
+*.log
+*.zip
+*.tar
+*.gz
+settings.json

@@ -12,7 +12,22 @@ from config import STATIC_FOLDER
 from controller.modules.files.utils import get_file_extension
 import os
 import json
+import logging
+from controller.utils.utils import ask_folder
 
+dir_path = 'wanderpi.log'
+logging.basicConfig(filename=dir_path, filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+# define a Handler which writes INFO messages or higher to the sys.stderr
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+# add the handler to the root logger
+logging.getLogger('').addHandler(console)
+logging.info("Log file will be saved to temporary path: {0}".format(dir_path))
+
+custom_folder_path = ask_folder(logging)
+load_custom_video_folder(custom_folder_path=custom_folder_path)    
 app = create_app('dev')
 droppzone = Dropzone(app)
 
@@ -25,5 +40,4 @@ def custom_static(filename):
 
 if __name__ == '__main__':
     db.Base.metadata.create_all(db.engine)
-    load_custom_video_folder()
     app.run(threaded=True, host="0.0.0.0", ssl_context=('/etc/letsencrypt/live/wanderpi.duckdns.org/fullchain.pem', '/etc/letsencrypt/live/wanderpi.duckdns.org/privkey.pem'))
