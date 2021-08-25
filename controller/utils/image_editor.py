@@ -145,4 +145,16 @@ class ImageEditor:
         image = Image.open(image)
         image.save(new_image_name)
 
-
+    @staticmethod
+    def create_thumbnail(image_path, new_image_path, size):
+        """
+        Create thumbnail
+        :param image_path:
+        :param new_image_path:
+        :param size:
+        :return:
+        """
+        image = Image.open(image_path)
+        image.thumbnail(size)
+        image.save(new_image_path)
+        

@@ -1,7 +1,7 @@
 from controller.models.models import Travel, Stop, MoneyInput, Note
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.travel import travel_blu
-from controller.modules.files.views import get_stop_upload_path, create_folder_structure_for_travel,create_folder_structure_for_stop, get_travel_folder_path
+from controller.modules.files.views import get_stop_upload_path, create_folder_structure_for_travel, create_folder_structure_for_stop, get_travel_folder_path
 from flask import redirect, request, jsonify, send_from_directory,send_file,render_template
 from datetime import *
 

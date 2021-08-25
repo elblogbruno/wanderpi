@@ -100,6 +100,9 @@ def stop(stop_id, page):
 
     total_count = len(wanderpis)
 
+    #sort wanderpis by date
+    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
 
     wanderpis = wanderpis[(page-1)*per_page:page*per_page]

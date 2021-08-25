@@ -18,13 +18,13 @@ Keep your best travel memories organized, and your costs to the letter.
   
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![App Screenshot](readme-images/index-screenshot.png)
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![App Screenshot](readme-images/stops-screenshot.png)
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![App Screenshot](readme-images/stop-screenshot.png)
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![App Screenshot](readme-images/calendar-screenshot.png)
   
 ## Tech Stack
 

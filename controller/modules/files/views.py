@@ -11,6 +11,7 @@ from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.files import files_blu
 from controller.modules.files.utils import *
 from controller.utils.utils import create_folder
+from controller.utils.image_editor import ImageEditor
 from controller.utils.video_editor import VideoEditor
 
 from flask_socketio import emit
@@ -108,9 +109,14 @@ def upload_file_to_database(file_path, static_path , filename, travel_id, stop_i
         lat, long, created_date,is_360 = get_image_tags(file_path, filename)
         print(created_date)
         file_id = str(uuid.uuid4()) 
-        file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename)
-        abs_file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id)
+        #file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename)
+        abs_file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename)
+        abs_file_thumbnail_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type='thumbnails')
         
+        file_thumbnail_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=file_id, file_type='thumbnails')
+
+        ImageEditor.create_thumbnail(file_path, abs_file_thumbnail_path, (500,500))
+
         save_file_to_database(True, travel_id, stop_id, filename, lat, long, file_id, file_thumbnail_path, abs_file_path, created_date=created_date, is_360=is_360)
         
     elif (get_file_extension(file_path) in VIDEO_EXTENSIONS):
@@ -289,6 +295,8 @@ def upload_file(stop_id):
                     static_path = get_travel_folder_path_static(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
                     
                     if not os.path.isfile(path):     
+                        if not os.path.isdir(path):
+                            create_folder_structure_for_travel(travel_id)
                         file.save(path)
                         upload_file_to_database(path, static_path, filename, travel_id, stop_id)
                     else:

@@ -55,6 +55,7 @@ class Wanderpi(db.Base):
             json.dump(self.as_dict(), f, default = datetime_parser)
 
     def delete(self):
+        print(self.file_path)
         if os.path.isfile(self.file_path):
             print("Removing file from disk")
             os.remove(self.file_path)
