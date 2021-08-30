@@ -3,7 +3,7 @@ from controller.modules.files.video_utils import VideoUtils
 from controller.utils.video_editor import VideoEditor
 from controller.models.models import Stop
 import uuid
-from controller.modules.files.views import get_travel_folder_path, get_travel_folder_path_static
+from controller.modules.files.views import get_file_path
 from datetime import datetime
 
 from controller.utils.camera import VideoCamera
@@ -44,14 +44,14 @@ def get_available_video_sources(): #todo get available video sources from databa
     
     return jsonify(devices = video_camera_ids)
 
-def start_record(video_camera, file_type):
+def start_record(video_camera,stop_id , file_type):
     global travel_id
     file_id = str(uuid.uuid4()) 
-    destination_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
+    destination_path = get_file_path(travel_id=travel_id, stop_id=stop_id, filename_or_file_id=file_id, file_type=file_type)
     video_camera.start_record(destination_path, file_id)
     return file_id
 
-def init_camera(camera_index = last_camera_index):
+def init_camera(camera_index = last_camera_index, stop_id=None):
     global last_camera_index
     global current_camera_index
     
@@ -75,11 +75,11 @@ def init_camera(camera_index = last_camera_index):
             print("Changed camera while recording")
             video_camera_temp = video_camera_objs[int(last_camera_index)]
             
-            if video_camera_temp.is_record:
+            if video_camera_temp.is_record and stop_id:
                 video_camera_temp.cap.release()
                 video_camera_temp.stop_record()
                 temp_video_to_join.append(video_camera_temp.recording_thread.path)
-                start_record(video_camera_objs[camera_index], 'videos')
+                start_record(video_camera_objs[camera_index], stop_id, 'videos')
             last_camera_index = camera_index
         
 
@@ -162,11 +162,11 @@ def record_status():
 
         if file_id_1:
             print("Deleting file that was not saved on database with id: {0}".format(file_id_1))
-            p =  get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id_1, file_type=file_type)
+            p =  get_file_path(travel_id=travel_id,stop_id=stop_id, filename_or_file_id=file_id_1, file_type=file_type)
             if os.path.exists(p):
                 os.remove(p)
 
-        file_id= start_record(video_camera, file_type)
+        file_id= start_record(video_camera, stop_id, file_type)
 
         return jsonify(result="started", file_id=file_id)
     else:
@@ -177,8 +177,8 @@ def record_status():
         if file_id is None:
             return jsonify(result="failed", status_code=400)
         
-        file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=file_id, file_type=file_type)
-        abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type='thumbnails')
+        file_path = get_file_path(travel_id=travel_id, stop_id=stop_id, filename_or_file_id=file_id, file_type=file_type)
+        abs_file_path = get_file_path(travel_id=travel_id, stop_id=stop_id, file_type='thumbnails')
         #static_file_path = get_travel_folder_path_static(travel_id=travel_id, file_type='thumbnails')
         
         if len(temp_video_to_join) > 0:

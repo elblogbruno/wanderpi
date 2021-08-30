@@ -14,46 +14,56 @@
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
     
-	<!-- <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet"> -->
-    
     <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
-    
     
     
     <!-- JavaScript Bundle with Popper -->
     <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
    
-   <!--  <script src="https://osmnames.org/api/v1/autocomplete.js"></script>
-    <link href="https://osmnames.org/api/v1/autocomplete.css" rel="stylesheet" />
-
-    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
-
-    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
-    <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script> -->
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
-    <!-- <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script> -->
-
-
-    <script src="{{ url_for('static', filename='js/stops_handler.js')}}"></script>
-    
-	    <!--Import SocketIO-->
+	<!--Import SocketIO-->
     <script src="{{ url_for('static', filename='node_modules/socket.io/client-dist/socket.io.js')}}"></script>
-
 	
     <script> 
         $(document).ready(function() { // this runs as soon as the page is ready (DOM is loaded)
             const script = document.createElement('script');
             script.src = '/static/js/download_handler.js';
+            const script1 = document.createElement('script');
+            script1.src = '/static/js/file_handler.js';
             document.head.appendChild(script);
+            document.head.appendChild(script1);
+            
         });
     </script> 
+
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
 <body>
 
+<div class="modal fade" id="uploadFileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalCenterTitle">Upload all Files to Travel</h5>
+        </div>
+        <div class="modal-body">
+            <a id="info-text-socket"> </a>
+            <a id="info-text-socket-counter"></a>
 
+            <div class="container mx-auto">
+                <progress id="progress-bar"></progress>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="process-upload-button" onclick="startProcessingUploadFolderForTravel('{{ travel.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
+            <button id="close-button" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
+            <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
+        </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="addStopModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -79,6 +89,31 @@
     </div>
   </div>
 
+<!-- Modal -->
+<div class="modal fade" id="editStopModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Stop</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+                <label for="new_name_input" class="col-form-label">New Name:</label>
+                <input id="new_name_input" type="text" class="form-control">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="edit_stop_button" type="button" class="btn btn-primary">Save <i class="bi bi-save"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
     <div class="container-fluid">
         <a class="navbar-brand mt-2 mt-lg-0" href="/">
@@ -92,25 +127,25 @@
         <h1 class=" mt-2 mt-lg-0">No stops</h1>
         {% endif %}
 
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center">    
+            <button id="new_stop" type="button" data-bs-toggle="modal" data-bs-target="#addStopModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+            
+            <button href="#" type="button" class="btn btn-warning btn-fab" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal" id="download_all_wanderpis_context">
+                <i class="bi bi-file-earmark-arrow-down lg-icon-fab"></i>
+                </button>
                 
-                <button id="new_stop" type="button" data-bs-toggle="modal" data-bs-target="#addStopModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
+            <button href="#" type="button" class="btn btn-success btn-fab mx-3" data-bs-toggle="modal" data-bs-target="#uploadFileModal"  id="upload_files">
+                <i class="bi bi-file-earmark-arrow-up"></i>
+            </button>
                 
-				<button href="#" type="button" class="btn btn-warning btn-fab" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal" id="download_all_wanderpis_context">
-					<i class="bi bi-file-earmark-arrow-down lg-icon-fab"></i>
-				  </button>
-				 
-				  <!-- <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-primary btn-fab" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
-					<i class="bi bi-map lg-icon-fab"></i>
-				  </button> -->
-				 
-				<button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-info btn-fab mx-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
-					<i class="bi bi-map"></i>
-				</button>
+            <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-info btn-fab mx-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
+                <i class="bi bi-map"></i>
+            </button>
         </div>
 
     </div>    
 </nav>
+
 
 <div id="dinamic-modal-body">
     {% with travel=travel, stop=stop, is_travel=True %}
@@ -138,7 +173,7 @@
 
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <span class="card-text d-inline-block"> {{ post.get_all_wanderpis()|length  }} wanderpis</span>
+                                            <span class="card-text d-inline-block"> {{ post.get_all_wanderpis()|length  }} videos & photos</span>
                                         </div>
                                     </div>
                                     
@@ -150,6 +185,7 @@
                                     <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
                                         <button id="open_stop" type="button"  onclick="window.location.href='{{ url_for( 'home.stop', stop_id = post.id ) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
                                         <button id="share_stop" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="edit_stop" type="button" data-bs-stop-id="{{ post.id }}"  data-bs-name="{{ post.name }}" data-bs-toggle="modal" data-bs-target="#editStopModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
                                         <button id="delete_stop" type="button"  onclick="window.location.href='/delete_stop/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
                                     </div>
 
@@ -169,6 +205,8 @@
         <!-- </div> -->
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/stops_handler.js')}}"></script>
 
 
 </body>

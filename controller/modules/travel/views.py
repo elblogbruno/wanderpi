@@ -1,7 +1,7 @@
 from controller.models.models import Travel, Stop, MoneyInput, Note
 from controller.modules.home.geocode_utils import GeoCodeUtils
 from controller.modules.travel import travel_blu
-from controller.modules.files.views import get_stop_upload_path, create_folder_structure_for_travel, create_folder_structure_for_stop, get_travel_folder_path
+from controller.modules.files.views import get_stop_upload_path, create_folder_structure_for_travel, create_folder_structure_for_stop, get_file_path,rename_stop_folder
 from flask import redirect, request, jsonify, send_from_directory,send_file,render_template
 from datetime import *
 
@@ -45,11 +45,14 @@ def toDate(dateString):
 
 @travel_blu.route('/edit_travel/<string:travel_id>', methods=['POST'])
 def edit_travel(travel_id):
+    print("Editing travel with id {0}".format(travel_id))
     json = request.json
-    name = json['name']
     travel = Travel.get_by_id(travel_id)
+    name = json['name'] if 'name' in json else travel.name
+    print("New travel name {0}".format(name))
     travel.name = name
     travel.save()
+
     return jsonify(status_code=200)
 
 @travel_blu.route('/add_note_to_travel/<string:travel_id>', methods=['POST'])
@@ -128,7 +131,7 @@ def save_travel(): #todo get available video sources from database
 
     create_folder_structure_for_travel(travel_id)
 
-    travel_folder_path = get_travel_folder_path(travel_id=travel_id, file_type='root') 
+    travel_folder_path = get_file_path(travel_id=travel_id, file_type='root') 
 
     travel = Travel(id=travel_id, name=name, lat="0", long="0", travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date)
     travel.save()
@@ -142,12 +145,26 @@ def add_stop(travel_id): #todo get available video sources from database
     name = request.args.get('name')
     stop_id = str(uuid.uuid4())
 
-    create_folder_structure_for_stop(name=name)
+    create_folder_structure_for_stop(travel_id=travel_id,name=name)
 
     stop = Stop(id=stop_id, travel_id=travel_id, name=name, lat="0", long="0")
     stop.save()
 
     return jsonify(status_code = 200, message = "OK")
+
+@travel_blu.route('/edit_stop/<string:stop_id>', methods=['GET', 'POST'])
+def edit_stop(stop_id): #todo get available video sources from database
+    print("Editing stop")
+    name = request.args.get('name')
+    
+    stop = Stop.get_by_id(stop_id)
+    old_name = stop.name
+    stop.name = name
+    stop.save()
+    
+    rename_stop_folder(stop.travel_id, old_name, name)
+
+    return jsonify(status_code = 200, message = "OK", travel_id=stop.travel_id)
 
 def make_archive(source, destination):
     base = os.path.basename(destination)
@@ -189,7 +206,7 @@ def download_travel(travel_id):
     download_status = 'Joining {0} videos from your {1}'.format(len(video_paths), travel.name)
     emit('travel_download_update', download_status)
 
-    video_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=final_video_id, file_type='videos')
+    video_path = get_file_path(travel_id=travel_id, filename_or_file_id=final_video_id, file_type='videos')
         
     final_video_path = VideoEditor.JoinVideos(video_paths, final_video_id, video_path)
     

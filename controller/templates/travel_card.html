@@ -1,61 +1,61 @@
 {% macro render_travel_card(travel) %}
 
 <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div class="card h-100">
-                                
-                                <div class="card-body">
-                                    <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px">
-                                        
-                                    </div>
-                                    <h5 class="card-title" href="travel/{{ travel.id }}"> {{ travel.name }} </h5>
+    <div class="card h-100">
+        
+        <div class="card-body">
+            <div id="map-container-google-{{ travel.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px">
+                
+            </div>
+            <h5 class="card-title" href="travel/{{ travel.id }}"> {{ travel.name }} </h5>
 
-                                    <div class="row mb-2">
-                                        <div class="col">
-                                            <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ travel.destination }}</span>
-                                        </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <i class="mr-2 card-text float-right bi bi-geo-alt"></i><span class="card-text d-inline-block"> {{ travel.destination }}</span>
+                </div>
 
-                                        <div class="col">
-                                            <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
-                                        </div>
+                <div class="col">
+                    <i class="mr-2  float-right bi bi-calendar3-range"></i><span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
+                </div>
 
-                                        
-                                    </div>
-                                    
-                                    <div class="col-md-2 col-xl-6 align-self-center">
-                                    <p class="card-text float-right bi bi-calendar4-event"></i><span> {{ travel.created_date }}</span>
-                                    
-                                    <p class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ travel.id }}" class="card-text d-inline-block"></span>
-                                    
-                                    </div>
+                
+            </div>
+            
+            <div class="col-md-2 col-xl-6 align-self-center">
+            <p class="card-text float-right bi bi-calendar4-event"></i><span> {{ travel.created_date }}</span>
+            
+            <p class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ travel.id }}" class="card-text d-inline-block"></span>
+            
+            </div>
 
-                                    <script>
-                                        {% if travel.get_all_wanderpis()|length > 0 %}  
-                                        {% for video in travel.get_all_wanderpis() %}
-                                            loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ travel.id }}");
-                                        {% endfor %}
-                                        getDistanceByTravelId("{{ travel.id }}");
-                                        {% endif  %}
-                                        
-                                    </script>
+            <script>
+                {% if travel.get_all_wanderpis()|length > 0 %}  
+                {% for video in travel.get_all_wanderpis() %}
+                    loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ travel.id }}");
+                {% endfor %}
+                getDistanceByTravelId("{{ travel.id }}");
+                {% endif  %}
+                
+            </script>
 
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ travel.id }}'" class="btn btn-outline-primary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
-                                        <button id="travel_calendar" type="button" onclick="window.location.href='{{ url_for('home.travel_calendar', travel_id = travel.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-calendar3-range"></i></button>
-										<button id="share_travel" type="button"  onclick="shareVideo({{ travel.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="edit_travel" type="button" data-bs-travel="{{ travel.id }}"  data-bs-name="{{ travel.name }}" data-bs-toggle="modal" data-bs-target="#editTravelModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
-                                        
-                                    </div>
-									
-									<button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-danger btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                        
-                                    <script>
-                                        {% for stop in travel.get_all_stops() %}
-                                            initializeStopsList("{{ stop.lat }}", "{{ stop.long}}");
-                                        {% endfor %}
-                                        initializeMapAndLocator("{{ travel.id }}","{{ travel.destination }}",);
-                                    </script>
+            <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+                <button id="open_travel" type="button"  onclick="window.location.href='travel/{{ travel.id }}'" class="btn btn-outline-primary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
+                <button id="travel_calendar" type="button" onclick="window.location.href='{{ url_for('home.travel_calendar', travel_id = travel.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-calendar3-range"></i></button>
+                <button id="share_travel" type="button"  onclick="shareVideo({{ travel.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                <button id="edit_travel" type="button" data-bs-travel="{{ travel.id }}"  data-bs-name="{{ travel.name }}" data-bs-toggle="modal" data-bs-target="#editTravelModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
+                
+            </div>
+            
+            <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-danger btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                
+            <script>
+                {% for stop in travel.get_all_stops() %}
+                    initializeStopsList("{{ stop.lat }}", "{{ stop.long}}");
+                {% endfor %}
+                initializeMapAndLocator("{{ travel.id }}","{{ travel.destination }}",);
+            </script>
 
-                                </div>
-                            </div>    
-                        </div>
+        </div>
+    </div>    
+</div>
 {% endmacro %}

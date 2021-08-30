@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- CSS only -->
+    <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+   
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
+
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
+
+    <!-- jQuery library -->
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+
+	<script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+
+    <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
+
+    {% if not file.is_image %}  
+    <link href="{{ url_for('static', filename='node_modules/video.js/dist/video-js.css')}}" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='node_modules/video.js/dist/video.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/videojs-vr/dist/videojs-vr.min.js')}}"></script>
+    {% else %}
+    <script src="{{ url_for('static', filename='js/360_handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/marzipano.js')}}"></script>
+    {% endif %}
+    
+    <add name="Access-Control-Allow-Headers" value="*" />
+</head>
+
+
+<div class="modal fade" id="moreInfoModal-{{ file.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+            <div class="modal-header">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">X</button>
+            </div>
+            <div class="py-4">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
+                            <div class="card h-55">
+                                <div class="card-body" >
+                                    {% block content %}  
+                                    <!-- <div class="column"> -->
+                                    {% if not file.is_image %} 
+                                        {% if not file.is_360 %}     
+                                        <video
+                                        id="my-video"
+                                        class="player-overlay card-img-top video-js"
+                                        controls
+                                        preload="auto"
+                                        width="640"
+                                        height="264"
+                                        poster="{{ file.file_thumbnail_path }}"
+                                        data-setup="{}"
+                                        >
+                                        <source src="{{ file.file_path }}" type="video/mp4" />
+                                        <p class="vjs-no-js">
+                                            To view this video please enable JavaScript, and consider upgrading to a
+                                            web browser that
+                                            <a href="https://videojs.com/html5-video-support/" target="_blank"
+                                            >supports HTML5 video</a
+                                            >
+                                        </p>
+                                        </video>
+                                        {% else %}   
+                                        <video
+                                        id="videojs-vr-player"
+                                        class="player-overlay card-img-top video-js"
+                                        controls
+                                        preload="auto"
+                                        width="640"
+                                        height="264"
+                                        poster="{{ file.file_thumbnail_path }}"
+                                        data-setup="{}"
+                                        >
+                                        <source src="{{ file.file_path }}" type="video/mp4" />
+                                        <p class="vjs-no-js">
+                                            To view this video please enable JavaScript, and consider upgrading to a
+                                            web browser that
+                                            <a href="https://videojs.com/html5-video-support/" target="_blank"
+                                            >supports HTML5 video</a
+                                            >
+                                        </p>
+                                        </video>
+                                        <script>
+                                        (function(window, videojs) {
+                                            var player = window.player = videojs('videojs-vr-player');
+                                            player.mediainfo = player.mediainfo || {};
+                                            player.mediainfo.projection = '360';
+                                    
+                                            // AUTO is the default and looks at mediainfo
+                                            var vr = window.vr = player.vr({
+                                            projection: 'AUTO',
+                                            debug: true,
+                                            forceCardboard: false,
+                                            sphereDetail: 64,
+                                            });
+                                        }(window, window.videojs));
+                                        </script>
+                                        {% endif %}
+                                    {% else %}    
+                                        {% if not file.is_360 %}                
+                                        <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.cdn_path }}"></img>
+                                        {% else %}    
+                                        {% with file=file %}
+                                            <div class="camera-view-responsive card-img-top" id="pano"></div>
+                                            <script>
+                                            load_360_image("{{ file.cdn_path }}")
+                                            </script>
+                                        {% endwith %}
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    
+                                    </div>
+                                    {% endblock %}    
+                                <!-- </div> -->
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
+                            <div class="card h-55">
+                                <div class="card-body">
+                                    <!-- <div id="file-map-{{ file.id }}" class="camera-view-responsive" style="height: 480px">
+                                    </div> -->
+                                    <h5 class="card-title"> {{ file.name }} {{ file.is_360 }}</h5>
+                                    <h6 class="card-text"> {{ file.created_date }} {{  file.time_duration }} </h6>
+                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+                                        <button id="download_video" type="button" onclick="window.location.href='{{ url_for('files_utils.download_file',travel_id=file.travel_id, filename=file.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                                        <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                                        <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+                                        <button id="edit_video" type="button"  data-bs-toggle="modal" data-bs-target="#bulkEditModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2 col-xl-6 align-self-center">
+                                        <h5 class="card-title"> GPS Information: </h3>
+                                        <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block">Latitude: {{ file.lat }}</span>
+                                        <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block">Longitude: {{ file.long }}</span>
+                                        <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block">Address: {{ file.address }}</span>
+                                        <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block"></span>
+                                    </div> 
+                                    
+                                    <div class="col-md-2 col-xl-6 align-self-center">
+                                        <h5 class="card-title"> {{ stop.name }}</h3>
+                                        <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block"> {{ stop.lat }}</span>
+                                        <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"> {{ stop.long }}</span>
+                                        <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block">{{ travel.name }}</span>
+                                        <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block">{{ travel.name }}</span>
+                                    </div>
+                                    </div>
+                                        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/edit_files.js"> </script>
+</div>
+
+<script>
+    var lat = '{{ file.lat }}';
+    var long  = '{{ file.long }}';
+    var address  = '{{ file.address }}';
+
+    showPosition(lat, long, address, "{{ file.id }}", false);
+
+    {% for point in file.get_all_points() %}
+          loadPoints("{{ point.lat }}", "{{ point.long }}");
+          loadDistanceListFromPoints("{{ point.lat }}", "{{ point.long }}");
+    {% endfor %}
+
+    getDistance();
+
+    addCard("{{ file.id }}"); 
+</script>
+
+
+</html>

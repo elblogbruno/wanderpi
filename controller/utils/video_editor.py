@@ -1,4 +1,3 @@
-#from controller.modules.files.views import get_travel_folder_path
 from moviepy import *
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, ImageClip, concatenate_videoclips
 

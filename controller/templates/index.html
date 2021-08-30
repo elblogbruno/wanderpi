@@ -31,12 +31,11 @@
 
     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
-    <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script>
+    <!-- <script src="{{ url_for('static', filename='dist/leaflet-realtime.js')}}"></script> -->
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
 
     <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script>
 
-    <script src="{{ url_for('static', filename='js/index.js')}}"></script>
     <script src="{{ url_for('static', filename='js/card_map_handler.js')}}"></script>
     <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
     
@@ -173,6 +172,9 @@
         <!-- </div> -->
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/index.js')}}"></script>
+
 
 </body>
 </html>

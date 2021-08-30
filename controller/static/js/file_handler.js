@@ -18,6 +18,9 @@ function disableButtons(){
   document.getElementById('download-button').disabled = true;
   document.getElementById('close-button').disabled = true;
   document.getElementById('process-upload-button').disabled = true;
+  document.getElementById("progress-bar").style.display = "inline";
+  if (document.getElementById("myDropzone"))
+    document.getElementById("myDropzone").style.display = "none";
 }
 
 function enableButtons(){
@@ -25,14 +28,40 @@ function enableButtons(){
   document.getElementById('close-button').disabled = false;
   document.getElementById('download-button').disabled = false;
   document.getElementById('process-upload-button').disabled = false;
+  document.getElementById("progress-bar").style.display = "none";
+  if (document.getElementById("myDropzone"))
+    document.getElementById("myDropzone").style.display = "block";
 }
 
-function startProcessingUploadFolder(travel_id)
+function startRecreatingThumbnails(stop_id){
+  disableButtons()
+  socket.emit('process_recreate_thumbnails', stop_id)
+}
+
+function startProcessingUploadFolderForStop(stop_id)
 {
     downloading_file = true;
     disableButtons()
-    document.getElementById("progress-bar").style.display = "inline";
-    socket.emit('process_upload_folder_update', travel_id)
+    socket.emit('process_upload_folder_update', stop_id)
+}
+
+function startProcessingUploadFolderForTravel(travel_id)
+{
+    downloading_file = true;
+    disableButtons()
+    socket.emit('process_travel_upload_folder_update', travel_id)
+}
+
+function get_upload_status()
+{
+    socket.emit('get_upload_status', 'data')
+}
+
+function ask_for_update(){
+  socket.emit('process_travel_upload_folder_update', 'ok')
+  setInterval(function(){ 
+    ask_for_update();
+  }, 5000);
 }
 
 socket.on('process_upload_folder_update_counter', function(data){
@@ -44,17 +73,45 @@ socket.on("process_upload_folder_update", function (data) {
   
   if (data == "200")
   {
-      document.getElementById("progress-bar").style.display = "none";
       enableButtons()
   }else{
       document.getElementById("info-text-socket").textContent = data;
   }
 });
 
+socket.on("process_travel_upload_folder_update", function (data) {
+  console.log( "Data from python: " + data);
+  
+  if (data == "200")
+  {
+      enableButtons()
+  }else{
+      document.getElementById("info-text-socket").textContent = data;
+  }
+});
+
+socket.on("get_upload_status", function (data) {
+  console.log( "Data from python: " + data);
+  
+  if (data == 'False')
+  {
+      document.getElementById("progress-bar").style.display = "none";
+      enableButtons()
+  }else{
+      document.getElementById("info-text-socket").textContent = data;
+      // socket.emit('process_travel_upload_folder_update', 'ok')
+      ask_for_update()
+  }
+});
+
+$('#uploadFileModal').on('show.bs.modal', function (event) {
+  get_upload_status();
+})
+
 document.getElementById("progress-bar").style.display = "none";
-document.getElementById("bulk-edit-button").style.display = "none";
 
-
+if (document.getElementById("bulk-edit-button"))
+  document.getElementById("bulk-edit-button").style.display = "none";
 
 
 //search

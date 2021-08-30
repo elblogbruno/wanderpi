@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import db
-from sqlalchemy import Column, Boolean, String, Float, DateTime, Text, Date, Time, desc
+from sqlalchemy import Column, Boolean, String, Float, DateTime, Text, Date, Time, desc, func
 # from datetime import datetime
 import os
 import json
@@ -21,6 +21,7 @@ class Wanderpi(db.Base):
     address = Column(String(256), nullable=False)
     time_duration = Column(Float, nullable=False)
     file_thumbnail_path = Column(String(256), nullable=False)
+    cdn_path = Column(String(256), nullable=False)
     file_path = Column(String(256), nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow)
     travel_id = Column(String(256), nullable=False)
@@ -59,7 +60,9 @@ class Wanderpi(db.Base):
         if os.path.isfile(self.file_path):
             print("Removing file from disk")
             os.remove(self.file_path)
-
+        if os.path.isfile(self.file_thumbnail_path):
+            print("Removing file thumbnail from disk")
+            os.remove(self.file_thumbnail_path)
         db.session.query(Wanderpi).filter(Wanderpi.id == self.id).delete()
         db.session.commit()
         return True
@@ -229,7 +232,7 @@ class Stop(db.Base):
     lat = Column(String(256), nullable=False)
     long = Column(String(256), nullable=False)
     name = Column(String(256), nullable=False)
-
+    
 
     def __repr__(self):
         return f'<Stop {self.id}>'
@@ -266,6 +269,25 @@ class Stop(db.Base):
             return wanderpis[i].file_thumbnail_path
         else:
             return '/static/wanderpi-icon.svg'
+
+    def rename_all_wanderpi_paths(new_path, old_path):
+        print(new_path, old_path)
+        updated_rows = (
+            db.session.query(Wanderpi).update({Wanderpi.file_thumbnail_path: func.replace(Wanderpi.file_thumbnail_path, old_path, new_path)},
+                    synchronize_session=False)
+        )
+        
+        updated_rows = (
+            db.session.query(Wanderpi).update({Wanderpi.file_path: func.replace(Wanderpi.file_path, old_path, new_path)},
+                    synchronize_session=False)
+        )
+        
+        updated_rows = (
+            db.session.query(Wanderpi).update({Wanderpi.cdn_path: func.replace(Wanderpi.cdn_path, old_path, new_path)},
+                    synchronize_session=False)
+        )
+        print("Updated {} rows".format(updated_rows))
+
     @staticmethod
     def get_by_id(id):
         return db.session.query(Stop).get(id)

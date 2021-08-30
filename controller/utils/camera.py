@@ -1,4 +1,3 @@
-from controller.modules.files.views import get_travel_folder_path
 import cv2
 import threading
 import pyaudio

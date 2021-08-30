@@ -1,39 +1,50 @@
-{% macro render_wanderpi_card(post) %}
+{% macro render_wanderpi_card(file) %}
+
 
 <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div id="{{ post.id }}" class="card h-100">
-                                   
-                                <div class="card-body">
-                                    <a href="/file/{{ post.id }}"> <img loading="lazy" class="camera-view-responsive card-img-top" src="{{ post.file_thumbnail_path }}"></img></a>
+    <div id="{{ file.id }}" class="card h-100">
+            
+        <div class="card-body">
+            <a data-bs-toggle="modal" data-bs-target="#moreInfoModal-{{ file.id }}" data-bs-backdrop="false"> <img loading="lazy" class="camera-view-responsive card-img-top" src="{{ file.file_thumbnail_path }}"></img></a>
 
-                                    <h5 class="card-title" href="/file/{{ post.id }}"> {{ post.name }} </h5>
-                                    
-                                    <div class="row mb-2">
-                                        <div class="col">
-                                            <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ post.address }}</span>
-                                        </div>
-                                        
-                                        {% if not post.is_image %}     
-                                            <div class="col">
-                                                <i class="card-text pull-right bi bi-stopwatch"></i><span> {{ post.time_duration }}</span>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
-                                    
+            <h5 class="card-title"> {{ file.name }} </h5>
+            
+            <div class="row mb-2">
+                <div class="col">
+                    <i class="card-text pull-right bi bi-geo-alt"></i><span> {{ file.address }}</span>
+                </div>
+                
+                {% if not file.is_image %}     
+                    <div class="col">
+                        <i class="card-text pull-right bi bi-stopwatch"></i><span> {{ file.time_duration }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <i class="card-text pull-right bi bi-calendar4-event"></i><span> {{ file.created_date }}</span>
+            
+            <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
 
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="download_video" type="button" onclick="window.location.href='{{ url_for('files_utils.download_file',travel_id=travel.id, filename=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
-                                        <button id="share_video" type="button"  onclick="window.location.href='/get_share_image/{{ travel.id }}/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=post.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                    </div>
+                <button onclick="window.location.href='/file/{{ file.id }}'" type="button" id="bulk-edit-button" class="btn btn-outline-secondary btn-block btn-responsive" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
+                    <i class="bi bi-info-square"></i>
+                </button>
+                <button id="download_video" type="button" onclick="window.location.href='{{ url_for('files_utils.download_file',travel_id=travel.id, filename=file.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+                <button id="share_video" type="button"  onclick="window.location.href='/get_share_image/{{ travel.id }}/{{ file.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                <button id="delete_file" type="button"  onclick="window.location.href='{{ url_for('files.delete_file', file_id=file.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+            </div>
 
-                                    
-                                    <div class="form-check">
-                                        <input class="form-check-input" id="card-selection-button-{{ post.id }}" onclick="selectCard('{{ post.id }}')" type="checkbox" value="">
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>
+            <div id="wanderpi-more-info-modal">
+                {% with travel=travel, file=file, stop=stop %}
+                    {% include "wanderpi_more_info_modal.html" %}
+                {% endwith %}
+            </div>
+            
+            <div class="form-check">
+                <input class="form-check-input" id="card-selection-button-{{ file.id }}" onclick="selectCard('{{ file.id }}')" type="checkbox" value="">
+            </div>
+        </div>
+    </div>    
+</div>
+
+
 {% endmacro %}

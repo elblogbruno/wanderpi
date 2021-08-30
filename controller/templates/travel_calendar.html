@@ -139,7 +139,12 @@
         {% block content %}  
           {% for note in notes %}
               <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
+                  {% if note.day|string == current_day|string %}
+                  <div class="selected-day card h-100">
+                  {% else %}
                   <div class="card h-100">
+                  {% endif %}
+                  
                       <div data-bs-toggle="modal" data-bs-target="#addNoteModal" data-bs-content='{{ note.content }}' data-bs-travel='{{ note.travel_id }}' data-bs-note-id='{{ note.id }}' data-bs-day='{{ note.day }}' class="card-body">
                           <h5  class="card-title"> {{ note.day }} </h5>
 

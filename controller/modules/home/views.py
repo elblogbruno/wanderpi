@@ -13,7 +13,7 @@ from datetime import *
 import jinja2.exceptions
 import geopy
 
-per_page=5
+per_page=10
 
 @home_blu.route('/favicon.ico')
 def favicon():
@@ -67,7 +67,9 @@ def travel_calendar(travel_id):
     else:
         notes = []
     session["current_travel_id"] = travel_id
-    return render_template("travel_calendar.html", travel=travel, notes=notes, total_price=total_price)  
+
+    current_day = date.today()
+    return render_template("travel_calendar.html", travel=travel, notes=notes, total_price=total_price, current_day=current_day)  
     # except:
     #     return redirect(url_for("home.index"))
 
@@ -140,7 +142,9 @@ def single_file(id):
         wanderpi = Wanderpi.get_by_id(id)
         stop = Stop.get_by_id(wanderpi.stop_id)
         travel = Travel.get_by_id(wanderpi.travel_id)
-        
+        # if wanderpi.is_image:
+        #     wanderpi.file_path = wanderpi.file_path.replace('/mnt', '')
+
         return render_template("single_video_view.html", file=wanderpi, stop=stop, travel=travel)   
     except jinja2.exceptions.UndefinedError as e:
         print(str(e))

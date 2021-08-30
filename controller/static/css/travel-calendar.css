@@ -2,3 +2,9 @@
 #field {
     margin-bottom:20px;
 }
+
+
+.selected-day
+{
+    background-color: #0b5ce99a;
+}

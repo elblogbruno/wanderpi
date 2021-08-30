@@ -1,4 +1,4 @@
-from controller.modules.files.views import get_travel_folder_path
+from controller.modules.files.views import get_file_path
 from flask import send_from_directory
 from werkzeug.utils import secure_filename
 
@@ -43,8 +43,8 @@ def download_file(travel_id, filename):
     print(travel_id, filename)
     file = Wanderpi.get_by_id(filename)
     file_type = 'images' if file.is_image else 'videos'
-    abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type=file_type)
-    file_path = get_travel_folder_path(travel_id=travel_id, filename_or_file_id=filename, file_type=file_type)
+    abs_file_path = get_file_path(travel_id=travel_id, stop_id=file.stop_id, file_type=file_type)
+    file_path = get_file_path(travel_id=travel_id, stop_id=file.stop_id, filename_or_file_id=filename, file_type=file_type)
     
     # check if file exists, if it does not, maybe it is a custom video or photo
     if not os.path.exists(file_path):
@@ -63,7 +63,7 @@ def download_file(travel_id, filename):
 def get_share_image(travel_id, filename):
     file = Wanderpi.get_by_id(filename)
     file_type = 'images' if file.is_image else 'videos'
-    abs_file_path = get_travel_folder_path(travel_id=travel_id, file_type=file_type)
+    abs_file_path = get_file_path(travel_id=travel_id, stop_id=file.stop_id, file_type=file_type)
     
     #ImageEditor.add_watermark(file.file_path, 'static/images/share_image_watermark.png', 100)
     if '.' not in filename: 
@@ -81,7 +81,7 @@ def get_share_image(travel_id, filename):
     #width_size = int((float(size[0]) * float(height_percent)))
 
     ImageEditor.resize_image('./controller/static/logo-watermark.png', new_height=int(fixed_height))
-    ImageEditor.duplicated_image_with_different_name('./controller'+file.file_path, new_name_path)
+    ImageEditor.duplicated_image_with_different_name(file.file_path, new_name_path)
     ImageEditor.add_watermark(new_name_path, './controller/static/logo-watermark.png', 100)
 
     

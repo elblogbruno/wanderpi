@@ -48,47 +48,66 @@ def dms_to_dd(dms):
     return float(dd)
 
 def get_file_tags(path_name, filename, file_type='image'):
-    try:
-        ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
-        with exiftool.ExifTool(executable_=ex_path) as et:
-            tags = et.get_metadata_batch([path_name])[0]
-            print(tags)
-            std_fmt = '%Y:%m:%d %H:%M:%S+%M:%S'
-            is_360 = 'XMP:ProjectionType' in tags
-            print("Image is 360? " + str(is_360))
-            lat = 0
-            long = 0
-            creation_datetime  = 0
-            duration = 0
-            
-            if file_type == 'video':
-                duration = tags['QuickTime:MediaDuration']
+    # try:
+    ex_path = exif_executable_raspberry if is_raspberrypi() else exif_Executable
+    with exiftool.ExifTool(executable_=ex_path) as et:
+        tags = et.get_metadata_batch([path_name])[0]
+        print(tags)
+        
+        std_fmt_time = '%Y:%m:%d %H:%M:%S+%M:%S'
+        std_fmt = '%Y:%m:%d %H:%M:%S'
+        
+        is_360 = 'XMP:ProjectionType' in tags
+        print("Image is 360? " + str(is_360))
+        lat = 0
+        long = 0
+        creation_datetime  = 0
+        duration = 0
+        
+        if file_type == 'video':
+            duration = tags['QuickTime:MediaDuration']
 
-            if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
-                lat = tags['Composite:GPSLatitude']
-                long = tags['Composite:GPSLongitude']
+        if 'Composite:GPSLatitude' in tags and 'Composite:GPSLongitude' in tags:
+            lat = tags['Composite:GPSLatitude']
+            long = tags['Composite:GPSLongitude']
 
-            if 'File:FileCreateDate' in tags:
-                create_date = str(tags['File:FileCreateDate'])
-                creation_datetime = parser.parse(create_date)
+        has_time = False
+        create_date = None
+        if 'File:FileCreateDate' in tags:
+            create_date = str(tags['File:FileCreateDate'])
+            print('File:FileCreateDate: ' + create_date)
+        elif 'EXIF:DateTimeOriginal' in tags:
+            create_date = str(tags['EXIF:DateTimeOriginal'])
+            print('EXIF:DateTimeOriginal: ' + create_date)
+        else:
+            match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+            if match_str:
+                print(match_str.group())
+                creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
             else:
-                match_str = re.search(r'\d{4}-\d{2}-\d{2}', filename)
-                if match_str:
-                    creation_datetime =  datetime.strptime(match_str.group(), '%Y-%m-%d').date()
-                else:
-                    creation_datetime = datetime.today()
-                print("Parsed datetime : " + str(creation_datetime))
+                creation_datetime = datetime.today()
+        
+        if has_time and create_date:
+            creation_datetime = datetime.strptime(create_date, std_fmt_time)
+        elif create_date:
+            creation_datetime = datetime.strptime(create_date, std_fmt)
 
-        if file_type == 'image':
-            return lat, long, creation_datetime, is_360
-        else:
-            return lat, long, creation_datetime, duration, is_360
-    except:
-        print("Error")
-        if file_type == 'image':
-            return 0, 0, datetime.today(), False
-        else:
-            return 0, 0, datetime.today(), 0, False
+            
+        
+        
+        
+        print("Parsed datetime : " + str(creation_datetime))
+
+    if file_type == 'image':
+        return lat, long, creation_datetime, is_360
+    else:
+        return lat, long, creation_datetime, duration, is_360
+    # except:
+    #     print("Error")
+    #     if file_type == 'image':
+    #         return 0, 0, datetime.today(), False
+    #     else:
+    #         return 0, 0, datetime.today(), -1, False
 
 # def get_video_tags(path_name, filename):
 #     try:

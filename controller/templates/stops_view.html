@@ -2,7 +2,7 @@
 {% from "wanderpi_card.html" import render_wanderpi_card with context %}
 {% from "options_card.html" import render_options_card with context %}
 
-
+{% set selected_file=wanderpis[0] %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,9 +15,10 @@
     <!-- CSS only -->
     <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    
     <link href="{{ url_for('static', filename='css/travel-view.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet"> 
-  
+    <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
     
     <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet">
@@ -159,8 +160,13 @@
                 <div class="gap-5 mx-auto pb-5"> 
 					<h5> Change stop: </h5> 
                     <select class="form-select" id="stopsSelect">
-                    {% for stop in travel.get_all_stops() %}
-                        <option class="dropdown-item" value="{{ stop.id }}"> {{ stop.name }} </option>
+                    {% for stop_option in travel.get_all_stops() %}
+                        {% if stop_option.id == stop.id %}
+                        <option class="dropdown-item"selected="selected" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
+                        {% else %}
+                        <option class="dropdown-item" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
+                        {% endif %}
+
                     {% endfor %}   
                     </select>
                 </div> 
@@ -206,7 +212,9 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button id="process-upload-button" onclick="startProcessingUploadFolder('{{ stop.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
+          <button id="process-upload-button" onclick="startProcessingUploadFolderForStop('{{ stop.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
+          <button id="process-recreate-button" onclick="startRecreatingThumbnails('{{ stop.id }}')" type="button" class="btn btn-primary">Recreate Thumbnails</button>  
+          
           <button id="close-button" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
           <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
         </div>
@@ -214,27 +222,33 @@
     </div>
 </div>
 
+
+
 <div id="dinamic-modal-body">
     {% with travel=travel, stop=stop, is_travel=False %}
         {% include "download_modal.html" %}
     {% endwith %}
 </div>
 
+
+
+
 <div class="py-4">
     <div class="container-fluid">
         <!-- <div class="row hidden-md-up"> -->
            
-                {% if wanderpis|length > 0 %}     
-                <div class="row">
-                    {% for post in wanderpis %}
-                       {{ render_wanderpi_card(post) }}
-                    {% endfor %}
-                    
-                    {{ render_options_card(stop) }}
-                </div>
-                {% else %}
-                    {{ render_options_card(stop) }}
-                {% endif %} 
+        {% if wanderpis|length > 0 %}     
+        <div class="row">
+            {% for post in wanderpis %}
+                {{ render_wanderpi_card(post) }}
+                
+            {% endfor %}
+            
+            {{ render_options_card(stop) }}
+        </div>
+        {% else %}
+            {{ render_options_card(stop) }}
+        {% endif %} 
            
         <!-- </div> -->
     </div>

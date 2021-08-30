@@ -23,18 +23,20 @@
 
     <!-- jQuery library -->
     <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='node_modules/marzipano.js')}}"></script>
 
 	  <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/360_handler.js')}}"></script>
 
     <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
 
-    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
-
+    {% if not file.is_image %}  
+    <link href="{{ url_for('static', filename='node_modules/video.js/dist/video-js.css')}}" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='node_modules/video.js/dist/video.min.js')}}"></script>
     <script src="{{ url_for('static', filename='node_modules/videojs-vr/dist/videojs-vr.min.js')}}"></script>
-
+    {% else %}
+    <script src="{{ url_for('static', filename='js/360_handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/marzipano.js')}}"></script>
+    {% endif %}
+    
     <add name="Access-Control-Allow-Headers" value="*" />
 </head>
 
@@ -163,7 +165,7 @@
                     </script> -->
                   {% else %}    
                     {% if not file.is_360 %}                
-                    <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.file_path }}"></img>
+                    <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.cdn_path }}"></img>
                     {% else %}    
                     {% with file=file %}
                         <div class="camera-view-responsive card-img-top" id="pano"></div>
@@ -193,7 +195,7 @@
         <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
           <div class="card h-55">
               <div class="card-body">
-                  <div id="file-map" class="camera-view-responsive" style="height: 480px">
+                  <div id="file-map-{{ file.id }}" class="camera-view-responsive" style="height: 480px">
                   </div>
                   <div class="row">
                     <div class="col-md-2 col-xl-6 align-self-center">
@@ -229,7 +231,7 @@
     var long  = '{{ file.long }}';
     var address  = '{{ file.address }}';
 
-    showPosition(lat,long, address);
+    showPosition(lat,long, address, "{{ file.id }}");
 
     {% for point in file.get_all_points() %}
           loadPoints("{{ point.lat }}", "{{ point.long }}");
