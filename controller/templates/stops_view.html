@@ -57,14 +57,57 @@
             document.head.appendChild(script2);
         });
     </script> 
-
-    
-    
 </head>
 
 <body>
 
+<div class="modal fade" id="bulkEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalCenterTitle">What would you like to do?</h5>
+        </div>
+        <div class="modal-body">
+            <div class="container mx-auto">
+                <h5> Edit info: </h5> 
+                
+                <div class="row">
+                    <div id="map-container-global" style="height: 300px">
+                </div>
+                <!-- <script>
+                    init_map_for_editing();
+                </script> -->
+                <div class="gap-5 mx-auto pb-5"> 
+                    <h5> Change stop: </h5> 
+                    <select class="form-select" id="stopsSelect">
+                    {% for stop_option in travel.get_all_stops() %}
+                        {% if stop_option.id == stop.id %}
+                        <option class="dropdown-item"selected="selected" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
+                        {% else %}
+                        <option class="dropdown-item" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
+                        {% endif %}
 
+                    {% endfor %}   
+                    </select>
+                </div> 
+                <!-- <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Location</span>
+                    </div>
+                    <input id="new-location-input" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                </div> -->
+                <button id="edit-selected-files" onclick="editSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Edit them</button>                  
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="delete-selected-files" onclick="deleteSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Delete them</button> 
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
+            <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
+        </div>
+        </div>
+    </div>
+</div>
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
     <div class="container-fluid">
@@ -74,7 +117,7 @@
         </a>
 
         <h1 class=" mt-2 mt-lg-0">{{ stop.name }}</h1>
-        <h1 class=" mt-2 mt-lg-0">{{ wanderpis|length }}</h1>
+        <h1 class=" mt-2 mt-lg-0">{{ current_count }} - {{ total_count }}</h1>
         
         <!-- if we have a search term show a button  -->
         {% if search_term %}
@@ -141,53 +184,6 @@
     </div>    
 </nav>
 
-<div class="modal fade" id="bulkEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalCenterTitle">What would you like to do?</h5>
-        </div>
-        <div class="modal-body">
-            <div class="container mx-auto">
-                <h5> Edit info: </h5> 
-                
-                <div class="row">
-                    <div id="map-container-global" style="height: 300px">
-                </div>
-                <!-- <script>
-                    init_map_for_editing();
-                </script> -->
-                <div class="gap-5 mx-auto pb-5"> 
-					<h5> Change stop: </h5> 
-                    <select class="form-select" id="stopsSelect">
-                    {% for stop_option in travel.get_all_stops() %}
-                        {% if stop_option.id == stop.id %}
-                        <option class="dropdown-item"selected="selected" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
-                        {% else %}
-                        <option class="dropdown-item" value="{{ stop_option.id }}"> {{ stop_option.name }} </option>
-                        {% endif %}
-
-                    {% endfor %}   
-                    </select>
-                </div> 
-                <!-- <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text" id="inputGroup-sizing-sm">Location</span>
-                    </div>
-                    <input id="new-location-input" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
-                </div> -->
-                <button id="edit-selected-files" onclick="editSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Edit them</button>                  
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-          <button id="delete-selected-files" onclick="deleteSelectedFiles('{{ travel.id }}')" type="button" class="btn btn-primary">Delete them</button> 
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
-          <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
-        </div>
-      </div>
-    </div>
-</div>
 
 {% block content %}
 <div class="modal fade" id="uploadFileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -210,13 +206,14 @@
             <div class="container mx-auto">
                 <progress id="progress-bar"></progress>
             </div>
+        
         </div>
+
         <div class="modal-footer">
           <button id="process-upload-button" onclick="startProcessingUploadFolderForStop('{{ stop.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
           <button id="process-recreate-button" onclick="startRecreatingThumbnails('{{ stop.id }}')" type="button" class="btn btn-primary">Recreate Thumbnails</button>  
           
           <button id="close-button" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
-          <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
         </div>
       </div>
     </div>
@@ -240,8 +237,7 @@
         {% if wanderpis|length > 0 %}     
         <div class="row">
             {% for post in wanderpis %}
-                {{ render_wanderpi_card(post) }}
-                
+                {{ render_wanderpi_card(post) }}   
             {% endfor %}
             
             {{ render_options_card(stop) }}

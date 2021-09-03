@@ -40,4 +40,5 @@ def custom_static(filename):
 
 if __name__ == '__main__':
     db.Base.metadata.create_all(db.engine)
+    app.jinja_env.cache = {}
     app.run(threaded=True, host="0.0.0.0", ssl_context=('/etc/letsencrypt/live/wanderpi.duckdns.org/fullchain.pem', '/etc/letsencrypt/live/wanderpi.duckdns.org/privkey.pem'))

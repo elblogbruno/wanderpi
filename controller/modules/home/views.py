@@ -13,7 +13,7 @@ from datetime import *
 import jinja2.exceptions
 import geopy
 
-per_page=10
+per_page=5
 
 @home_blu.route('/favicon.ico')
 def favicon():
@@ -106,30 +106,84 @@ def stop(stop_id, page):
     wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
 
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
+    current_count = page*per_page
 
     wanderpis = wanderpis[(page-1)*per_page:page*per_page]
     if travel:
         if query:
-            return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, search_term=query)  
+            return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, search_term=query, current_count=current_count)  
 
-        return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
+        return render_template("stops_view.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, current_count=current_count)  
     else:
         return redirect(url_for("home.index"))
-        
-@home_blu.route('/global_map/<string:travel_id>')
-def global_map(travel_id):
-    # 模板渲染
-    # username = session.get("username")
-    # if not username:
-    #     session["initialized"] = False
-    #     return redirect(url_for("user.login"))
-        
-    try:   
-        travel = Travel.get_by_id(travel_id)
+
+@home_blu.route('/slide_view/<string:stop_id>/', defaults={'page': None})
+@home_blu.route('/slide_view/<string:stop_id>/<int:page>/')
+def slide_view(stop_id, page):
+    print(stop_id)
+    global per_page
+
+    stop = Stop.get_by_id(stop_id)
+    travel = None
+    
+    if stop:
+        wanderpis = stop.get_all_wanderpis()
+        travel = Travel.get_by_id(stop.travel_id)
+    else:
+        travel = Travel.get_by_id(stop_id)
         wanderpis = travel.get_all_wanderpis()
-        return render_template("global_map.html", wanderpis=wanderpis, travel=travel)
-    except:
-        return redirect(url_for("home.index"))   
+    
+    if not page:
+        page = 1
+
+    total_count = len(wanderpis)
+
+    #sort wanderpis by date
+    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+
+    pagination = Pagination(page, per_page=per_page, total_count=total_count)
+
+    current_count = page*per_page
+
+    wanderpis = wanderpis[(page-1)*per_page:page*per_page]
+    if stop:
+        return render_template("slide_view.html", wanderpis=wanderpis, stop=stop, pagination=pagination, total_count=total_count, per_page=per_page, first_lat=wanderpis[0].lat, first_long=wanderpis[0].long, current_count=current_count)  
+    
+    return render_template("slide_view.html", wanderpis=wanderpis, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page, first_lat=wanderpis[0].lat, first_long=wanderpis[0].long, current_count=current_count)  
+
+
+@home_blu.route('/global_map/<string:id>/', defaults={'page': None})
+@home_blu.route('/global_map/<string:id>/<int:page>/')
+def global_map(id, page):
+    print(id)
+    global per_page
+    
+    stop = Stop.get_by_id(id)
+    travel = None
+    
+    if stop:
+        wanderpis = stop.get_all_wanderpis()
+        travel = Travel.get_by_id(stop.travel_id)
+    else:
+        travel = Travel.get_by_id(id)
+        wanderpis = travel.get_all_wanderpis()
+
+    if not page:
+        page = 1
+
+    total_count = len(wanderpis)
+
+    #sort wanderpis by date
+    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+
+    pagination = Pagination(page, per_page=per_page, total_count=total_count)
+
+    wanderpis = wanderpis[(page-1)*per_page:page*per_page]
+    if stop:
+        return render_template("global_map.html", wanderpis=wanderpis, stop=stop, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
+    return render_template("global_map.html", wanderpis=wanderpis, travel=travel, pagination=pagination, total_count=total_count, per_page=per_page)  
+    
+
 
 @home_blu.route('/file/<path:id>')
 def single_file(id):

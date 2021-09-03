@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Wanderpi</title>
+
+    <!-- CSS only -->
+    <link href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/leaflet.fullscreen.css')}}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/slide-view.css')}}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css')}}" rel="stylesheet">
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js')}}"></script>
+    
+    <link href="{{ url_for('static', filename='css/index.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/maps.css')}}" rel="stylesheet">
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+ 
+    <!-- jQuery library -->
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='node_modules/Leaflet.fullscreen/dist/Leaflet.fullscreen.min.js')}}"></script>
+    
+    <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
+    
+    <add name="Access-Control-Allow-Headers" value="*" />
+</head>
+
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #B6E4FF;">
+    <div class="container-fluid">
+        <a class="navbar-brand mt-2 mt-lg-0" href="/">
+            <img src="{{url_for('static', filename='wanderpi-icon.svg')}}" height="35"  alt="">
+        </a>
+
+        {% if travel %}
+        <h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
+        {% else %}
+        <h1 class=" mt-2 mt-lg-0">{{ stop.name }}</h1>
+        {% endif %}
+
+        <h1 class=" mt-2 mt-lg-0">{{ current_count }} - {{ total_count }}</h1>
+    </div>    
+</nav>
+
+
+<div class="py-4">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex row">   
+                    <div class="col-sm-12 col-md-6 col-lg-7">           
+                        <div id="carouselExampleControls" class="carousel carousel-dark slide">
+                            <div class="carousel-inner">
+                                {% for  item in wanderpis %}
+                                {% if loop.index0 == 0 %}
+                                <div data-bs-file-long="{{ item.long }}" data-bs-file-lat="{{ item.lat }}" data-bs-index="{{ loop.index }}" class="carousel-item active">
+                                {% else %}
+                                <div data-bs-file-long="{{ item.long }}" data-bs-file-lat="{{ item.lat }}" data-bs-index="{{ loop.index }}" class="carousel-item">
+                                {% endif %}
+                                    {% if item.is_image %}
+                                    <img  class="d-block mx-auto" height="500" src="{{ item.cdn_path }}" alt="...">
+                                    {% else %}
+                                    <video  class="d-block w-100" src="{{ item.cdn_path }}" alt="...">
+                                    {% endif %}
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>{{ item.name }}</h5>
+                                        <p>{{ item.address }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm-8 col-md-6 col-lg-5">           
+                        <div id="map-container-slide" style="height: 500px">
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/carousel_handler.js')}}"></script>
+                    
+<script>
+    setPerPageNumber("{{ per_page }}")
+    {% if travel %}
+    setStopId("{{ travel.id }}")
+    {% else %}
+    setStopId("{{ stop.id }}")
+    {% endif %}
+    setPagination("{{ pagination.next_num }}");
+    setFileOnMap("{{ first_lat }}", "{{ first_long }}")
+</script>
+
+</body>
+</html>

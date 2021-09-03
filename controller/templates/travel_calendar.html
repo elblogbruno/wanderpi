@@ -97,9 +97,11 @@
         </a>
 
         <h1 class="card-text d-inline-block"> {{ travel.name }} </h1>
-        
-        <i class="mr-2 card-text float-right bi bi-currency-euro"></i><span class="card-text d-inline-block"> {{ total_price }}</span>
 
+        
+        <button class="mt-2 mt-lg-0 btn btn-info">{{ total_price }}<i class="bi bi-currency-euro"></i></button>
+        
+        
         <span class="card-text d-inline-block"> {{ travel.start_date }} - {{ travel.end_date }}</span>
 
 

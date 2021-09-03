@@ -21,10 +21,26 @@ function initializeMapAndLocator(travel_id, travel_destination)
 
     function onLocationFound(e) 
     {
-        pathCoords.push(e.latlng);
+        if (e.latlng.lat != 0)
+          pathCoords.push(e.latlng);
 
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
 
+        
+
+        // var pathLine = L.motion.polyline(pathCoords, {
+        //   color: "transparent"
+        // }, {
+        //   auto: true,
+        //   speed: 5,
+        //   duration: 10000,
+        //   easing: L.Motion.Ease.easeInOutQuart
+        // }, {
+        //   removeOnEnd: false,
+        //   showMarker: true,
+        //   icon: L.divIcon({html: "<i class='bi bi-cart2' aria-hidden='true'></i>", iconSize: L.point(27.5, 24)})
+        // }).addTo(map);
+        
         map.fitBounds(pathLine.getBounds());
 
         setInterval(locate, 100000);

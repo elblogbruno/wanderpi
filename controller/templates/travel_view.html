@@ -130,6 +130,10 @@
         <div class="d-flex align-items-center">    
             <button id="new_stop" type="button" data-bs-toggle="modal" data-bs-target="#addStopModal" class="btn btn-primary me-3"><i class="bi bi-plus-square"></i></button>
             
+            <button id="slide_view" type="button"  onclick="window.location.href='{{ url_for('home.slide_view', stop_id=travel.id) }}'" data-bs-toggle="tooltip" data-bs-placement="left" title="Slide view" class="btn btn-info btn-fab me-3">
+                <i class="bi bi-file-slides"> </i>
+            </button>
+
             <button href="#" type="button" class="btn btn-warning btn-fab" data-bs-toggle="modal" data-bs-target="#downloadWanderpisModal" id="download_all_wanderpis_context">
                 <i class="bi bi-file-earmark-arrow-down lg-icon-fab"></i>
                 </button>
@@ -138,7 +142,7 @@
                 <i class="bi bi-file-earmark-arrow-up"></i>
             </button>
                 
-            <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', travel_id=travel.id) }}'" class="btn btn-info btn-fab mx-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
+            <button  type="button" onclick="window.location.href='{{ url_for('home.global_map', id=travel.id, page=1) }}'" class="btn btn-info btn-fab mx-3" data-bs-toggle="tooltip" data-bs-placement="left" title="Global Trip Map" id="global_map">
                 <i class="bi bi-map"></i>
             </button>
         </div>

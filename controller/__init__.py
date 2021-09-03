@@ -5,7 +5,9 @@ from config import config_dict, load_custom_video_folder, STATIC_FOLDER
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 
+from flask_compress import Compress
 
+compress = Compress()
 
 def setup_log(log_level):
    
@@ -47,5 +49,6 @@ def create_app(config_type):
     #setup_log(config_class.LOG_LEVEL)
     
     socketio.init_app(app)
+    compress.init_app(app)
 
     return app
