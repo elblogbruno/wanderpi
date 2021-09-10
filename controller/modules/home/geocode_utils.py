@@ -46,7 +46,7 @@ class GeoCodeUtils:
                 
 
     @staticmethod
-    def reverse_address(address):
+    def reverse_address(address, original_lat = None, original_long = None):
         """Function that having an adress translates it to a lat and long values"
         """
         locator = Nominatim(user_agent="openmapquest")
@@ -56,9 +56,18 @@ class GeoCodeUtils:
             if location:
                 return location.latitude, location.longitude
             else:
-                return 0,0
+                if original_lat and original_long:
+                    print("Returning original lat and long")
+                    return original_lat,original_long
+                else:
+                    return 0,0
         except geopy.exc.GeocoderUnavailable as e:
-                return 0,0
+                if original_lat and original_long:
+                    print("Returning original lat and long")
+
+                    return original_lat,original_long
+                else:
+                    return 0,0
 
 
     @staticmethod

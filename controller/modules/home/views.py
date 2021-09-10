@@ -63,7 +63,7 @@ def travel_calendar(travel_id):
     travel = Travel.get_by_id(travel_id)
     if travel:
         notes = travel.get_all_notes()
-        total_price = travel.get_total_price()
+        total_price = round(travel.get_total_price(), 3)
     else:
         notes = []
     session["current_travel_id"] = travel_id
@@ -103,7 +103,7 @@ def stop(stop_id, page):
     total_count = len(wanderpis)
 
     #sort wanderpis by date
-    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+    #wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
 
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
     current_count = page*per_page
@@ -139,7 +139,7 @@ def slide_view(stop_id, page):
     total_count = len(wanderpis)
 
     #sort wanderpis by date
-    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+    #wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
 
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
 
@@ -174,7 +174,7 @@ def global_map(id, page):
     total_count = len(wanderpis)
 
     #sort wanderpis by date
-    wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
+    #wanderpis = sorted(wanderpis, key=lambda x: x.created_date)
 
     pagination = Pagination(page, per_page=per_page, total_count=total_count)
 
@@ -199,7 +199,7 @@ def single_file(id):
         # if wanderpi.is_image:
         #     wanderpi.file_path = wanderpi.file_path.replace('/mnt', '')
 
-        return render_template("single_video_view.html", file=wanderpi, stop=stop, travel=travel)   
+        return render_template("single_file_view.html", file=wanderpi, stop=stop, travel=travel)   
     except jinja2.exceptions.UndefinedError as e:
         print(str(e))
         return redirect(url_for("home.index"))

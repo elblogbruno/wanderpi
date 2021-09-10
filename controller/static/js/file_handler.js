@@ -52,6 +52,13 @@ function startProcessingUploadFolderForTravel(travel_id)
     socket.emit('process_travel_upload_folder_update', travel_id)
 }
 
+function recalculateStopsCoordenates(travel_id)
+{
+    downloading_file = true;
+    disableButtons()
+    socket.emit('process_recalculate_stops_coordenates', travel_id)
+}
+
 function get_upload_status()
 {
     socket.emit('get_upload_status', 'data')

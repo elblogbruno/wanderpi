@@ -99,7 +99,7 @@
 		 */
 		var getUniqueTemplate = function () {
 			var template = $(settings.template).html();
-			template = template.replace(/{\?}/g, "new" + i++); 	// {?} => iterated placeholder
+			template = template.replace(/{\?}/g, "new-" + i++); 	// {?} => iterated placeholder
 			template = template.replace(/\{[^\?\}]*\}/g, ""); 	// {valuePlaceholder} => ""
 			return $(template);
 		};

@@ -1,4 +1,6 @@
 {% from "add_button.html" import render_add_card with context %}
+{% from "stop_card.html" import render_stop_card with context %}
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,6 +60,7 @@
         </div>
         <div class="modal-footer">
             <button id="process-upload-button" onclick="startProcessingUploadFolderForTravel('{{ travel.id }}')" type="button" class="btn btn-primary">Process Uploads Folder</button>  
+            <button id="recalculate-stops-coordenates" onclick="recalculateStopsCoordenates('{{ travel.id }}')" type="button" class="btn btn-primary">Recalculate Stops Coordenates</button>  
             <button id="close-button" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>     
             <!-- <button id="upload-button" type="button" class="btn btn-primary">Go ahead</button>   -->
         </div>
@@ -78,6 +81,11 @@
             <div class="mb-3">
                 <label for="name_input" class="col-form-label">Name:</label>
                 <input id="name_input" type="text" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="address_input" class="col-form-label">Stop Address:</label>
+                <input id="address_input" type="text" class="form-control">
             </div>
           </form>
         </div>
@@ -103,6 +111,10 @@
                 <label for="new_name_input" class="col-form-label">New Name:</label>
                 <input id="new_name_input" type="text" class="form-control">
             </div>
+            <div class="mb-3">
+                <label for="new_address_input" class="col-form-label">New Stop Address:</label>
+                <input id="new_address_input" type="text" class="form-control">
+            </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -122,7 +134,7 @@
 		
 		<h1 class=" mt-2 mt-lg-0">{{ travel.name }}</h1>
         {% if stops|length > 0 %} 
-        <h1 class=" mt-2 mt-lg-0">{{ stops|length }} stops</h1>
+        <h2 class=" mt-2 mt-lg-0">{{ stops|length }} stops - {{ travel.get_all_wanderpis()|length }} Photos & Videos</h2>
         {% else %}
         <h1 class=" mt-2 mt-lg-0">No stops</h1>
         {% endif %}
@@ -164,42 +176,8 @@
             {% block content %}
                 {% if stops|length > 0 %}     
                 <div class="row">
-                    {% for post in stops %}
-                        <div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
-                            <div class="card h-100">
-                    
-                                <div class="card-body">
-                                    <!-- <div id="map-container-google-{{ post.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div> -->
-									<a href="{{ url_for( 'home.stop', stop_id = post.id ) }}"> <img class="camera-view-responsive card-img-top" src="{{ post.get_random_thumbnail() }}" ></img></a>
-
-									
-                                    <h5 class="card-title" href="stop/{{ post.id }}"> {{ post.name }} </h5>
-
-                                    <div class="row mb-2">
-                                        <div class="col">
-                                            <span class="card-text d-inline-block"> {{ post.get_all_wanderpis()|length  }} videos & photos</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ post.created_date }}</span>
-                                    
-                                    <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ post.id }}" class="card-text d-inline-block"></span> -->
-                                
-
-                                    <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
-                                        <button id="open_stop" type="button"  onclick="window.location.href='{{ url_for( 'home.stop', stop_id = post.id ) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
-                                        <button id="share_stop" type="button"  onclick="shareVideo({{ post.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
-                                        <button id="edit_stop" type="button" data-bs-stop-id="{{ post.id }}"  data-bs-name="{{ post.name }}" data-bs-toggle="modal" data-bs-target="#editStopModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
-                                        <button id="delete_stop" type="button"  onclick="window.location.href='/delete_stop/{{ post.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                                    </div>
-
-                                   <!--  <script>
-                                        initializeMapAndLocator("{{ post.id }}","{{ post.name }}");
-                                    </script> -->
-
-                                </div>
-                            </div>    
-                        </div>
+                    {% for stop in stops %}
+                        {{ render_stop_card(stop) }}
                     {% endfor %}
                     {{ render_add_card("#addStopModal", "New Stop") }}
                 {% else %}

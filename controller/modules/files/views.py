@@ -75,32 +75,35 @@ def create_folder_structure_for_stop(travel_id, name=None, stop_id=None):
         
 #get_travel_folder_path_static
 #get_travel_folder_path
-def get_file_path(travel_id, stop_id, filename_or_file_id= None, file_type = 'images', static = False):
+def get_file_path(travel_id, stop_id = None, filename_or_file_id= None, file_type = 'images', static = False):
     CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER, UPLOAD_FOLDER = load_custom_video_folder()
     
     root = STATIC_FOLDER if static else VIDEOS_FOLDER
     stop = Stop.get_by_id(stop_id)
+    init_path = root + str(travel_id)
+    if stop_id:
+        init_path = init_path + '/' + stop.name
+        if filename_or_file_id and stop_id:
+            if file_type == 'images':
+                return init_path + '/images/' + str(filename_or_file_id)
+            elif file_type == 'videos':
+                if '.mp4' in filename_or_file_id:
+                    return init_path + '/videos/'+  str(filename_or_file_id)
+                else:
+                    return init_path + '/videos/'+  str(filename_or_file_id) + '.mp4'
+            elif file_type == 'thumbnails':
+                return init_path + '/thumbnails/thumbnail-%s.jpg' % str(filename_or_file_id)
 
-    init_path = root + str(travel_id) + '/' + stop.name
-    if filename_or_file_id and stop_id:
-        if file_type == 'images':
-            return init_path + '/images/' + str(filename_or_file_id)
-        elif file_type == 'videos':
-            if '.mp4' in filename_or_file_id:
-                return init_path + '/videos/'+  str(filename_or_file_id)
-            else:
-                return init_path + '/videos/'+  str(filename_or_file_id) + '.mp4'
-        elif file_type == 'thumbnails':
-            return init_path + '/thumbnails/thumbnail-%s.jpg' % str(filename_or_file_id)
-
+        else:
+            if file_type == 'images':
+                return init_path + '/images'
+            elif file_type == 'videos':
+                return init_path + '/videos'
+            elif file_type == 'thumbnails':
+                return init_path + '/thumbnails'
     else:
-        if file_type == 'images':
-            return init_path + '/images'
-        elif file_type == 'videos':
-            return init_path + '/videos'
-        elif file_type == 'thumbnails':
-            return init_path + '/thumbnails'
-
+        return init_path
+        
 def get_stop_upload_path(stop_name, stop_id=None):
     CUSTOM_STATIC_FOLDER, VIDEOS_FOLDER, UPLOAD_FOLDER = load_custom_video_folder()
     if stop_id:
@@ -165,20 +168,25 @@ def save_file_to_database(is_image, travel_id, stop_id, name, lat_coord, long_co
         else:
             time_duration = VideoUtils.get_video_info(video_file_path)
     
+    has_original_lat_long = True
+
     stop = Stop.get_by_id(stop_id)
     if lat_coord == 0 and long_coord == 0:
         lat_coord = stop.lat
         long_coord = stop.long
-        address = stop.name
+        address = stop.address
+        has_original_lat_long = False
     else:
         #address = GeoCodeUtils.reverse_latlong(lat_coord, long_coord)
         #In the future will make a bot thtat does this on background.
-        address = stop.name
+        address = stop.address
+        has_original_lat_long = False
+
 
     #remove everything till it reaches the word wanderpi
     cdn_path = '/wanderpi/'+file_path.split('/wanderpi/')[-1]
 
-    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, stop_id=stop_id, address=address, time_duration=time_duration, file_path=file_path, cdn_path=cdn_path, is_image=is_image, has_been_edited=edit_video, created_date=created_date, is_360=is_360)
+    video = Wanderpi(id=file_id, name=name, lat=lat_coord, long=long_coord, file_thumbnail_path=file_thumbnail_path, travel_id=travel_id, stop_id=stop_id, address=address, time_duration=time_duration, file_path=file_path, cdn_path=cdn_path, is_image=is_image,has_original_lat_long=has_original_lat_long, has_been_edited=edit_video, created_date=created_date, is_360=is_360)
     video.save()
 
     return "ok"
@@ -456,7 +464,7 @@ def process_recreate_thumbnails(stop_id):
         recreate_stops_thumbnail(stop_id=stop_id, emit_key="process_upload_folder_update")
 
 
-def process_stop_files(stop_id,emit_key):
+def process_stop_files(stop_id, emit_key, single_one = True):
     global latest_message
     global latest_message_counter
     
@@ -469,16 +477,16 @@ def process_stop_files(stop_id,emit_key):
         
     final_folder_path = UPLOAD_FOLDER + stop_name + "/"
     create_folder_structure_for_stop(travel_id=travel_id, stop_id=stop_id)
-
+    print("Final stop folder upload path: "  + final_folder_path)
     try:
         upload_files = [f for f in listdir(final_folder_path) if isfile(join(final_folder_path, f))]
         total_files = len(upload_files)
         counter = 0
         if len(upload_files) > 0:
             for file in upload_files:                
-                emit(emit_key, 'Uploading file {0}'.format(file))
-                print('Uploading file {0}'.format(file))
-                latest_message = 'Uploading file {0}'.format(file)
+                emit(emit_key, 'Uploading file {0} to {1}'.format(file,stop_name))
+                print('Uploading file {0} to {1}'.format(file,stop_name))
+                latest_message = 'Uploading file {0} to {1}'.format(file,stop_name)
                 path_to_move_file = final_folder_path+file
                 if (get_file_extension(file) in IMAGE_EXTENSIONS):
                     #move file to images folder
@@ -514,9 +522,10 @@ def process_stop_files(stop_id,emit_key):
                     print("Done")
 
             sleep(0.1)
-            emit(emit_key, "200")
-            latest_message = "200"
-            uploading_files = False
+            if single_one:
+                emit(emit_key, "200")
+                latest_message = "200"
+                uploading_files = False
         else:
             emit(emit_key, "No files on the uploads folder")
             print('No files on the uploads folder')
@@ -524,17 +533,19 @@ def process_stop_files(stop_id,emit_key):
             sleep(2)
             emit(emit_key, "")
             latest_message = ""
-            emit(emit_key, "200")
-            latest_message = "200"
-            uploading_files = False
+            if single_one:
+                emit(emit_key, "200")
+                latest_message = "200"
+                uploading_files = False
 
         return "200"
     except OSError as e:
         emit(emit_key, str(e))
         latest_message = str(e)
         sleep(2)
-        emit(emit_key, "200")
-        latest_message = "200"
+        if single_one:
+            emit(emit_key, "200")
+            latest_message = "200"
         return "200"
 
 
@@ -572,11 +583,71 @@ def process_travel_upload(travel_id):
             emit('process_travel_upload_folder_update', 'Processing stop {0}'.format(stop_name))
             print('Processing stop {0}'.format(stop_name))
             latest_message = 'Processing stop {0}'.format(stop_name)
-            status = process_stop_files(stop_id=stop_id, emit_key="process_travel_upload_folder_update")
+            status = process_stop_files(stop_id=stop_id, emit_key="process_travel_upload_folder_update", single_one=False)
             if status == "200":
                 emit('process_travel_upload_folder_update', 'Finished processing stop {0}'.format(stop_name))
                 print('Finished processing stop {0}'.format(stop_name))
                 latest_message = 'Finished processing stop {0}'.format(stop_name)
-            
-            
 
+def recalculate_stop_coordenates(stop_id, emit_key):
+    global latest_message
+    global latest_message_counter
+    
+    stop =  Stop.get_by_id(stop_id)
+
+    try:
+        lat, lng = GeoCodeUtils.reverse_address(stop.address,original_lat= stop.lat,original_long= stop.long)
+
+        stop.lat = lat
+        stop.long = lng
+
+        stop.fix_all_wanderpi_coordenates(lat, lng, stop.address)
+        stop.save()
+
+        emit(emit_key, "Stop {0} has correct coordenates now.".format(stop.name))
+        latest_message = "Stop {0} has correct coordenates now.".format(stop.name)
+        
+        sleep(0.1)
+        emit(emit_key, "200")
+        latest_message = "200"
+        uploading_files = False
+
+        return "200"
+    except OSError as e:
+        emit(emit_key, str(e))
+        latest_message = str(e)
+        sleep(2)
+        emit(emit_key, "200")
+        latest_message = "200"
+        return "200"
+
+
+@socketio.on("process_recalculate_stops_coordenates")
+def process_recalculate_stops_coordenates(travel_id):
+    #for every file in the uploads folder, upload it to the database
+    global latest_message
+    global latest_message_counter
+    if travel_id == 'ok':
+        print("user conected again")
+        emit('process_travel_upload_folder_update', latest_message)
+        emit('process_upload_folder_update_counter', latest_message_counter)
+    else:
+        global uploading_files
+        uploading_files = True
+        travel =  Travel.get_by_id(travel_id)
+        for stop in travel.get_all_stops(): 
+            stop_name = stop.name
+            stop_id = stop.id
+            emit('process_travel_upload_folder_update', 'Processing stop {0}'.format(stop_name))
+            print('Processing stop {0}'.format(stop_name))
+            latest_message = 'Processing stop {0}'.format(stop_name)
+            status = recalculate_stop_coordenates(stop_id=stop_id, emit_key="process_travel_upload_folder_update")
+            if status == "200":
+                emit('process_travel_upload_folder_update', 'Finished processing stop {0}'.format(stop_name))
+                print('Finished processing stop {0}'.format(stop_name))
+                latest_message = 'Finished processing stop {0}'.format(stop_name)
+    
+    emit('process_travel_upload_folder_update', 'Finished processing stops')
+    latest_message = 'Finished processing stops'
+           
+     

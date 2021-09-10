@@ -18,11 +18,20 @@ $('#addNoteModal').on('show.bs.modal', function (event) {
         var cost_container  = document.querySelector(".repeatable");
         costs = [];
         //field-group-{?}
-        for (let index = 0; index < cost_container.children.length; index++) {
-            var input_name = document.getElementById('input-price-name-new'+index) //input-price-name-new0
+        if (cost_container.children.length >= 1)
+        {
+            var id = cost_container.children[0].id;
+            start_index = id.split("-")[id.split("-").length-1];
+            // start_index = id.charAt(id.length-1);
+
+            console.log("STARTING INDEX: "  + start_index);
+        }
+
+        for (let index = start_index; index < cost_container.children.length; index++) {
+            var input_name = document.getElementById('input-price-name-new-'+index) //input-price-name-new0
             var name = input_name.value;
-            var price = document.getElementById('input-price-value-new'+index).value;
-            var id = document.getElementById('input-price-id-new'+index).value;
+            var price = document.getElementById('input-price-value-new-'+index).value;
+            var id = document.getElementById('input-price-id-new-'+index).value;
             console.log(id);
             
             if (id){
@@ -44,9 +53,18 @@ $('#addNoteModal').on('show.bs.modal', function (event) {
         }
         addNote(travel_id, note_content, costs, note_id);
     };
-  })
+})
 
+$('#addNoteModal').on('shown.bs.modal', function (event) {
+    console.log("MODAL HAS BEEN SHOWN");
+})
 
+$(".input-money .repeatable").repeatable({
+    addTrigger: ".add",
+    deleteTrigger: ".delete",
+    template: '#input-money',
+    itemContainer: ".field-group",
+});
 
 function addNote(travel_id, note_content, costs, note_id){
     var data = {
@@ -80,17 +98,15 @@ function addNote(travel_id, note_content, costs, note_id){
 
 }
 
-$(".input-money .repeatable").repeatable({
-    addTrigger: ".add",
-    deleteTrigger: ".delete",
-    template: '#input-money',
-    itemContainer: ".field-group",
-});
+
+var start_index = 0;
 
 var next = 0;
-function clone(name, value, id){
+function clone(name, value, id)
+{
     let button = document.querySelector(".add");
     button.click();
+    
     next = next + 1;
     nextBefore = next-1;
 
@@ -98,36 +114,19 @@ function clone(name, value, id){
     
     // $("#add-more-"+nextBefore).attr('id', 'add-more-'+next)
     // $("#input-price-name-"+nextBefore).attr('id', 'input-price-name-'+next)
-    $("#input-price-name-new"+nextBefore).val(name)
+    $("#input-price-name-new-"+nextBefore).val(name)
 
     // $("#input-price-value-"+nextBefore).attr('id', 'input-price-value-'+next)
-    $("#input-price-value-new"+nextBefore).val(value)
+    $("#input-price-value-new-"+nextBefore).val(value)
     
     // $("#input-price-id-"+nextBefore).attr('id', 'input-price-id-'+next)
-    $("#input-price-id-new"+nextBefore).val(id)
+    $("#input-price-id-new-"+nextBefore).val(id)
     // $(".input-money .repeatable").repeatable.addOne();
-    
-    
     console.log("added new clone: " + next);
 }
 
-function remove(id){
-    console.log(id);
-    fields = document.getElementById("fields")
-    console.log(fields.children.length);
-    console.log(fields.children);
-    if(fields.children.length > 1){
-        for (let index = 0; index < fields.children.length; index++) {
-            const element = fields.children[index];
-            if (element.id = id){
-                fields.removeChild(fields.children[index]);
-                break;
-            }
-        }
-    }
-}
-
-function get_costs(note_id){
+function get_costs(note_id)
+{
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
@@ -149,12 +148,46 @@ function get_costs(note_id){
     xhr.send();
 }
 
-function instantiateCosts(note_input_prices){
-    console.log(note_input_prices);
+function removeAllChilds()
+{
+    // var cost_container  = document.querySelector(".repeatable");
+    
+
+    // console.log(cost_container.children.length);
+    // console.log(cost_container.children);
+
+    // for (let index = 0; index < cost_container.children.length; index++) 
+    // {
+    //     console.log(index);
+    //     let input = document.getElementById('field-group-new'+index);
+    //     console.log(input);
+    //     let button = input.querySelector(".delete");
+    //     console.log(button);
+    //     button.click();
+    // }
+
     var cost_container  = document.querySelector(".repeatable");
-    cost_container.innerHTML = ''
-    if (note_input_prices.length >= 1){
-        console.log("We need to add existing costs");
+    
+    // start_index = cost_container.children.length;
+    // console.log("STARTING INDEX: "  + start_index);
+
+    
+
+    cost_container.innerHTML = '';
+}
+
+function instantiateCosts(note_input_prices)
+{
+    console.log(note_input_prices);
+
+    // last_total_count_of_inputs = note_input_prices.length;
+    
+    removeAllChilds();
+    
+    if (note_input_prices.length >= 1)
+    {
+        console.log("We need to add existing costs");   
+        
         for (let index = 0; index < note_input_prices.length; index++) {
             const element = note_input_prices[index];
             var name = element.name;
@@ -163,7 +196,7 @@ function instantiateCosts(note_input_prices){
             clone(name, value,id);
         }
     }else{
-        
+        next = 0;
         console.log("Adding no costs")
     }
 }

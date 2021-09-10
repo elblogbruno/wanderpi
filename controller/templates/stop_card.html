@@ -1,0 +1,42 @@
+{% macro render_stop_card(stop) %}
+
+<div class="col-sm-12 col-md-4 col-lg-3 pb-4"> 
+    <div class="card h-100">
+
+        <div class="card-body">
+            <!-- <div id="map-container-google-{{ stop.id }}" class="camera-view-responsive card-img-top z-depth-1-half map-responsive" style="height: 200px"></div> -->
+            <a href="{{ url_for( 'home.stop', stop_id = stop.id ) }}"> <img class="camera-view-responsive card-img-top" src="{{ stop.get_random_thumbnail() }}" ></img></a>
+
+            
+            <h5 class="card-title" href="stop/{{ stop.id }}"> {{ stop.name }} </h5>
+
+            <div class="row mb-2">
+                <div class="col">
+                    <span class="card-text d-inline-block"> {{ stop.get_all_wanderpis()|length  }} videos & photos</span>
+                </div>
+            </div>
+            
+            <!-- <i class="card-text float-right bi bi-calendar4-event"></i><span> {{ stop.created_date }}</span>
+            
+            <i class="mr-5 float-right bi bi-binoculars"></i><span id="distance-result-{{ stop.id }}" class="card-text d-inline-block"></span> -->
+        
+            <span id="latitude_text" class="card-text d-inline-block">{{ stop.address }}</span>
+            <span id="latitude_text" class="card-text d-inline-block">{{ stop.lat }} {{ stop.long }}</span>
+            <!-- <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"> </span> -->
+
+            <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+                <button id="open_stop" type="button"  onclick="window.location.href='{{ url_for( 'home.stop', stop_id = stop.id ) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-folder2-open"></i></button>    
+                <button id="share_stop" type="button"  onclick="shareVideo({{ stop.id }})" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+                <button id="edit_stop" type="button" data-bs-stop-id="{{ stop.id }}"  data-bs-name="{{ stop.name }}" data-bs-address="{{ stop.address }}" data-bs-toggle="modal" data-bs-target="#editStopModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button>
+                <button id="delete_stop" type="button"  onclick="window.location.href='/delete_stop/{{ stop.id }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+            </div>
+
+           <!--  <script>
+                initializeMapAndLocator("{{ stop.id }}","{{ stop.name }}");
+            </script> -->
+
+        </div>
+    </div>    
+</div>
+
+{% endmacro %}

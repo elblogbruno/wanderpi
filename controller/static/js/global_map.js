@@ -6,18 +6,11 @@ var markers;
 var gps = document.getElementById("gps_text");
 var oms;
 
-const OverlappingMarkerSpiderfier = window.OverlappingMarkerSpiderfier;
+// const OverlappingMarkerSpiderfier = window.OverlappingMarkerSpiderfier;
 
 function init_map()
 {
-    map = L.map('map-container-global');
-
-    googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        }).addTo(map);
-        
-    map.addControl(new L.Control.Fullscreen());
+    map = create_map('map-container-global', true);
 
     markers = new L.MarkerClusterGroup({ 
         spiderfyOnMaxZoom: true, 
@@ -29,7 +22,8 @@ function init_map()
 }
 
 //function that checks if a point is already on the map
-function is_point_on_map(lat, long) {
+function is_point_on_map(lat, long) 
+{
     for (var i = 0; i < list_of_points.length; i++) {
         console.log(lat,list_of_points[i].lat, long, list_of_points[i].lng);
         if (list_of_points[i].lat == lat && list_of_points[i].lng == long) {
@@ -41,13 +35,12 @@ function is_point_on_map(lat, long) {
 
 function plot_map_from_list(list) {
     console.log(list);
-    for (var i = 0; i < list.length; i++) {
+    
+    for (var i = 0; i < list.length; i++) 
+    {
         plot_map(list[i].lat, list[i].long, list[i].name, list[i].thumbnail_path, list[i].id);
     }
 }
-
-
-
 
 function plot_map(lat, long, name, thumbnail_path, id) {
     if (!map_initiated) {

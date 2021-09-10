@@ -1,20 +1,27 @@
 var pathCoords = [];
+var map;
+var map_initialized = false;
 
-function initializeStopsList(sLat, sLong){
-    pathCoords.push(new L.LatLng(sLat,sLong))
+function initializeMap(travel_id)
+{
+  if (!map_initialized)
+  {
+    map = create_map(`map-container-google-${travel_id}`, true);
+    map_initialized = true;
+  } 
 }
+
+function initializeStopsList(sLat, sLong, sAddress){
+    pathCoords.push(new L.LatLng(sLat,sLong))
+
+    var marker_html = `<a> ${sAddress} </a>`;
+    var marker = L.marker([sLat, sLong]).bindPopup(marker_html).addTo(map);
+}
+
 //function that inits leaflet map but shows text that says start recording to show map
 //https://gis.stackexchange.com/questions/53394/select-two-markers-draw-line-between-them-in-leaflet
-function initializeMapAndLocator(travel_id, travel_destination)
+function initializeMapAndLocator(travel_lat, travel_long)
 { 
-    var map = L.map(`map-container-google-${travel_id}`);
-    map.addControl(new L.Control.Fullscreen());
-    
-    googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        }).addTo(map);
-      
     function locate() {
       map.locate({setView: true, maxZoom: 16});
     }
@@ -26,20 +33,12 @@ function initializeMapAndLocator(travel_id, travel_destination)
 
         var pathLine = L.polyline(pathCoords, {color: 'red'}).addTo(map);
 
-        
+        console.log(pathCoords);
 
-        // var pathLine = L.motion.polyline(pathCoords, {
-        //   color: "transparent"
-        // }, {
-        //   auto: true,
-        //   speed: 5,
-        //   duration: 10000,
-        //   easing: L.Motion.Ease.easeInOutQuart
-        // }, {
-        //   removeOnEnd: false,
-        //   showMarker: true,
-        //   icon: L.divIcon({html: "<i class='bi bi-cart2' aria-hidden='true'></i>", iconSize: L.point(27.5, 24)})
-        // }).addTo(map);
+        sortByDistance(pathCoords, e.latlng);
+
+        console.log(pathCoords);
+
         
         map.fitBounds(pathLine.getBounds());
 
@@ -48,38 +47,41 @@ function initializeMapAndLocator(travel_id, travel_destination)
     
     map.on('locationfound', onLocationFound);
 
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            var response = JSON.parse(xhr.responseText);
+    pathCoords.push(new L.LatLng(travel_lat, travel_long))
 
-            if (response.status_code == 200) {
-              var lat = response.lat;
-              var long = response.long;
+    locate();
+    // var xhr = new XMLHttpRequest();
+    // xhr.onreadystatechange = function () {
+    //     if (xhr.readyState == 4 && xhr.status == 200) {
+    //         var response = JSON.parse(xhr.responseText);
 
-              // console.log(lat, long);
+    //         if (response.status_code == 200) {
+    //           var lat = response.lat;
+    //           var long = response.long;
+
+    //           // console.log(lat, long);
           
-              // call locate every 3 seconds... forever
-              locate();
+    //           // call locate every 3 seconds... forever
+    //           locate();
               
-              pathCoords.push(new L.LatLng(lat, long));
-            }
-            else
-            {
-              console.log(response.status_code);
-            }
-        }
+    //           pathCoords.push(new L.LatLng(lat, long));
+    //         }
+    //         else
+    //         {
+    //           console.log(response.status_code);
+    //         }
+    //     }
 
         
-    }
+    // }
 
-    var base_url = window.location.origin;
-    var url = new URL(base_url+"/latlong/"+ travel_destination);
-    url.searchParams.append('travel_id', travel_id);
+    // var base_url = window.location.origin;
+    // var url = new URL(base_url+"/latlong/"+ travel_destination);
+    // url.searchParams.append('travel_id', travel_id);
 
-    xhr.open("POST", url.toString());
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send();
+    // xhr.open("POST", url.toString());
+    // xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    // xhr.send();
     
 }
  

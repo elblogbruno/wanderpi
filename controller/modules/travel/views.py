@@ -133,7 +133,9 @@ def save_travel(): #todo get available video sources from database
 
     travel_folder_path = get_file_path(travel_id=travel_id, file_type='root') 
 
-    travel = Travel(id=travel_id, name=name, lat="0", long="0", travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date)
+    lat, lng = GeoCodeUtils.reverse_address(address)
+
+    travel = Travel(id=travel_id, name=name, lat=lat, long=lng, travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date)
     travel.save()
     travel.init_calendar()
     return jsonify(status_code = 200, message = "OK")
@@ -143,25 +145,44 @@ def add_stop(travel_id): #todo get available video sources from database
     print("Adding stop")
     
     name = request.args.get('name')
+    address = request.args.get('address')
+    
+    print(address)
+
     stop_id = str(uuid.uuid4())
 
-    create_folder_structure_for_stop(travel_id=travel_id,name=name)
+    create_folder_structure_for_stop(travel_id=travel_id, name=name)
 
-    stop = Stop(id=stop_id, travel_id=travel_id, name=name, lat="0", long="0")
+    lat, lng = GeoCodeUtils.reverse_address(address)
+
+    stop = Stop(id=stop_id, address=address, travel_id=travel_id, name=name, lat=lat, long=lng)
     stop.save()
 
     return jsonify(status_code = 200, message = "OK")
 
 @travel_blu.route('/edit_stop/<string:stop_id>', methods=['GET', 'POST'])
 def edit_stop(stop_id): #todo get available video sources from database
-    print("Editing stop")
+    print("Editing stop {0}".format(stop_id))
     name = request.args.get('name')
+    address = request.args.get('address')
     
     stop = Stop.get_by_id(stop_id)
+    
+    old_address = stop.address
+    stop.address = address
+
     old_name = stop.name
     stop.name = name
-    stop.save()
     
+    lat, long = GeoCodeUtils.reverse_address(address, original_lat=stop.lat,original_long=stop.long)
+
+    stop.lat = lat
+    stop.long = long
+
+    stop.fix_all_wanderpi_coordenates(lat, long, address)
+
+    stop.save()
+
     rename_stop_folder(stop.travel_id, old_name, name)
 
     return jsonify(status_code = 200, message = "OK", travel_id=stop.travel_id)

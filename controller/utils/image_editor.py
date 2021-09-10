@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 import cv2
+import numpy as np
 
 class ImageEditor:
     """
@@ -156,10 +157,10 @@ class ImageEditor:
         :return:
         """
         img = cv2.imread(image_path, cv2.COLOR_BGR2RGB)
-        RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # cv2.imshow('image',img)
-        image = Image.fromarray(RGB_img)
-        #image = Image.open(image_path)
-        image.thumbnail(size)
-        image.save(new_image_path)
-        
+        if img is not None:
+            RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            # cv2.imshow('image',img)
+            image = Image.fromarray(RGB_img)
+            #image = Image.open(image_path)
+            image.thumbnail(size)
+            image.save(new_image_path)   

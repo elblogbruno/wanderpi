@@ -1,5 +1,6 @@
 //having a list of coordenates, calculates total distance
-function calculateDistance(list_of_points) {
+function calculateDistance(list_of_points) 
+{
     var distance = 0;
     for (var i = 0; i < list_of_points.length - 1; i++) {
         distance += getDistanceBetweenPoints(list_of_points[i].lat, list_of_points[i].lng, list_of_points[i + 1].lat, list_of_points[i + 1].lng);
@@ -28,6 +29,16 @@ function deg2rad(p){
 var singlePointsList = [];
 var acLatlong = {};
 
+function is_point_on_map(lat, long, travel_id) 
+{
+    for (var i = 0; i < acLatlong[travel_id].length; i++) {
+        if (acLatlong[travel_id][i].lat == lat && acLatlong[travel_id][i].lng == long) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function loadDistanceListFromWanderpis(lat, long, travel_id)
 {
     // if keys are not set, then we are starting a new map
@@ -35,8 +46,9 @@ function loadDistanceListFromWanderpis(lat, long, travel_id)
     {
         acLatlong[travel_id] = []
     }
-
-    acLatlong[travel_id].push(new L.LatLng(lat, long)); 
+    
+    if (!is_point_on_map(lat, long, travel_id) && (lat != 0 && long != 0))
+        acLatlong[travel_id].push(new L.LatLng(lat, long)); 
 }
 
 function loadDistanceListFromPoints(lat, long)
@@ -52,7 +64,8 @@ function getDistance(){
     return distance;
 }
 
-function getDistanceByList(list_points){
+function getDistanceByList(list_points)
+{
     var distance = calculateDistance(list_points);
 
     return distance;
@@ -69,3 +82,33 @@ function getDistanceByTravelId(travel_id){
 }
 
 
+const distance = (coor1, coor2) => {
+   console.log(coor1, coor2);
+   var d = getDistanceBetweenPoints(coor1.lat, coor1.lng, coor2.lat, coor2.lng);
+   console.log(d);
+   return d;
+};
+
+const sortByDistance = (coordinates, point) => {
+   const sorter = (a, b) => distance(a, point) - distance(b, point);
+   coordinates.sort(sorter);
+};
+
+
+function create_map(map_id, add_fullscreen)
+{
+    console.log("Initializing map with id: " + map_id);
+    map = L.map(map_id); //file-map
+
+    googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+        }).addTo(map);
+    
+    if (add_fullscreen)
+    {
+        map.addControl(new L.Control.Fullscreen());
+    }
+
+    return map;
+}

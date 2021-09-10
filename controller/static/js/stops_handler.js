@@ -1,6 +1,8 @@
 function add_stop(travel_id)
 {
     var name = document.getElementById("name_input").value;
+    var address_input = document.getElementById("address_input").value;
+
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
@@ -18,6 +20,7 @@ function add_stop(travel_id)
     var url = new URL(base_url+"/add_stop/"+travel_id);
     
     url.searchParams.append('name', name);
+    url.searchParams.append('address', address_input)
 
     xhr.open("POST", url.toString());
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -27,7 +30,7 @@ function add_stop(travel_id)
 
 
 
-function editStop(stop_id, name)
+function editStop(stop_id, name, address)
 {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -48,6 +51,7 @@ function editStop(stop_id, name)
     var url = new URL(base_url+"/edit_stop/"+stop_id);
     
     url.searchParams.append('name', name);
+    url.searchParams.append('address', address);
 
     xhr.open("POST", url.toString());
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -63,14 +67,20 @@ editStopModal.addEventListener('show.bs.modal', function (event) {
     console.log("Initializing modal");
     var button = event.relatedTarget // Button that triggered the modal
     var stop_id = button.getAttribute('data-bs-stop-id')
-    var name = button.getAttribute('data-bs-name')
-    console.log(stop_id, name);
+    var original_name = button.getAttribute('data-bs-name')
+    var original_address = button.getAttribute('data-bs-address')
+    
+    console.log(stop_id, original_name, original_address);
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var modal = $(this)
-    modal.find('.modal-body input').val(name)
+    modal.find('#new_name_input').val(original_name)
+    modal.find('#new_address_input').val(original_address)
+    
+    var new_name =  modal.find('#new_name_input').val();
+    var new_address =  modal.find('#new_address_input').val();
 
     document.getElementById('edit_stop_button').onclick = function () {
-        editStop(stop_id, modal.find('.modal-body input').val());
+        editStop(stop_id, new_name, new_address);
     };
 });

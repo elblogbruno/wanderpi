@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import db
-from sqlalchemy import Column, Boolean, String, Float, DateTime, Text, Date, Time, desc, func
+from sqlalchemy import Column, Boolean, String, Float, DateTime, Text, Date, Time, asc, func
 # from datetime import datetime
 import os
 import json
@@ -28,6 +28,7 @@ class Wanderpi(db.Base):
     stop_id  = Column(String(256), nullable=False)
     is_image = Column(Boolean)
     is_360 = Column(Boolean)
+    has_original_lat_long =  Column(Boolean)
     has_been_edited = Column(Boolean, default=False)
 
     def __repr__(self):
@@ -150,9 +151,9 @@ class Travel(db.Base):
     def get_all_wanderpis(self, filter=None):
         if filter:
             is_image = (filter == 'image')
-            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id, Wanderpi.is_image == is_image).all()
+            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id, Wanderpi.is_image == is_image).order_by(asc(Wanderpi.created_date)).all()
         else:
-            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id).all()
+            return db.session.query(Wanderpi).filter(Wanderpi.travel_id == self.id).order_by(asc(Wanderpi.created_date)).all()
 
     def get_all_stops(self):
         return db.session.query(Stop).filter(Stop.travel_id == self.id).all()
@@ -232,7 +233,7 @@ class Stop(db.Base):
     lat = Column(String(256), nullable=False)
     long = Column(String(256), nullable=False)
     name = Column(String(256), nullable=False)
-    
+    address = Column(String(256), nullable=False)
 
     def __repr__(self):
         return f'<Stop {self.id}>'
@@ -258,9 +259,9 @@ class Stop(db.Base):
     def get_all_wanderpis(self, filter=None):
         if filter:
             is_image = (filter == 'image')
-            return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id, Wanderpi.is_image == is_image).all()
+            return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id, Wanderpi.is_image == is_image).order_by(asc(Wanderpi.created_date)).all()
         else:
-            return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id).all()
+            return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id).order_by(asc(Wanderpi.created_date)).all()
     
     def get_random_thumbnail(self):
         wanderpis  = self.get_all_wanderpis()
@@ -287,7 +288,25 @@ class Stop(db.Base):
                     synchronize_session=False)
         )
         print("Updated {} rows".format(updated_rows))
-
+    
+    def fix_all_wanderpi_coordenates(self, lat, long, address):
+        print(lat, long, address)
+        updated_rows = (
+            db.session.query(Wanderpi).filter(Wanderpi.has_original_lat_long == False, Wanderpi.stop_id == self.id).update({Wanderpi.lat: func.replace(Wanderpi.lat, Wanderpi.lat, lat)},
+                    synchronize_session=False)
+        )
+        print("Updated {} rows".format(updated_rows))
+        updated_rows = (
+            db.session.query(Wanderpi).filter(Wanderpi.has_original_lat_long == False, Wanderpi.stop_id == self.id).update({Wanderpi.long: func.replace(Wanderpi.long, Wanderpi.long, long)},
+                    synchronize_session=False)
+        )
+        print("Updated {} rows".format(updated_rows))
+        updated_rows = (
+            db.session.query(Wanderpi).filter(Wanderpi.has_original_lat_long == False, Wanderpi.stop_id == self.id).update({Wanderpi.address: func.replace(Wanderpi.address, Wanderpi.address, address)},
+                    synchronize_session=False)
+        )
+        print("Updated {} rows".format(updated_rows))
+        
     @staticmethod
     def get_by_id(id):
         return db.session.query(Stop).get(id)

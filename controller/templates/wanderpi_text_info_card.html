@@ -1,0 +1,55 @@
+{% macro render_wanderpi_info_card(file, stop, render_map) %}
+
+<div class="card h-55">
+    <div class="card-body">
+        {% if render_map %}
+        <div id="file-map-{{ file.id }}" class="camera-view-responsive" style="height: 480px">
+        </div>
+        {% endif %}
+        <h5 class="card-title"> {{ file.name }}</h5>
+        <!-- <h6 class="card-text"> {{ file.created_date }} {{  file.time_duration }} </h6>
+         -->
+        <p class="bi bi-compass"></i><h6 id="created_date_text" class="card-text d-inline-block">{{ file.created_date }}</h6>
+        
+        {% if not file.is_image %}
+        <p class="bi bi-compass"></i><h6 id="created_date_text" class="card-text d-inline-block">{{ file.time_duration }}</h6>
+        {% endif %}
+
+        <p class="bi bi-compass"></i><h6 id="created_date_text" class="card-text d-inline-block">{{ file.is_360 }}</h6>
+
+        <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
+            {% if not render_map %}
+            <button onclick="window.location.href='/file/{{ file.id }}'" type="button" id="bulk-edit-button" class="btn btn-outline-secondary btn-block btn-responsive" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit wanderpis" id="new_wanderpi">
+                <i class="bi bi-info-square"></i>
+            </button>
+            {% endif %}
+            <button id="download_video" type="button" onclick="window.location.href='{{ url_for('files_utils.download_file',travel_id=file.travel_id, filename=file.id) }}'" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-file-arrow-down-fill"></i></button>
+            <button id="share_video" type="button"  class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-share"></i></button>
+            <button id="delete_file" type="button"  onclick="window.location.href='/delete_file/{{ file.id }}'"class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-trash"></i></button>
+            {% if render_map %}
+            <button id="edit_video" type="button"  data-bs-toggle="modal" data-bs-target="#bulkEditModal" class="btn btn-outline-secondary btn-block btn-responsive"><i class="bi bi-pencil"></i></button> 
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 col-xl-6 align-self-center">
+            <h5 class="card-title"> GPS Information: </h3>
+            <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block">Latitude: {{ file.lat }}</span>
+            <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block">Longitude: {{ file.long }}</span>
+            <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block">Address: {{ file.address }}</span>
+            <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block"></span>
+        </div> 
+        
+        <div class="col-md-2 col-xl-6 align-self-center">
+            <h5 class="card-title"> {{ stop.name }}</h3>
+            <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block"> {{ stop.lat }}</span>
+            <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"> {{ stop.long }}</span>
+            <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block">{{ travel.name }}</span>
+            <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block">{{ travel.name }}</span>
+        </div>
+        </div>
+            
+    </div>
+</div>
+
+{% endmacro %}

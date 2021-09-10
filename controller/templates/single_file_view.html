@@ -1,3 +1,6 @@
+{% from "wanderpi_text_info_card.html" import render_wanderpi_info_card with context %}
+{% from "wanderpi_placeholder_card.html" import render_wanderpi_placeholder with context %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,7 +29,7 @@
 
 	  <script src="{{ url_for('static', filename='js/map_utils.js')}}"></script>
 
-    <script src="{{ url_for('static', filename='js/single_video_view.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/single_file_view.js')}}"></script>
 
     {% if not file.is_image %}  
     <link href="{{ url_for('static', filename='node_modules/video.js/dist/video-js.css')}}" rel="stylesheet" />
@@ -75,8 +78,6 @@
     </div>
   </div>
 
-<!-- style="background-color: #B6E4FF;" -->
-
 <!-- Image and text -->
 
 <nav class="navbar  sticky-top navbar-expand-sm navbar-light bg-light" style="background-color: #B6E4FF;">
@@ -93,15 +94,10 @@
   <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
-          <div class="card h-55">
+          <!-- <div class="card h-55">
               <div class="card-body" >
                 {% block content %}  
-                  <!-- <div class="column"> -->
                   {% if not file.is_image %}  
-                    <!-- <video class="player-overlay card-img-top" id="my-video" width="640" height="auto" controls>
-                      <source src="{{ file.file_path }}" type="video/mp4">
-                    </video>   
-                    -->
                     {% if not file.is_360 %}     
                     <video
                       id="my-video"
@@ -158,11 +154,6 @@
                       }(window, window.videojs));
                     </script>
                     {% endif %}
-                    <!-- <script>
-                      var player = videojs('my-video');
-
-                      player.vr();
-                    </script> -->
                   {% else %}    
                     {% if not file.is_360 %}                
                     <img loading="lazy"  class="camera-view-responsive card-img-top"  src="{{ file.cdn_path }}"></img>
@@ -187,36 +178,12 @@
                   </div>
 				  </div>
                 {% endblock %}    
-              <!-- </div> -->
-          </div>
+          </div> -->
+          {{ render_wanderpi_placeholder(file) }}
         </div>
 
-
         <div class="col-sm-12 col-md-6 col-lg-6 pb-4">
-          <div class="card h-55">
-              <div class="card-body">
-                  <div id="file-map-{{ file.id }}" class="camera-view-responsive" style="height: 480px">
-                  </div>
-                  <div class="row">
-                    <div class="col-md-2 col-xl-6 align-self-center">
-                      <h5 class="card-title"> GPS Information: </h3>
-                      <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block"></span>
-                      <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"></span>
-                      <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block"></span>
-                      <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block"></span>
-                  </div> 
-                  
-                  <div class="col-md-2 col-xl-6 align-self-center">
-                    <h5 class="card-title"> {{ stop.name }}</h3>
-                    <p class="ml-5 float-right bi-compass"></i><span id="latitude_text" class="card-text d-inline-block"> {{ stop.lat }}</span>
-                    <p class="ml-5 float-right bi-compass"></i><span id="longitude_text" class="card-text d-inline-block"> {{ stop.long }}</span>
-                    <p class="ml-5 float-right bi-geo-alt"></i><span id="address_text" class="card-text d-inline-block">{{ travel.name }}</span>
-                    <p class="ml-5 float-right bi bi-binoculars"></i><span id="distance-result" class="card-text d-inline-block">{{ travel.name }}</span>
-                </div>
-                  </div>
-                    
-              </div>
-          </div>
+          {{ render_wanderpi_info_card(file, stop, True) }}
         </div>
       </div>
   </div>
@@ -230,8 +197,9 @@
     var lat = '{{ file.lat }}';
     var long  = '{{ file.long }}';
     var address  = '{{ file.address }}';
-
-    showPosition(lat,long, address, "{{ file.id }}");
+    var file_id = "{{ file.id }}";
+    
+    showPosition(lat,long, address, file_id);
 
     {% for point in file.get_all_points() %}
           loadPoints("{{ point.lat }}", "{{ point.long }}");

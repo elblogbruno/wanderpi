@@ -6,18 +6,11 @@ function init_map_for_editing()
 {
     if (map_initiated == false)
     {
-        console.log("initialized map to edit");
+        console.log("Initialized map to edit");
 
-        map = L.map('map-container-global');
-        map.addControl(new L.Control.Fullscreen());
-    
-        googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-                maxZoom: 15,
-                subdomains:['mt0','mt1','mt2','mt3']
-            }).addTo(map);
-        
+        map = create_map('map-container-global', true);
         map.setView([46.244553376495,-9.43842451847176], 2);
-
+        
         map.on('click', function(e){
             var coord = e.latlng;
             var lat = coord.lat;
@@ -33,7 +26,7 @@ function init_map_for_editing()
         
             map.setView(e.latlng, 15);
             map_modified = true;
-          });
+        });
 
         
         map_initiated = true;
@@ -190,5 +183,5 @@ bulkEditModal.addEventListener('shown.bs.modal', function (event) {
     init_map_for_editing();
     setTimeout(function() {
         map.invalidateSize();
-   }, 1);
+    }, 1);
 });
