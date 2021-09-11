@@ -88,6 +88,11 @@ cd wanderpi && pip install -r requirements.txt
 python server.py \\Python 3.5 to versions 3.8 supported.
 ```
 
+## Api
+
+Watch https://github.com/elblogbruno/wanderpi/blob/main/controller/modules/api/views.py
+
+Documentation coming soon.
 
 ## Acknowledgements
 
