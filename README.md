@@ -6,7 +6,9 @@
 
 Keep your best travel memories organized, and your costs to the letter.
 
-[![Demo](https://img.youtube.com/vi/tdPjDHavmf4/0.jpg)](https://www.youtube.com/watch?v=tdPjDHavmf4)
+[![Demo](https://img.youtube.com/vi/tdPjDHavmf4/0.jpg)](https://www.youtube.com/watch?v=tdPjDHavmf4) 
+
+Click the thumbnail to watch the video!
 
 Add your trips on the dashboard  |  Organize everything by trip stops or "Albums"
 :---: | :---:
