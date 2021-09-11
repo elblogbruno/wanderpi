@@ -140,6 +140,15 @@ class Travel(db.Base):
     def get_all_notes(self):
         return db.session.query(Note).filter(Note.travel_id == self.id).all()
 
+    def get_all_notes_as_json(self):
+        json_notes = []
+        notes = self.get_all_notes()
+
+        for note in notes:
+            json_notes.append(note.as_dict())
+
+        return json_notes
+
     def get_total_price(self):
         total = 0
 
@@ -157,6 +166,15 @@ class Travel(db.Base):
 
     def get_all_stops(self):
         return db.session.query(Stop).filter(Stop.travel_id == self.id).all()
+
+    def get_all_stops_as_json(self):
+        json_stop = []
+        stops = self.get_all_stops()
+
+        for stop in stops:
+            json_stop.append(stop.as_dict())
+
+        return json_stop
 
     def delete(self):
         if os.path.isdir(self.travel_folder_path):
@@ -188,6 +206,16 @@ class Travel(db.Base):
     @staticmethod
     def get_all():
         return db.session.query(Travel).all()
+
+    @staticmethod
+    def get_all_as_json():
+        json_travel = []
+        travels = db.session.query(Travel).all()
+
+        for travel in travels:
+            json_travel.append(travel.as_dict())
+
+        return json_travel
 
 class Point(db.Base):
     __tablename__ = 'points'
@@ -255,14 +283,26 @@ class Stop(db.Base):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
+    
     def get_all_wanderpis(self, filter=None):
         if filter:
+            if filter == '360':
+                return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id, Wanderpi.is_360 == True).order_by(asc(Wanderpi.created_date)).all()
+
             is_image = (filter == 'image')
             return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id, Wanderpi.is_image == is_image).order_by(asc(Wanderpi.created_date)).all()
         else:
             return db.session.query(Wanderpi).filter(Wanderpi.stop_id == self.id).order_by(asc(Wanderpi.created_date)).all()
-    
+
+    def get_all_wanderpis_as_json(self, filter=None):
+        json_wanderpi = []
+        wanderpis = self.get_all_wanderpis(filter=filter)
+
+        for wanderpi in wanderpis:
+            json_wanderpi.append(wanderpi.as_dict())
+
+        return json_wanderpi
+
     def get_random_thumbnail(self):
         wanderpis  = self.get_all_wanderpis()
         if len(wanderpis) > 0:
@@ -342,6 +382,16 @@ class Note(db.Base):
     def get_all_input_as_json(self):
         return json.dump(db.session.query(MoneyInput).filter(MoneyInput.note_id == self.id).all(), default= datetime_parser)
 
+    def get_all_input_as_json_dumps(self):
+        json_input = []
+        inputs = self.get_all_input()
+
+        for input in inputs:
+            json_input.append(input.as_json())
+
+        return json_input
+
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -353,6 +403,15 @@ class Note(db.Base):
     def get_all():
         return db.session.query(Note).all()
 
+    @staticmethod
+    def get_all_as_json():
+        json_notes = []
+        notes = db.session.query(Note).all()
+
+        for note in notes:
+            json_notes.append(note.as_dict())
+
+        return json_notes
 
 class MoneyInput(db.Base):
     __tablename__ = 'input'

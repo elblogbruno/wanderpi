@@ -35,8 +35,8 @@ def create_app(config_type):
     app.register_blueprint(home_blu)
     from controller.modules.user import user_blu
     app.register_blueprint(user_blu)
-    # from controller.modules.video import video_blu
-    # app.register_blueprint(video_blu)
+    from controller.modules.api import api_blu
+    app.register_blueprint(api_blu)
     from controller.modules.travel import travel_blu
     app.register_blueprint(travel_blu)
     from controller.modules.record import record_blu

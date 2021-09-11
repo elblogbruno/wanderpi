@@ -265,6 +265,10 @@ def search_wanderpis(stop, query):
         wanderpis = stop.get_all_wanderpis(filter='image')
         final_query = final_query.replace('%image','')
         type_filter = True
+    elif '%is_360' in query:
+        wanderpis = stop.get_all_wanderpis(filter='360')
+        final_query = final_query.replace('%is_360','')
+        type_filter = True
     else:
         wanderpis = stop.get_all_wanderpis()
     
