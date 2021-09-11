@@ -13,3 +13,5 @@ logs/log*
 *.tar
 *.gz
 settings.json
+cameras.json
+.vscode
