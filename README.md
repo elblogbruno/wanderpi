@@ -8,6 +8,19 @@ Keep your best travel memories organized, and your costs to the letter.
 
 [![Demo](https://img.youtube.com/vi/tdPjDHavmf4/0.jpg)](https://www.youtube.com/watch?v=tdPjDHavmf4)
 
+Add your trips on the dashboard  |  Organize everything by trip stops or "Albums"
+:---: | :---:
+![](readme-images/index-screenshot.png)  |  ![](readme-images/stops-screenshot.png)
+
+
+Watch all your images and videos (With location data) |  Control your costs with the Trip Calendar view.
+:---: | :---:
+![](readme-images/stop-screenshot.png)  |  ![](readme-images/calendar-screenshot.png)
+
+Show all your photos with the slide view |  Watch them all scattered arround the globe (WIP)
+:---: | :---:
+![](readme-images/slide-view.png)  |  ![](readme-images/map-view.png)
+
 ## Features
 
 - Upload your photos and videos of your trip or even record ones from the UI, they can be all organized, downloadable at the same quality to share with your friends and family. Stop wasting the internet while traveling sending your photos through WhatsApp and other apps.
@@ -23,24 +36,13 @@ Keep your best travel memories organized, and your costs to the letter.
 - Mobile responsive, raspberry pi best fit, you can take wanderpi with you everywhere (It can run without internet).
 
 
-Add your trips on the dashboard  |  Organize everything by trip stops or "Albums"
-:---: | :---:
-![](readme-images/index-screenshot.png)  |  ![](readme-images/stops-screenshot.png)
 
-
-Watch all your images and videos (With location data) |  Control your costs with the Trip Calendar view.
-:---: | :---:
-![](readme-images/stop-screenshot.png)  |  ![](readme-images/calendar-screenshot.png)
-
-Show all your photos with the slide view |  Watch them all scattered arround the globe (WIP)
-:---: | :---:
-![](readme-images/slide-view.png)  |  ![](readme-images/map-view.png)
   
-## Tech Stack
+<!-- ## Tech Stack
 
 **Client:** Bootstrap 
 
-**Server:** Flask, Jinja2 Templates and SQLAlchemy.
+**Server:** Flask, Jinja2 Templates and SQLAlchemy. -->
 
 ## How to install?
 
