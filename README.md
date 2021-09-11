@@ -21,16 +21,20 @@ Keep your best travel memories organized, and your costs to the letter.
 - Download images, edit their names, or click to download videos ready to present to your best friends with all the best photos and videos from your trip.
 
 - Mobile responsive, raspberry pi best fit, you can take wanderpi with you everywhere (It can run without internet).
-  
-## Screenshots
 
-![App Screenshot](readme-images/index-screenshot.png)
 
-![App Screenshot](readme-images/stops-screenshot.png)
+Add your trips on the dashboard  |  Organize everything by trip stops or "Albums"
+:---: | :---:
+![](readme-images/index-screenshot.png)  |  ![](readme-images/stops-screenshot.png)
 
-![App Screenshot](readme-images/stop-screenshot.png)
 
-![App Screenshot](readme-images/calendar-screenshot.png)
+Watch all your images and videos (With location data) |  Control your costs with the Trip Calendar view.
+:---: | :---:
+![](readme-images/stop-screenshot.png)  |  ![](readme-images/calendar-screenshot.png)
+
+Show all your photos with the slide view |  Watch them all scattered arround the globe (WIP)
+:---: | :---:
+![](readme-images/slide-view.png)  |  ![](readme-images/map-view.png)
   
 ## Tech Stack
 
@@ -40,7 +44,46 @@ Keep your best travel memories organized, and your costs to the letter.
 
 ## How to install?
 
-Coming soon....
+## Installing
+
+It is very easy, and there are different ways from click to install one's to more advanced ones, in case you want to install it from source.
+(Docker image coming soon)
+
+
+### Mac OS
+[Manual Installation](https://github.com/elblogbruno/wanderpi#manual-installation) Or you can run the Linux script down here.
+
+### Linux
+To install the python server, fire up your Linux or Mac OS distributed machine and run this command.
+
+```
+wget https://raw.githubusercontent.com/elblogbruno/wanderpi/master/setup.sh && sudo sh setup.sh
+```
+That's it.
+
+
+### Windows
+
+[Manual Installation](https://github.com/elblogbruno/wanderpi#manual-installation)
+
+
+### Manual installation
+
+Instead, you can follow the steps down here:
+
+- Step 1. Simply clone this repo.
+```
+git clone https://github.com/elblogbruno/wanderpi
+```
+- Step 2. Install requirements for python server.
+```
+cd wanderpi && pip install -r requirements.txt
+```
+- Step 3. Run the server.
+```
+python server.py \\Python 3.5 to versions 3.8 supported.
+```
+
 
 ## Acknowledgements
 

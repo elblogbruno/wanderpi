@@ -133,7 +133,7 @@ def save_travel(): #todo get available video sources from database
 
     travel_folder_path = get_file_path(travel_id=travel_id, file_type='root') 
 
-    lat, lng = GeoCodeUtils.reverse_address(address)
+    lat, lng = GeoCodeUtils.reverse_address(destination)
 
     travel = Travel(id=travel_id, name=name, lat=lat, long=lng, travel_folder_path=travel_folder_path, destination=destination, start_date=start_date, end_date=end_date)
     travel.save()
@@ -166,9 +166,11 @@ def edit_stop(stop_id): #todo get available video sources from database
     name = request.args.get('name')
     address = request.args.get('address')
     
+    print("New stop address: " + address)
+
     stop = Stop.get_by_id(stop_id)
     
-    old_address = stop.address
+    # old_address = stop.address
     stop.address = address
 
     old_name = stop.name

@@ -83,9 +83,9 @@ function getDistanceByTravelId(travel_id){
 
 
 const distance = (coor1, coor2) => {
-   console.log(coor1, coor2);
+//    console.log(coor1, coor2);
    var d = getDistanceBetweenPoints(coor1.lat, coor1.lng, coor2.lat, coor2.lng);
-   console.log(d);
+//    console.log(d);
    return d;
 };
 

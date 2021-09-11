@@ -77,10 +77,13 @@ editStopModal.addEventListener('show.bs.modal', function (event) {
     modal.find('#new_name_input').val(original_name)
     modal.find('#new_address_input').val(original_address)
     
-    var new_name =  modal.find('#new_name_input').val();
-    var new_address =  modal.find('#new_address_input').val();
+    
 
     document.getElementById('edit_stop_button').onclick = function () {
+        var new_name =  modal.find('#new_name_input').val();
+        var new_address =  modal.find('#new_address_input').val();
+
+        console.log(new_address);
         editStop(stop_id, new_name, new_address);
     };
 });

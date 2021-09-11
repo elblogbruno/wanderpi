@@ -29,8 +29,15 @@
             </div>
 
             <script>
-                console.log("{{ travel.get_all_wanderpis()|length }}");
+                
+                initializeMap("{{ travel.id }}");
 
+                {% for stop in travel.get_all_stops() %}
+                    initializeStopsList("{{ stop.lat }}", "{{ stop.long}}", "{{ stop.address }}", "{{ travel.id }}");
+                {% endfor %}
+                
+                initializeMapAndLocator("{{ travel.lat }}","{{ travel.long }}","{{ travel.id }}");
+                
                 {% if travel.get_all_wanderpis()|length > 0 %}  
                     {% for video in travel.get_all_wanderpis() %}
                         loadDistanceListFromWanderpis("{{ video.lat }}", "{{ video.long }}", "{{ travel.id }}");
@@ -38,6 +45,7 @@
                     getDistanceByTravelId("{{ travel.id }}");
                 {% endif  %}
                 
+
             </script>
 
             <div class="card-footer text-center bg-transparent border-light" role="group" aria-label="Basic example">
@@ -49,14 +57,6 @@
             </div>
             
             <button id="delete_travel" type="button"  onclick="window.location.href='/delete_travel/{{ travel.id }}'" class="btn btn-outline-danger btn-block btn-responsive"><i class="bi bi-trash"></i></button>
-                
-            <script>
-                initializeMap("{{ travel.id }}")
-                {% for stop in travel.get_all_stops() %}
-                    initializeStopsList("{{ stop.lat }}", "{{ stop.long}}", "{{ stop.address }}");
-                {% endfor %}
-                initializeMapAndLocator("{{ travel.lat }}","{{ travel.long }}",);
-            </script>
 
         </div>
     </div>    
