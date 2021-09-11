@@ -14,3 +14,4 @@ flask-socketio
 ExifRead
 reverse_geocoder
 PyExifTool
+Flask-Compress

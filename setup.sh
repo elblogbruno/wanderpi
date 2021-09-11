@@ -27,7 +27,7 @@ echo "Installing necessary dependencies... (This could take a while)"
 echo ""
 echo "============================================================"
 apt-get update
-apt-get install -y  python-pip git python3-pip python3.6
+apt-get install -y  python-pip git python3-pip python3.6 libpq-dev 
 echo "============================================================"
 if [ "$?" = "1" ]
 then
@@ -63,7 +63,7 @@ fi
 echo "============================================================"
 echo "Setup was successful."
 echo "You can run 'python app.py ' to start the server!"
-echo "Next steps are configuring the notion credentials!"
+echo "Next steps are uploading your memories into wanderpi!"
 echo "============================================================"
 
 sleep 2
