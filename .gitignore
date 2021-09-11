@@ -14,4 +14,10 @@ logs/log*
 *.gz
 settings.json
 cameras.json
-.vscode
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
