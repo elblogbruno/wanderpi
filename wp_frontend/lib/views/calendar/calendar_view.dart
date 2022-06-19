@@ -9,7 +9,7 @@ import 'package:wp_frontend/models/event.dart';
 
 import 'package:wp_frontend/models/travel.dart';
 
-import '../ui/bar/context_bar.dart';
+import '../../ui/bar/context_bar.dart';
 
 class CalendarView extends StatefulWidget
 {
@@ -25,58 +25,127 @@ DateTime get _now => DateTime.now();
 
 class _CalendarViewState extends State<CalendarView> {
 
+  String _calendarViewType = 'month';
 
   @override
   Widget build(BuildContext context) {
+    EventController<Event> _eventController = EventController<Event>()..addAll(_events);
+
     return CalendarControllerProvider<Event>(
-        controller: EventController<Event>()..addAll(_events),
+        controller: _eventController,
         child: Scaffold(
-          appBar: AppBar(
-            title: Text("Calendar"),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.add),
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Add Event"),
-                          content: const TextField(
-                            decoration: InputDecoration(
-                              labelText: "Title",
-                            ),
-                          ),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text("Cancel"),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            FlatButton(
-                              child: Text("Add"),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      });
+                  widget.onBackPressed!();
                 },
               ),
-            ],
-          ),
-    ));
+              title: Text(_title),
+              actions: _buildWidgets(),
+            ),
+            body: _switchCalendarView(_calendarViewType, _eventController),
+        ),
+    );
+  }
 
+  List<Widget> _buildWidgets(){
+    return  <Widget>[
+      const VerticalDivider(),
+      IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Add Event"),
+                  content: const TextField(
+                    decoration: InputDecoration(
+                      labelText: "Title",
+                    ),
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text("Cancel"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    FlatButton(
+                      child: Text("Add"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
+        },
+      ),
+      const VerticalDivider(),
+      IconButton(
+        icon: const Icon(Icons.calendar_today),
+        onPressed: () {
+          setState(() {
+            _calendarViewType = 'month';
+          });
+        },
+      ),
+      const VerticalDivider(),
+      IconButton(
+        icon: const Icon(Icons.view_agenda),
+        onPressed: () {
+          setState(() {
+            _calendarViewType = 'week';
+          });
+        },
+      ),
+      const VerticalDivider(),
+      IconButton(
+        icon: const Icon(Icons.view_list),
+        onPressed: () {
+          setState(() {
+            _calendarViewType = 'day';
+          });
+        },
+      ),
+      //_buildCalendarDropDown(),
+    ];
+  }
 
-    /* Column that holds the map and the bottom buttons */
-    /*return Column(
-      children: <Widget>[
-        _buildTitle(),
+  Widget _switchCalendarView(String viewType, EventController<Event> eventController) {
+    switch (viewType) {
+      case 'month':
+        return MonthView(
+          controller: eventController,
+          borderColor: Colors.grey,
+          borderSize: 1,
+          cellAspectRatio: 1.5,
+        );
+      case 'week':
+        return WeekView(
+          controller: eventController,
+        );
+      case 'day':
+        return DayView(
+          controller: eventController,
+        );
+      default:
+        return MonthView(
+          controller: eventController,
+          borderColor: Colors.grey,
+          borderSize: 1,
+          cellAspectRatio: 1.5,
+        );
+    }
+  }
 
-      ],
-    );*/
+  String get _title {
+    if (widget.travel != null) {
+      return "${widget.travel!.travelName} Calendar";
+    }
+    return "Global Calendar";
   }
 
   Widget _buildTitle(){
@@ -90,6 +159,7 @@ class _CalendarViewState extends State<CalendarView> {
       title: title,
       onBackPressed: widget.onBackPressed,
       showBackButton: widget.travel != null,
+      child: Container(),
     );
 
     /*return Container(
