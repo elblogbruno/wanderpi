@@ -5,15 +5,21 @@ import '../../utils/utils.dart';
 
 class ContextBar extends StatefulWidget  {
   final bool showBackButton;
+
   final bool? showBar;
   final bool? showContextButtons;
+  final bool? showDeleteButton;
+
   final String? title;
   final String? subtitle;
+
   final Function? onBackPressed;
+  final Function? onAddClicked;
+  final Function? onDeleteClicked;
 
   final Widget child;
 
-  const ContextBar({Key? key, required this.showBackButton, this.showContextButtons, this.subtitle, this.title, this.onBackPressed, required this.child, this.showBar}) :  super(key: key, );
+  const ContextBar({Key? key, required this.showBackButton, this.showDeleteButton, this.onDeleteClicked, this.onAddClicked, this.showContextButtons, this.subtitle, this.title, this.onBackPressed, required this.child, this.showBar}) :  super(key: key, );
 
   @override
   State<ContextBar> createState() => _ContextBarState();
@@ -103,17 +109,26 @@ class _ContextBarState extends State<ContextBar> {
     return true;
   }
 
+  bool showDeleteButton() {
+    if (widget.showDeleteButton != null) {
+      return widget.showDeleteButton!;
+    }
+    return true;
+  }
+
   List<Widget> _getActionButtons() {
     return [
         const VerticalDivider(),
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () {  },
+          onPressed: () { widget.onAddClicked!(); },
         ),
+        if(showDeleteButton())
         const VerticalDivider(),
+      if(showDeleteButton())
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () {  },
+          onPressed: () { widget.onDeleteClicked!(); },
         ),
     ];
   }

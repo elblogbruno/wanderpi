@@ -112,7 +112,7 @@ class _GlobalMapViewState extends State<GlobalMapView> {
           //tileProvider: const CachedTileProvider(),
         ),
         MarkerLayerOptions(
-          markers:  widget.travel != null ? widget.travel!.travelStops.map((stop) => stop.toMarker()).toList() : [],
+          markers:  widget.travel != null ? widget.travel!.travelStops!.map((stop) => stop.toMarker()).toList() : [],
         ),
       ],
     );

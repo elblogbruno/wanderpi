@@ -67,11 +67,11 @@ class _DocumentVaultViewState extends State<DocumentVaultView> {
     if (widget.travel != null) {
       print('Loading documents for ${widget.travel!.travelName}');
 
-      for (int i  = 0; i < widget.travel!.travelDocuments.length; i++) {
+      for (int i  = 0; i < widget.travel!.travelDocuments!.length; i++) {
 
-        print('Adding ${widget.travel!.travelDocuments[i].documentName}');
+        print('Adding ${widget.travel!.travelDocuments![i].documentName}');
 
-        Document document = widget.travel!.travelDocuments[i];
+        Document document = widget.travel!.travelDocuments![i];
 
         DocumentCard card  = DocumentCard(
           document: document,

@@ -6,6 +6,7 @@ import 'package:wp_frontend/const/design_globals.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/ui/bloc/card_preview.dart';
+import 'package:wp_frontend/ui/bloc/card_title_preview.dart';
 import 'package:wp_frontend/ui/utils.dart';
 import 'package:wp_frontend/utils/maps/cached_tile_provider.dart';
 
@@ -129,59 +130,20 @@ class _StopCardState extends State<StopCard> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children:
         <Widget>[
-          Padding(padding: const EdgeInsets.all(10.0),
-            child: Align(
-                alignment: Alignment.centerLeft,
-                child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text( widget.stop.stopName,
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context).textTheme.headline6?.copyWith(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          widget.stop.stopCreationDate.toString(),
-                          textAlign: TextAlign.start,
-
-                          style: Theme.of(context).textTheme.headline6?.copyWith(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Checkbox(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Globals.radius),
-                      ),
-                      checkColor: Colors.white,
-                      fillColor: MaterialStateProperty.resolveWith(getColor),
-                      value: _isSelected,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isSelected = value!;
-
-                          if (_isSelected) {
-                            widget.onSelect(widget.stop);
-                          }else{
-                            widget.onSelect(null);
-                          }
-
-                        });
-                      },
-                    ),
-                  ],
-                )
-
-            ),
+          CardTitlePreview(
+            objectPreviewName: widget.stop.stopName,
+            objectCreationDate: widget.stop.stopCreationDate!,
+            onSelect: (bool isSelected) {
+              setState(() {
+                if (isSelected) {
+                  widget.onSelect(widget.stop);
+                }else{
+                  widget.onSelect(null);
+                }
+              });
+            },
           ),
+
           Column(
             children: <Widget>[
               ListTile(

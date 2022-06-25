@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/const/design_globals.dart';
+import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/ui/utils.dart';
 import 'package:wp_frontend/utils/geo_utils.dart';
 
-class NewTravelDialog extends StatefulWidget  {
+class NewStopDialog extends StatefulWidget  {
 
-  final ValueChanged<Travel> onTravelCreated;
-  const NewTravelDialog({Key? key, required this.onTravelCreated}) :  super(key: key, );
+  final ValueChanged<Stop> onStopCreated;
+  final Travel travel;
+  const NewStopDialog({Key? key, required this.onStopCreated, required this.travel}) :  super(key: key, );
 
   @override
-  State<NewTravelDialog> createState() => _NewTravelDialogState();
+  State<NewStopDialog> createState() => _NewStopDialogState();
 }
 
-class _NewTravelDialogState extends State<NewTravelDialog> {
+class _NewStopDialogState extends State<NewStopDialog> {
 
   String _selectedDate = '';
   late DateTimeRange range;
@@ -36,7 +38,7 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(Globals.radius) ,
       ),
-      title: Text('New Travel'),
+      title: Text('New Stop'),
       content: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Form(
@@ -46,7 +48,7 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children:  [
               TextFormField(
-                decoration: getInputDecoration('Travel Name', hintText: 'Enter Travel Name', icon: Icons.drive_file_rename_outline),
+                  decoration: getInputDecoration('Travel Name', hintText: 'Enter Travel Name', icon: Icons.drive_file_rename_outline),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter Travel Name';
@@ -136,40 +138,32 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
 
     getLatLongFromAddress(
         _addressEditingController.value.text).then((value) =>
-        {
-            addTravel(value)
-        }
+    {
+      addTravel(value)
+    }
     );
 
   }
 
   void addTravel(List<double> value)
   {
-        Travel travel = Travel(
-          travelDescription: _descriptionEditingController.value.text,
-          travelDateRangeEnd: range.start,
-          travelDateRangeStart: range.end,
-          travelDestinationName: _addressEditingController.value.text,
-          travelLatitude: value[0],
-          travelLongitude: value[1],
-          travelName: _nameEditingController.value.text,
-          travelId: 'demo',
-        );
-
-        widget.onTravelCreated(travel);
-
-        Navigator.of(context).pop();
-  }
-
-  InputDecoration getInputDecoration(String labelText, {String hintText = '', IconData? icon = Icons.location_on}) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(Globals.radius),
-      ),
-      icon: Icon(icon),
+    Stop stop = Stop(
+      stopDescription: _descriptionEditingController.value.text,
+      stopDateRangeEnd: range.start,
+      stopDateRangeStart: range.end,
+      stopDestinationName: _addressEditingController.value.text,
+      stopLatitude: value[0],
+      stopLongitude: value[1],
+      stopName: _nameEditingController.value.text,
+      stopId: 'demo',
+      stopTravelId: widget.travel.travelId
     );
+
+    widget.onStopCreated(stop);
+
+    Navigator.of(context).pop();
   }
+
+
 }
 

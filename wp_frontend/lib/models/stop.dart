@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:wp_frontend/const/design_globals.dart';
 
 class Stop {
   final String stopId;
@@ -12,17 +13,20 @@ class Stop {
   final double stopLongitude;
   final String stopDestinationName;
 
-  final DateTime stopCreationDate;
+  final DateTime? stopLastUpdateDate;
+  final DateTime? stopCreationDate;
   final DateTime stopDateRangeStart;
   final DateTime stopDateRangeEnd;
   final String stopDescription;
 
-  final double stopDistance;
-  final double stopSpentPrice;
+  final double? stopDistance;
+  final double? stopSpentPrice;
 
-  final String stopThumbnailUri;
-  final String stopImageUri;
+  final String? stopThumbnailUrlSmall;
+  final String? stopThumbnailUri;
+  final String? stopImageUri;
 
+  final String stopTravelId;
 
   Stop({
     required this.stopId,
@@ -30,64 +34,76 @@ class Stop {
     required this.stopLatitude,
     required this.stopLongitude,
     required this.stopDestinationName,
-    required this.stopCreationDate,
+    this.stopLastUpdateDate,
+    this.stopCreationDate,
     required this.stopDateRangeStart,
     required this.stopDateRangeEnd,
     required this.stopDescription,
-    required this.stopDistance,
-    required this.stopSpentPrice,
-    required this.stopImageUri,
-    required this.stopThumbnailUri,
+    this.stopDistance,
+    this.stopSpentPrice,
+    this.stopImageUri,
+    this.stopThumbnailUri,
+    this.stopThumbnailUrlSmall,
+    required this.stopTravelId
   });
 
   Stop.fromJson(Map<dynamic, dynamic> json)
-      : stopId = json['stopId'],
-        stopName = json['stopName'],
-        stopLatitude = json['stopLatitude'],
-        stopLongitude = json['stopLongitude'],
-        stopDestinationName = json['stopDestinationName'],
-        stopCreationDate = DateTime.parse(json['stopCreationDate']),
-        stopDateRangeStart = DateTime.parse(json['stopDateRangeStart']),
-        stopDateRangeEnd = DateTime.parse(json['stopDateRangeEnd']),
-        stopDescription = json['stopDescription'],
-        stopDistance = json['stopDistance'],
-        stopSpentPrice = json['stopSpentPrice'],
-        stopImageUri = json['stopImageUri'],
-        stopThumbnailUri = json['stopThumbnailUri'];
+      : stopId = json['id'],
+        stopName = json['name'],
+        stopLatitude = json['latitude'],
+        stopLongitude = json['longitude'],
+        stopDestinationName = json['address'],
+        stopLastUpdateDate = DateTime.parse(json['last_update_date']),
+        stopCreationDate = DateTime.parse(json['creation_date']),
+        stopDateRangeStart = DateTime.parse(json['date_range_start']),
+        stopDateRangeEnd = DateTime.parse(json['date_range_end']),
+        stopDescription = json['description'],
+        stopDistance = json['distance'],
+        stopSpentPrice = json['spent_price'],
+        stopImageUri = json['image_uri'],
+        stopThumbnailUri = json['thumbnail_uri'],
+        stopThumbnailUrlSmall = json['thumbnail_uri_small'],
+        stopTravelId = json['travel_id'];
 
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
-    'stopId': stopId,
-    'stopName': stopName,
-    'stopLatitude': stopLatitude,
-    'stopLongitude': stopLongitude,
-    'stopDestinationName': stopDestinationName,
-    'stopCreationDate': stopCreationDate.toIso8601String(),
-    'stopDateRangeStart': stopDateRangeStart.toIso8601String(),
-    'stopDateRangeEnd': stopDateRangeEnd.toIso8601String(),
-    'stopDescription': stopDescription,
-    'stopDistance': stopDistance,
-    'stopSpentPrice': stopSpentPrice,
-    'stopImageUri': stopImageUri,
-    'stopThumbnailUri': stopThumbnailUri,
+    'id': stopId,
+    'name': stopName,
+    'latitude': stopLatitude,
+    'longitude': stopLongitude,
+    'address': stopDestinationName,
+    'last_update_date': stopLastUpdateDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+    'creation_date': stopCreationDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+    'date_range_start': stopDateRangeStart.toIso8601String(),
+    'date_range_end': stopDateRangeEnd.toIso8601String(),
+    'description': stopDescription,
+    'distance': stopDistance ?? 0.0,
+    'spent_price': stopSpentPrice ?? 0.0,
+    'image_uri': stopImageUri ?? "https://picsum.photos/1920/720?random=0",
+    'thumbnail_uri': stopThumbnailUri ?? "https://picsum.photos/1920/720?random=0",
+    'thumbnail_uri_small': stopThumbnailUrlSmall ?? "https://picsum.photos/1920/720?random=0",
+    'travel_id': stopTravelId
   };
 
 
   static Stop randomFromInt(int i, double latitude, double longitude) {
     return Stop(
-      stopId: 'stopId$i',
-      stopName: 'stopName$i',
+      stopId: 'Id$i',
+      stopName: 'Name$i',
       stopLatitude: latitude,
       stopLongitude:  longitude,
-      stopDestinationName: 'stopDestinationName$i',
+      stopDestinationName: 'DestinationName$i',
       stopCreationDate: DateTime.now(),
       stopDateRangeStart: DateTime.now().subtract(Duration(days: Random().nextInt(100))),
       stopDateRangeEnd: DateTime.now().add(Duration(days: Random().nextInt(100))),
-      stopDescription: 'stopDescription$i',
+      stopDescription: 'Description$i',
       stopDistance: Random().nextDouble(),
       stopSpentPrice: Random().nextDouble(),
-      stopImageUri: 'https://picsum.photos/1920/720?random=${i}',
-      stopThumbnailUri: 'https://picsum.photos/400/300?random=${i}',
+      stopImageUri: 'https://picsum.photos/1920/720?random=$i',
+      stopThumbnailUri: 'https://picsum.photos/400/300?random=$i',
+      stopThumbnailUrlSmall: 'https://picsum.photos/200/100?random=$i',
+      stopTravelId: '2',
+        stopLastUpdateDate: DateTime.now(),
     );
   }
 
@@ -102,17 +118,30 @@ class Stop {
 
   Marker toMarker(){
     return Marker(
-      width: 40.0,
-      height: 40.0,
+      width: 50.0,
+      height: 50.0,
       point: LatLng(stopLatitude, stopLongitude),
       builder: (ctx) => Container(
-        child: IconButton(
-          icon: const Icon(Icons.location_on, color: Colors.red),
-          color: Colors.red,
-          onPressed: () {
-            print("Location pressed");
-            //_openOnGoogleMaps();
-          },
+        padding: const EdgeInsets.all(4.0),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(Globals.radius)),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10.0,
+              spreadRadius: 2.0,
+              offset: Offset(
+                0.0, // horizontal, move right 10
+                0.0, // vertical, move down 10
+              ),
+            ),
+          ],
+        ),
+        child:
+        Image.network(
+          stopThumbnailUrlSmall!,
+          fit: BoxFit.cover,
         ),
       ),
     );

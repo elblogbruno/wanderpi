@@ -1,15 +1,9 @@
-/* Creates a rounded box that holds a title and image */
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-
 import 'package:wp_frontend/const/design_globals.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/models/document.dart';
-import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/ui/bloc/card_preview.dart';
+import 'package:wp_frontend/ui/bloc/card_title_preview.dart';
 import 'package:wp_frontend/ui/utils.dart';
-import 'package:wp_frontend/utils/maps/cached_tile_provider.dart';
-
 
 
 class DocumentCard extends StatefulWidget
@@ -25,12 +19,8 @@ class DocumentCard extends StatefulWidget
 }
 
 class _DocumentCardState extends State<DocumentCard> {
-  bool _isSelected = false;
-
   @override
   Widget build(BuildContext context) {
-    EdgeInsets padding = const EdgeInsets.all(10.0);
-
     /* Card that holds the image and text and has bottom buttons*/
     return Card(
       elevation: 1,
@@ -71,59 +61,20 @@ class _DocumentCardState extends State<DocumentCard> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children:
         <Widget>[
-          Padding(padding: const EdgeInsets.all(10.0),
-            child: Align(
-                alignment: Alignment.centerLeft,
-                child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text( widget.document.documentName,
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context).textTheme.headline6?.copyWith(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          widget.document.documentCreationDate.toString(),
-                          textAlign: TextAlign.start,
-
-                          style: Theme.of(context).textTheme.headline6?.copyWith(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Checkbox(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Globals.radius),
-                      ),
-                      checkColor: Colors.white,
-                      fillColor: MaterialStateProperty.resolveWith(getColor),
-                      value: _isSelected,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isSelected = value!;
-
-                          if (_isSelected) {
-                            widget.onSelect(widget.document);
-                          }else{
-                            widget.onSelect(null);
-                          }
-
-                        });
-                      },
-                    ),
-                  ],
-                )
-
-            ),
+          CardTitlePreview(
+            objectPreviewName: widget.document.documentName,
+            objectCreationDate: widget.document.documentCreationDate,
+            onSelect: (bool isSelected) {
+              setState(() {
+                if (isSelected) {
+                  widget.onSelect(widget.document);
+                }else{
+                  widget.onSelect(null);
+                }
+              });
+            },
           ),
+
           Column(
             children: <Widget>[
               ListTile(

@@ -36,6 +36,17 @@ class _CardPreviewState extends State<CardPreview> {
     return buildPreview();
   }
 
+  Widget buildDivider() {
+    return  const SizedBox(
+      height: 0,
+      width: 35,
+      child: Divider(
+        color: Colors.black,
+        thickness: 1.0,
+      ),
+    );
+  }
+
   Widget buildPreview() {
     return Container(
         height: 200,
@@ -43,7 +54,7 @@ class _CardPreviewState extends State<CardPreview> {
             .of(context)
             .size
             .width,
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
         decoration: const
         BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -94,10 +105,9 @@ class _CardPreviewState extends State<CardPreview> {
                       },
                     ),
                   ),
-                  const VerticalDivider(
-                    color: Colors.black,
-                    thickness: 5,
-                  ),
+
+                  buildDivider(),
+
                   Container(
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -115,10 +125,9 @@ class _CardPreviewState extends State<CardPreview> {
                       },
                     ),
                   ),
-                  const VerticalDivider(
-                    color: Colors.black,
-                    thickness: 5,
-                  ),
+
+                  buildDivider(),
+
                   Container(
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(

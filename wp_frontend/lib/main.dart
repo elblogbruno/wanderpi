@@ -1,39 +1,87 @@
-import 'package:wp_frontend/const/content_type.dart';
-import 'package:wp_frontend/const/design_globals.dart';
+
+import 'package:wp_frontend/api/api.dart';
+import 'package:wp_frontend/api/shared_preferences.dart';
+import 'package:wp_frontend/locales/main.i18n.dart';
 import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/models/wanderpi.dart';
 import 'package:wp_frontend/ui/bar/filter_bar.dart';
 import 'package:wp_frontend/ui/bar/corner_profile_picture.dart';
 import 'package:wp_frontend/ui/bar/floating_action_button.dart';
 import 'package:wp_frontend/ui/bar/nav_rail.dart';
-import 'package:wp_frontend/ui/bloc/brain_memory_management_card.dart';
-import 'package:wp_frontend/ui/bloc/wanderpi_card.dart';
-import 'package:wp_frontend/ui/dialogs/new_travel_dialog.dart';
-import 'package:wp_frontend/ui/grid/main_grid.dart';
+
+
 import 'package:wp_frontend/ui/grid/stop_grid.dart';
 import 'package:wp_frontend/ui/grid/travel_grid.dart';
 import 'package:wp_frontend/ui/grid/wanderpi_grid.dart';
+import 'package:wp_frontend/views/authentication/login_view.dart';
 import 'package:wp_frontend/views/calendar/calendar_view.dart';
 import 'package:wp_frontend/views/document_vault_view.dart';
 import 'package:wp_frontend/views/global_map.dart';
-import 'package:wp_frontend/views/notification.dart';
+
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/views/single_wanderpi.dart';
 import 'package:wp_frontend/views/slide_view.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:i18n_extension/i18n_widget.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  TranslationData translations = TranslationData();
+  await translations.initTranslations();
+
+  String? token = await  SharedApi.getToken();
+
+    if (token != null) {
+      bool valid = await Api().validateToken(token);
+
+      if (!valid) {
+        SharedApi.deleteToken();
+
+        print('No token found');
+        runApp(Login());
+      } else {
+        print('Token: $token');
+
+        User? user = await SharedApi.getUser();
+
+        MyApp app = MyApp(
+          child: MainScreen(title: 'Navigation Rail Demo', user: user!,),
+        );
+
+        runApp(app);
+      }
+
+    } else {
+      print('No token found');
+
+      MyApp app = MyApp(
+        child: LoginScreen(),
+      );
+
+      runApp(app);
+    }
+
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final Widget child;
+  const MyApp({Key? key, required this.child }) : super(key: key);
 
-  // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', "US"),
+        Locale('es', "ES"),
+      ],
       debugShowCheckedModeBanner: false,
       title: 'NavigationRail Demo',
       theme: ThemeData(
@@ -46,41 +94,26 @@ class MyApp extends StatelessWidget {
           primary: Colors.red,
         ),
       ),
-      home: const MyHomePage(title: 'Navigation Rail Demo'),
-    );
-  }
-
-  ThemeData _theme(ThemeData base) {
-    return ThemeData(
-      primarySwatch: Colors.blue,
-      appBarTheme: base.appBarTheme.copyWith(elevation: 0.0),
-      floatingActionButtonTheme: base.floatingActionButtonTheme.copyWith(
-        elevation: 2.0,
-        backgroundColor: base.colorScheme.secondary,
+      home: I18n(
+          child:  child
       ),
     );
   }
+
+
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class MainScreen extends StatefulWidget {
+  final User user;
   final String title;
 
+  const MainScreen({Key? key, required this.title, required this.user}) : super(key: key);
+
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainScreen> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MainScreen> {
   static const int TRAVEL_GRID = 0;
   static const int MAP_VIEW = 1;
   static const int SLIDE_VIEW = 2;
@@ -132,11 +165,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static const _actionTitles = [ 'Download ', 'Map', 'Slide', 'Calendar' ];
 
-  void _showAction(BuildContext context, int index) {
-    showDialog<void>(
+  Future _showAction(BuildContext context, int index) {
+    return showDialog(
       context: context,
-      builder: (context) {
-        return NewTravelDialog();
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(_actionTitles[index]),
+          content:  Text('This is a $_actionTitles[index].'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
   }
@@ -242,21 +286,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return NavRail(
       scaffoldKey: _scaffoldKey,
       drawerHeaderBuilder: (context) {
         return Column(
-          children: const <Widget>[
+          children:  <Widget>[
             UserAccountsDrawerHeader(
-              currentAccountPicture: CornerProfilePicture(radius: 0.5, userAvatarUrl: 'assets/images/profile.jpg',),
-              accountName: Text("Steve Jobs"),
-              accountEmail: Text("jobs@apple.com"),
+              currentAccountPicture: const CornerProfilePicture(radius: 0.5, userAvatarUrl: 'assets/images/profile.jpg',),
+              accountName: Text(widget.user.full_name),
+              accountEmail: Text(widget.user.email),
             ),
             //BrainMemoryManagementCard(),
           ],
@@ -264,10 +302,27 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       drawerFooterBuilder: (context) {
         return Column(
-          children: const <Widget>[
+          children:  <Widget>[
             ListTile(
               leading: Icon(Icons.storage),
               title: Text("Memory Management"),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("Logout"),
+              onTap: () async {
+                try{
+                  await  Api().logout();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(),
+                    ),
+                  );
+                } catch(e){
+                  print(e);
+                }
+              },
             ),
             ListTile(
               leading: Icon(Icons.settings),
@@ -380,10 +435,10 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () => _showAction(context, 2),
             icon: const Icon(Icons.insert_photo, color: Colors.white),
           ),
-          ActionButton(
+          /*ActionButton(
             onPressed: () => _showAction(context, 4),
             icon: const Icon(Icons.add_location, color: Colors.white),
-          ),
+          ),*/
         ],
       ),
       /*floatingActionButton: FloatingActionButton(

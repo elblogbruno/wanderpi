@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wp_frontend/const/design_globals.dart';
 
 Widget buildButton(BuildContext context, IconData icon, String text, Color color, Function onPressed){
 
@@ -33,4 +34,16 @@ Color getColor(Set<MaterialState> states) {
 
 String convertDateTimeDisplay(DateTime date) {
   return  "${date.day}/${date.month}/${date.year}";
+}
+
+
+InputDecoration getInputDecoration(String labelText, {String hintText = '', IconData? icon = Icons.location_on}) {
+  return InputDecoration(
+    labelText: labelText,
+    hintText: hintText,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(Globals.radius),
+    ),
+    icon: Icon(icon),
+  );
 }
