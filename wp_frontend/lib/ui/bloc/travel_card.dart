@@ -56,9 +56,9 @@ class _TravelCardState extends State<TravelCard> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CardPreview(
-                latitude: widget.travel.travelLatitude,
-                longitude: widget.travel.travelLongitude,
-                objectPreviewName: widget.travel.travelName,
+                latitude: widget.travel.latitude,
+                longitude: widget.travel.longitude,
+                objectPreviewName: widget.travel.name,
                 markers: markers,
                 type: CardPreviewType.map,
               ),
@@ -99,8 +99,8 @@ class _TravelCardState extends State<TravelCard> {
         children:
         <Widget>[
           CardTitlePreview(
-            objectPreviewName: widget.travel.travelName,
-            objectCreationDate: widget.travel.travelCreationDate!,
+            objectPreviewName: widget.travel.name,
+            objectCreationDate: widget.travel.creationDate,
             onSelect: (bool isSelected) {
               setState(() {
                 if (isSelected) {
@@ -114,8 +114,16 @@ class _TravelCardState extends State<TravelCard> {
           Column(
             children: <Widget>[
               ListTile(
+                leading: Image.network(
+                  widget.travel.userCreatedBy.avatar_url,
+                  height: 30,
+                  width: 30,
+                ),
+                title: Text(widget.travel.userCreatedBy.full_name),
+              ),
+              ListTile(
                 leading: const Icon(Icons.location_on, color: Colors.black),
-                title: Text(widget.travel.travelDestinationName, style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                title: Text(widget.travel.address, style: Theme.of(context).textTheme.bodyText1?.copyWith(
                   color: Colors.black,
                 ),),
               ),

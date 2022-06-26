@@ -156,7 +156,7 @@ class _NewStopDialogState extends State<NewStopDialog> {
       stopLongitude: value[1],
       stopName: _nameEditingController.value.text,
       stopId: 'demo',
-      stopTravelId: widget.travel.travelId
+      stopTravelId: widget.travel.id
     );
 
     widget.onStopCreated(stop);

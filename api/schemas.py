@@ -16,6 +16,7 @@ class User(BaseModel):
     username: str
     email: str
     full_name: str
+    avatar_url: str
     disabled: bool 
 
 class UserCreate(BaseModel):
@@ -42,6 +43,7 @@ class BaseSchema(BaseModel):
     address: str
     creation_date: datetime.datetime
     last_update_date: datetime.datetime
+    user_created_by: str 
 
 class Wanderpi(BaseSchema):
     type: str

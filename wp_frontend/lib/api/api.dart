@@ -13,7 +13,7 @@ import 'package:wp_frontend/resources/strings.dart';
 
 class Api {
   static const int TIMEOUT_TIME = 5;
-  static const String API_ENDPOINT = "http://192.168.1.44:8000/";
+  static const String API_ENDPOINT = "http://127.0.0.1:8000/";
 
   Future<bool> validateToken(String token) async {
     String finalUrl = "${API_ENDPOINT}validate_token/";
@@ -32,7 +32,7 @@ class Api {
   }
 
   Future<Travel> deleteTravel(Travel travel) async {
-    String finalUrl = "${API_ENDPOINT}travels/${travel.travelId}";
+    String finalUrl = "${API_ENDPOINT}travels/${travel.id}";
 
     print(travel.toJson());
 
@@ -140,6 +140,27 @@ class Api {
     }
   }
 
+  User? getUserSync(String token) {
+    getUserById(token).then((user) {
+      if (user != null) {
+        return user;
+      }
+    });
+
+    return null;
+  }
+
+  Future<User?> getUserById(String id) async {
+    String finalUrl = "${API_ENDPOINT}users/$id";
+
+    http.Response  response =  await apiPetition(finalUrl);
+
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      return null;
+    }
+  }
 
   Future<User> getUser() async {
     String finalUrl = "${API_ENDPOINT}users/me/";

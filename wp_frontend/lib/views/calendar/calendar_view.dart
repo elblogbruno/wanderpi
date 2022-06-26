@@ -143,7 +143,7 @@ class _CalendarViewState extends State<CalendarView> {
 
   String get _title {
     if (widget.travel != null) {
-      return "${widget.travel!.travelName} Calendar";
+      return "${widget.travel!.name} Calendar";
     }
     return "Global Calendar";
   }
@@ -152,7 +152,7 @@ class _CalendarViewState extends State<CalendarView> {
     String title = "Global Calendar";
 
     if ( widget.travel != null) {
-      title = "${widget.travel!.travelName} Calendar";
+      title = "${widget.travel!.name} Calendar";
     }
 
     return ContextBar(

@@ -69,7 +69,7 @@ class _StopGridState extends State<StopGrid> {
 
   void initState() {
     super.initState();
-    title = widget.travel.travelName;
+    title = widget.travel.name;
 
     for (int i = 0; i < widget.travel.travelStops!.length; i++) {
 

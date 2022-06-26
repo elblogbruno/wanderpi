@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/const/design_globals.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/utils/geo_utils.dart';
 
 class NewTravelDialog extends StatefulWidget  {
 
   final ValueChanged<Travel> onTravelCreated;
-  const NewTravelDialog({Key? key, required this.onTravelCreated}) :  super(key: key, );
+  final User currentUser;
+
+  const NewTravelDialog({Key? key, required this.onTravelCreated, required this.currentUser}) :  super(key: key, );
 
   @override
   State<NewTravelDialog> createState() => _NewTravelDialogState();
@@ -149,11 +152,15 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
           travelDescription: _descriptionEditingController.value.text,
           travelDateRangeEnd: range.start,
           travelDateRangeStart: range.end,
-          travelDestinationName: _addressEditingController.value.text,
-          travelLatitude: value[0],
-          travelLongitude: value[1],
-          travelName: _nameEditingController.value.text,
-          travelId: 'demo',
+          address: _addressEditingController.value.text,
+          latitude: value[0],
+          longitude: value[1],
+          name: _nameEditingController.value.text,
+          id: 'demo',
+          user_created_by: widget.currentUser,
+          creation_date: DateTime.now(),
+          last_update_date: DateTime.now(),
+
         );
 
         widget.onTravelCreated(travel);

@@ -25,7 +25,7 @@ class _GlobalMapViewState extends State<GlobalMapView> {
 
   String get _title {
     if (widget.travel != null) {
-      return "${widget.travel!.travelName} Map View";
+      return "${widget.travel!.name} Map View";
     }
     return "Global Map View";
   }

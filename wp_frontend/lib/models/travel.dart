@@ -1,19 +1,12 @@
 import 'dart:math';
+import 'dart:ui';
 
+import 'package:wp_frontend/models/base_model.dart';
 import 'package:wp_frontend/models/document.dart';
 import 'package:wp_frontend/models/stop.dart';
+import 'package:wp_frontend/models/user.dart';
 
-class Travel {
-  final String travelId;
-  final String travelName; // Name of the travel (e.g. "London to Paris") (required) (string) (max-size 31)
-
-
-  final double travelLatitude;
-  final double travelLongitude;
-  final String travelDestinationName;
-
-  final DateTime? travelLastUpdateDate;
-  final DateTime? travelCreationDate;
+class Travel extends BaseModel {
   final DateTime travelDateRangeStart;
   final DateTime travelDateRangeEnd;
   final String travelDescription;
@@ -25,13 +18,14 @@ class Travel {
   final List<Document>? travelDocuments;
 
   Travel({
-    required this.travelId,
-    required this.travelName,
-    required this.travelLatitude,
-    required this.travelLongitude,
-    required this.travelDestinationName,
-    this.travelCreationDate,
-    this.travelLastUpdateDate,
+    required String id,
+    required String name,   // Name of the travel (e.g. "London to Paris") (required) (string) (max-size 31)
+    required double latitude,
+    required double longitude,
+    required String  address,
+    required DateTime creation_date,
+    required DateTime last_update_date,
+    required User user_created_by,
     required this.travelDateRangeStart,
     required this.travelDateRangeEnd,
     required this.travelDescription,
@@ -39,34 +33,21 @@ class Travel {
     this.travelSpentPrice,
     this.travelStops,
     this.travelDocuments,
-  });
+  }) : super(id, name, latitude, longitude, address, creation_date, last_update_date, user_created_by);
 
   Travel.fromJson(Map<dynamic, dynamic> json)
-      : travelId = json['id'],
-        travelName = json['name'],
-        travelLatitude = json['latitude'],
-        travelLongitude = json['longitude'],
-        travelDestinationName = json['address'],
-        travelLastUpdateDate =  DateTime.parse(json['last_update_date']),
-        travelCreationDate = DateTime.parse(json['creation_date']),
-        travelDateRangeStart = DateTime.parse(json['date_range_start']),
+      : travelDateRangeStart = DateTime.parse(json['date_range_start']),
         travelDateRangeEnd = DateTime.parse(json['date_range_end']),
         travelDescription = json['description'],
         travelDistance = json['distance'],
         travelSpentPrice = json['spent_price'],
         travelStops = (json['stops'] as List<dynamic>).map((e) => Stop.fromJson(e)).toList(),
-        travelDocuments = (json['documents'] as List<dynamic>).map((e) => Document.fromJson(e)).toList();
+        travelDocuments = (json['documents'] as List<dynamic>).map((e) => Document.fromJson(e)).toList(),
+        super.fromJson(json);
 
 
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
-        'id': travelId,
-        'name': travelName,
-        'latitude': travelLatitude,
-        'longitude': travelLongitude,
-        'address': travelDestinationName,
-        'last_update_date': travelLastUpdateDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
-        'creation_date': travelCreationDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
         'date_range_start': travelDateRangeStart.toIso8601String(),
         'date_range_end': travelDateRangeEnd.toIso8601String(),
         'description': travelDescription,
@@ -74,7 +55,7 @@ class Travel {
         'spent_price': travelSpentPrice ?? 0.0,
         'stops': travelStops ?? [],
         'documents': travelDocuments ?? [],
-
+        ...super.toJson(),
   };
 
   //final random = Random();
@@ -102,13 +83,22 @@ class Travel {
       documents.add(Document.randomFromInt(j, 'name$i'));
     }
 
+    User user = User(
+      username: 'dd',
+          email: 'dd',
+      full_name: 'ddd',
+      disabled: false, avatar_url: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200',
+    );
+
     return Travel(
-      travelId: 'id$i',
-      travelName: 'name$i',
-      travelLatitude: latitude,
-      travelLongitude: longitude,
-      travelDestinationName: 'DestinationName$i',
-      travelCreationDate: DateTime.now(),
+      id: 'id$i',
+      name: 'name$i',
+      latitude: latitude,
+      longitude: longitude,
+      address: 'DestinationName$i',
+      creation_date: DateTime.now(),
+      last_update_date: DateTime.now(),
+      user_created_by: user,
       travelDateRangeStart: DateTime.now().subtract(Duration(days: Random().nextInt(100))),
       travelDateRangeEnd: DateTime.now().add(Duration(days: Random().nextInt(100))),
       travelDescription: 'Description$i',
@@ -116,15 +106,8 @@ class Travel {
       travelSpentPrice: Random().nextDouble(),
       travelStops: stops,
       travelDocuments: documents,
+
     );
   }
 
-  static Travel getBusStop(String query, List<Travel> busStops)  {
-    for (Travel busStop in busStops) {
-      if (busStop.travelId == query) {
-        return busStop;
-      }
-    }
-    return busStops.first;
-  }
 }

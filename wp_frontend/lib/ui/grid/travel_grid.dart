@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:i18n_extension/default.i18n.dart';
 import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/resources/strings.dart';
 import 'package:wp_frontend/ui/bar/context_bar.dart';
 import 'package:wp_frontend/ui/bloc/add_new_card.dart';
@@ -16,9 +17,10 @@ import 'package:wp_frontend/ui/grid/base_grid.dart';
 
 class TravelGrid extends StatefulWidget{
   final ContentType? filter;
+  final User currentUser;
   final ValueChanged<Travel> onTravelSelected;
 
-  const TravelGrid({Key? key, this.filter, required this.onTravelSelected}) :  super(key: key);
+  const TravelGrid({Key? key, this.filter, required this.onTravelSelected, required this.currentUser}) :  super(key: key);
 
   @override
   State<TravelGrid> createState() => _TravelGridState();
@@ -50,24 +52,24 @@ class _TravelGridState extends State<TravelGrid> {
               });
             },
             onTap: () {
-              print('Tapped ${travel.travelName}');
+              print('Tapped ${travel.name}');
 
               widget.onTravelSelected(travel);
             },
             onSelect: (Travel? travelSelected) {
 
               if (travelSelected != null) {
-                print('Selected ${travel.travelName}');
+                print('Selected ${travel.name}');
 
                 setState(() {
                   _selectedTravels.add(travel);
                   changeTitle();
                 });
               }else{
-                print('Unselected ${travel.travelName}');
+                print('Unselected ${travel.name}');
 
                 setState(() {
-                  _selectedTravels.removeWhere((element) => element.travelName == travel.travelName);
+                  _selectedTravels.removeWhere((element) => element.name == travel.name);
                   changeTitle();
                 });
               }
@@ -100,9 +102,9 @@ class _TravelGridState extends State<TravelGrid> {
       title = 'Your travels - ${_travelList.length}';
     }else{
       if (_selectedTravels.length == 1) {
-        title = '${_selectedTravels.first.travelName} selected';
+        title = '${_selectedTravels.first.name} selected';
       }else{
-        title = '${_selectedTravels.first.travelName} and  ${_selectedTravels.length - 1} more selected';
+        title = '${_selectedTravels.first.name} and  ${_selectedTravels.length - 1} more selected';
       }
     }
   }
@@ -112,6 +114,7 @@ class _TravelGridState extends State<TravelGrid> {
       context: context,
       builder: (dialogContex) {
         return NewTravelDialog(
+          currentUser: widget.currentUser,
           onTravelCreated: (Travel travel) async {
             await Api().createTravel(travel);
 

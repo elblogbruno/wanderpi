@@ -52,6 +52,7 @@ def create_user(db: Session, user: schemas.UserCreate, hashed_password: str):
                             hashed_password=hashed_password,
                             disabled=False,
                             creation_date=current_date,
+                            avatar_url= 'https://www.gravatar.com/avatar/',
                             token=None)
     
     db_user.save(db)

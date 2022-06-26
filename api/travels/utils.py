@@ -13,7 +13,7 @@ def get_travels(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Travel).offset(skip).limit(limit).all()
 
 
-def create_travel(db: Session, travel: schemas.Travel):
+def create_travel(db: Session, travel: schemas.Travel, current_user: schemas.User):
     
     id = str(uuid.uuid4())
     current_date = datetime.datetime.now()
@@ -34,7 +34,8 @@ def create_travel(db: Session, travel: schemas.Travel):
         description = travel.description,
 
         distance = 0,
-        spent_price = 0     
+        spent_price = 0, 
+        user_created_by = current_user.id
     )
     
     db_travel.save(db)

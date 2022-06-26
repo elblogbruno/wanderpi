@@ -34,6 +34,7 @@ class BaseModelSchema(object):
     address = Column(String(255))
     creation_date = Column(DateTime, default=datetime.now)
     last_update_date = Column(DateTime, default=datetime.now)
+    user_created_by  = Column(String(36))
 
     def save(self, db):
         db.add(self)
@@ -49,9 +50,11 @@ class User(Base):
     email = Column(String(255))
     full_name = Column(String(255))
     hashed_password = Column(String(255))
+    avatar_url = Column(String(255))
     disabled = Column(Boolean, default=False)
     creation_date = Column(DateTime, default=datetime.now)
     token = Column(String(255))
+    # children = relationship("Child")
 
     def save(self, db):
         db.add(self)

@@ -33,7 +33,7 @@ class _DocumentVaultViewState extends State<DocumentVaultView> {
 
   String get _title {
     if (widget.travel != null) {
-      return "${widget.travel!.travelName} Document Vault";
+      return "${widget.travel!.name} Document Vault";
     }
     return "Global Document Vault";
   }
@@ -65,7 +65,7 @@ class _DocumentVaultViewState extends State<DocumentVaultView> {
 
   void initGrid(){
     if (widget.travel != null) {
-      print('Loading documents for ${widget.travel!.travelName}');
+      print('Loading documents for ${widget.travel!.name}');
 
       for (int i  = 0; i < widget.travel!.travelDocuments!.length; i++) {
 

@@ -162,6 +162,12 @@ async def refresh_token(current_user: schemas.User = Depends(get_current_active_
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@app.get("/users/{user_id}", response_model=schemas.User)
+async def get_user(user_id: str, db : Session = Depends(get_db)):
+    user = users.utils.get_user_by_id(db, user_id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @app.get("/users/me", response_model=schemas.User)
 async def read_users_me(current_user: schemas.User = Depends(get_current_active_user)):
@@ -173,7 +179,7 @@ def create_travel(travel: schemas.Travel, db: Session = Depends(get_db), current
     if db_travel:
         raise HTTPException(status_code=400, detail="Travel already created")
 
-    return  travels.utils.create_travel(db=db, travel=travel)
+    return  travels.utils.create_travel(db=db, travel=travel, current_user=current_user)
 
 @app.put("/travels/{id}", response_model=schemas.Travel)
 def update_travel(travel: schemas.Travel, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):

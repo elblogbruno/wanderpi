@@ -1,2 +1,9 @@
 aiosqlite
 databases
+uvicorn
+fastapi
+pydantic 
+sqlalchemy
+starlette 
+python-jose[cryptography]
+passlib[bcrypt]

@@ -192,7 +192,7 @@ class _MyHomePageState extends State<MainScreen> {
   void _resetTravelGrid() {
     print('Reset travel grid');
 
-    currentGrid = TravelGrid(onTravelSelected: _onTravelSelected,);
+    currentGrid = TravelGrid(onTravelSelected: _onTravelSelected, currentUser: widget.user,);
     _travelOpened = false;
 
   }
@@ -246,7 +246,7 @@ class _MyHomePageState extends State<MainScreen> {
   }
 
   void _onTravelSelected(Travel travel) {
-    print('Selected: ${travel.travelName}');
+    print('Selected: ${travel.name}');
 
     setState(() {
       currentGrid = StopGrid(travel: travel, onStopSelected: _onStopSelected, onBackPressed: () { setState(() { _resetTravelGrid(); } ); } ,);
