@@ -32,6 +32,16 @@ class SharedApi {
     }
   }
 
+  static saveServerUri(String serverUri) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('serverUri', serverUri);
+  }
+
+  static Future<String?> getServerUri() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('serverUri');
+  }
+
   static deleteToken() async {
     final SharedPreferences prefs = await SharedApi.getInstance();
     prefs.remove('token');

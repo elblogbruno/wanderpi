@@ -13,16 +13,27 @@ import 'package:wp_frontend/resources/strings.dart';
 
 class Api {
   static const int TIMEOUT_TIME = 5;
+
   static const String API_ENDPOINT = "http://127.0.0.1:8000/";
 
   Future<bool> validateToken(String token) async {
-    String finalUrl = "${API_ENDPOINT}validate_token/";
+    String finalUrl = "${API_ENDPOINT}token/validate_token";
 
-    String json = {
+    /*String json = {
       "token": token
-    }.toString();
+    }.toString();*/
 
-    http.Response  response =  await apiPostPetition(finalUrl, json);
+    Token tokenObj = Token(access_token: token, token_type: "Bearer");
+
+    Uri url = Uri.parse(finalUrl);
+
+    Map<String, String>? headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    http.Response response = await http.post(url, headers:headers, body: jsonEncode(tokenObj.toJson())).timeout(
+      const Duration(seconds: TIMEOUT_TIME),
+    );
 
     if (response.statusCode == 200) {
       return true;
@@ -151,7 +162,7 @@ class Api {
   }
 
   Future<User?> getUserById(String id) async {
-    String finalUrl = "${API_ENDPOINT}users/$id";
+    String finalUrl = "${API_ENDPOINT}users/id/$id";
 
     http.Response  response =  await apiPetition(finalUrl);
 
@@ -163,7 +174,7 @@ class Api {
   }
 
   Future<User> getUser() async {
-    String finalUrl = "${API_ENDPOINT}users/me/";
+    String finalUrl = "${API_ENDPOINT}users/me";
 
     http.Response  response =  await apiPetition(finalUrl);
 
@@ -281,7 +292,6 @@ class Api {
       return Future.error(Strings.noInternet.i18n);
     }
   }
-
 
   Future<http.Response> apiPetition(String finalUrl) async {
     try {

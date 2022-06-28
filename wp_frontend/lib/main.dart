@@ -21,6 +21,7 @@ import 'package:wp_frontend/views/document_vault_view.dart';
 import 'package:wp_frontend/views/global_map.dart';
 
 import 'package:flutter/material.dart';
+import 'package:wp_frontend/views/settings/settings.dart';
 import 'package:wp_frontend/views/single_wanderpi.dart';
 import 'package:wp_frontend/views/slide_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -327,6 +328,14 @@ class _MyHomePageState extends State<MainScreen> {
             ListTile(
               leading: Icon(Icons.settings),
               title: Text("Settings"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsScreen(),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: Icon(Icons.info_outline),

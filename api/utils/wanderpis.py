@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from models import models
@@ -20,6 +21,15 @@ def create_wanderpi(db: Session, wanderpi: schemas.Wanderpi):
 
     return db_wanderpi
 
+def delete_wanderpi(db: Session, wanderpi_id: int):
+    db_wanderpi = get_wanderpi(db, wanderpi_id)
+    
+    if db_wanderpi:
+        db.delete(db_wanderpi)
+        db.commit()
+        return db_wanderpi
+    else:
+        raise HTTPException(status_code=404, detail="Wanderpi with id {0} not found".format(str(wanderpi_id)))
 
 def update_wanderpi(db: Session, wanderpi: schemas.Wanderpi, db_wanderpi: models.Wanderpi):
     db_wanderpi.id = wanderpi.id

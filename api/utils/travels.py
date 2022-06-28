@@ -10,6 +10,9 @@ def get_travel(db: Session, travel_id: int):
     return db.query(models.Travel).filter(models.Travel.id == travel_id).first()
 
 def get_travels(db: Session, skip: int = 0, limit: int = 100):
+
+    # convert the users to a list of schemas.User
+    
     return db.query(models.Travel).offset(skip).limit(limit).all()
 
 
@@ -40,7 +43,27 @@ def create_travel(db: Session, travel: schemas.Travel, current_user: schemas.Use
     
     db_travel.save(db)
 
-    return db_travel
+    travel = schemas.Travel(
+        id = id,
+        name = travel.name,
+        latitude = travel.latitude,
+        longitude = travel.longitude,
+        address = travel.address,
+        creation_date = current_date,
+        last_update_date = current_date,
+        date_range_start = travel.date_range_start,
+        date_range_end = travel.date_range_end,
+        description = travel.description,
+        distance = 0,
+        spent_price = 0, 
+        user_created_by = current_user,
+        stops=[],
+        documents= [],
+    )
+
+    print(travel)
+
+    return travel
 
 def delete_travel(db: Session, travel_id: str):
     travel = db.query(models.Travel).filter(models.Travel.id == travel_id).first()

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from models import models
@@ -60,11 +61,13 @@ def create_user(db: Session, user: schemas.UserCreate, hashed_password: str):
     return db_user
 
 def delete_user(db: Session, user_id: str):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    db.delete(user)
-    db.commit()
-
-    return user
+    db_user = get_user_by_id(db, user_id)
+    if db_user:
+        db.delete(db_user)
+        db.commit()
+        return db_user
+    else:
+        raise HTTPException(status_code=404, detail="User with id {0} not found".format(str(user_id)))
 
 def update_user(db: Session, user: schemas.User, db_user: models.User):
     # update the user with the new data

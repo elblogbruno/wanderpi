@@ -46,7 +46,7 @@ class BaseModel {
         'latitude': latitude,
         'longitude': longitude,
         'address': address,
-        'user_created_by': userCreatedBy,
+        'user_created_by': userCreatedBy.toJson(),
         'last_update_date': lastUpdateDate.toIso8601String(),
         'creation_date': creationDate.toIso8601String(),
       };

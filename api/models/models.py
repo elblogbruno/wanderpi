@@ -34,7 +34,8 @@ class BaseModelSchema(object):
     address = Column(String(255))
     creation_date = Column(DateTime, default=datetime.now)
     last_update_date = Column(DateTime, default=datetime.now)
-    user_created_by  = Column(String(36))
+    # it is a User pydantic class 
+    user_created_by =  relationship("User", back_populates="travels")
 
     def save(self, db):
         db.add(self)

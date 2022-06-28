@@ -8,7 +8,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 class TokenData(BaseModel):
     username: Union[str, None] = None
 
@@ -43,7 +42,7 @@ class BaseSchema(BaseModel):
     address: str
     creation_date: datetime.datetime
     last_update_date: datetime.datetime
-    user_created_by: str 
+    user_created_by: Union[User, None] = None 
 
 class Wanderpi(BaseSchema):
     type: str

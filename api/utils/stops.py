@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from models import models
@@ -63,6 +64,15 @@ def create_stop(db: Session, stop: schemas.Stop):
 
     return db_stop
 
+def delete_stop(db: Session, stop_id: int):
+    db_stop = get_stop(db, stop_id)
+    
+    if db_stop:
+        db.delete(db_stop)
+        db.commit()
+        return db_stop
+    else:
+        raise HTTPException(status_code=404, detail="Stop with id {0} not found".format(str(stop_id)))
 
 def get_items(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Stop).offset(skip).limit(limit).all()
