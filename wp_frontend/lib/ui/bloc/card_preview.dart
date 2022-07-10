@@ -50,10 +50,8 @@ class _CardPreviewState extends State<CardPreview> {
   Widget buildPreview() {
     return Container(
         height: 200,
-        width: MediaQuery
-            .of(context)
-            .size
-            .width,
+        width: 550,
+        //width: MediaQuery.of(context).size.width - 20,
         padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
         decoration: const
         BoxDecoration(

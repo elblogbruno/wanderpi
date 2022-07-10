@@ -5,6 +5,8 @@ from models import models
 
 import schemas
 
+def get_stop_wanderpis(db: Session, stop_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Wanderpi).filter(models.Wanderpi.stop_id == stop_id).offset(skip).limit(limit).all()
 
 def get_stop(db: Session, stop_id: int):
     return db.query(models.Stop).filter(models.Stop.id == stop_id).first()
@@ -48,6 +50,8 @@ def create_stop(db: Session, stop: schemas.Stop):
         address = stop.address,
         creation_date = stop.creation_date,
         last_update_date = stop.last_update_date,
+        user_created_by = stop.user_created_by,
+    
         date_range_start = stop.date_range_start,
         date_range_end = stop.date_range_end,
         description = stop.description,
@@ -58,6 +62,8 @@ def create_stop(db: Session, stop: schemas.Stop):
         thumbnail_uri_small = stop.thumbnail_uri_small,
         travel_id = stop.travel_id,
         wanderpis = stop.wanderpis
+
+
     )
     
     db_stop.save(db)

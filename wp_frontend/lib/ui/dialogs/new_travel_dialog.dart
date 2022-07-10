@@ -1,3 +1,4 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/const/design_globals.dart';
@@ -68,6 +69,10 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
                   }
                   return null;
                 },
+
+                onTap: () async {
+                  openCountryList();
+                }
               ),
               const SizedBox(height: 10),
               TextFormField(
@@ -128,6 +133,46 @@ class _NewTravelDialogState extends State<NewTravelDialog> {
 
   }
 
+  void openCountryList(){
+
+    void onCountrySelected(Country country) {
+      print(country.name);
+      setState(() {
+        _addressEditingController.text = country.name;
+      });
+      //_addressEditingController.text = country.name;
+    }
+
+    showCountryPicker(
+      context: context,
+      showWorldWide: true,
+      countryListTheme: CountryListThemeData(
+        //flagSize: 25,
+        backgroundColor: Theme.of(context).backgroundColor,
+        textStyle: const TextStyle(fontSize: 16, color: Colors.blueGrey),
+        bottomSheetHeight: 500, // Optional. Country list modal height
+        //Optional. Sets the border radius for the bottomsheet.
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(Globals.radius),
+          topRight: Radius.circular(Globals.radius),
+        ),
+        //Optional. Styles the search field.
+        inputDecoration: InputDecoration(
+          labelText: 'Search',
+          hintText: 'Start typing to search',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: const Color(0xFF8C98A8).withOpacity(0.2),
+            ),
+          ),
+        ),
+      ),
+      onSelect: (Country country) => onCountrySelected(country),
+    );
+
+
+  }
 
   void processForm()
   {

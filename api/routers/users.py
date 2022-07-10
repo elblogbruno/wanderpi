@@ -17,6 +17,15 @@ async def get_user(user_id: str, db : Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+@router.delete("/{id}", response_model=schemas.User)
+def delete_user(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+    db_wanderpi = utils.wanderpis.get_wanderpi(db=db, wanderpi_id=id)
+
+    if not db_wanderpi:
+        raise HTTPException(status_code=404, detail="Wanderpi with id {0} not found".format(str(id)))
+
+    return  utils.wanderpis.delete_wanderpi(db=db, wanderpi_id=id)
+
 @router.get("/me", response_model=schemas.User)
 async def read_users_me(current_user: schemas.User = Depends(get_current_active_user)):
     return current_user

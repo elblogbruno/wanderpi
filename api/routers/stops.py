@@ -23,8 +23,10 @@ def create_stop(stop: schemas.Stop, db: Session = Depends(get_db), current_user:
 
     return  utils.stops.create_stop(db=db, stop=stop)
 
+
+
 @router.delete("/{id}", response_model=schemas.Stop)
-def delete_stop(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+def delete_stop(id: str, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
     db_stop = utils.stops.get_stop(db=db, stop_id=id)
 
     if not db_stop:
@@ -43,3 +45,7 @@ def update_stop(stop: schemas.Stop, db: Session = Depends(get_db), current_user:
     return  utils.stops.update_stop(db=db, stop=stop, db_stop = db_stop)
 
 
+@router.get("/{id}/wanderpis", response_model=list[schemas.Wanderpi])
+def read_stop_wanderpis(id: str, skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+    stops_list = utils.stops.get_stop_wanderpis(db, id, skip=skip, limit=limit)
+    return stops_list

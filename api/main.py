@@ -1,3 +1,6 @@
+from utils.db_manager import DbManager
+from utils.memory_manager import MemoryManager
+from background.upload_watchdog import UploadWatchdog
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
 
@@ -6,7 +9,7 @@ from models.models import *
 
 import logging
 from dependencies import *
-from routers import stops, travels, wanderpis, users, auth
+from routers import stops, travels, wanderpis, users, auth, file, drives
 
 
 dir_path = 'wanderpi.log'
@@ -22,12 +25,21 @@ logging.info("Log file will be saved to temporary path: {0}".format(dir_path))
 
 Base.metadata.create_all(bind=engine)
 
+
 app = FastAPI()
 app.include_router(auth.router)
 app.include_router(stops.router)
 app.include_router(travels.router)
 app.include_router(wanderpis.router)
 app.include_router(users.router)
+app.include_router(file.router)
+app.include_router(drives.router)
+
+db_manager = DbManager(db_session=SessionLocal())
+
+config = MemoryManager('./api/config/', 'memory.json') # create a singleton instance of MemoryManagement
+
+watchdog = UploadWatchdog(config.memories) 
 
 @app.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db : Session = Depends(get_db)):

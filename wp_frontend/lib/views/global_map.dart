@@ -23,6 +23,9 @@ class GlobalMapView extends StatefulWidget{
 
 class _GlobalMapViewState extends State<GlobalMapView> {
 
+  MapController? _mapController;
+
+
   String get _title {
     if (widget.travel != null) {
       return "${widget.travel!.name} Map View";
@@ -42,6 +45,19 @@ class _GlobalMapViewState extends State<GlobalMapView> {
       },
       child: _buildMap(),
     );
+  }
+
+  @override
+  void didUpdateWidget (GlobalMapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    print('didUpdateObject DocumentVaultView');
+    if (widget.travel !=  null) {
+      _mapController?.move(LatLng(widget.travel!.latitude, widget.travel!.longitude), 15);
+    }
+    else{
+      _mapController?.move(LatLng(0, 0), 0);
+    }
   }
 
   Widget _buildBottomButtons(){
@@ -96,25 +112,33 @@ class _GlobalMapViewState extends State<GlobalMapView> {
     );
   }
 
-  FlutterMap _buildMap(){
-    return FlutterMap(
-      options: MapOptions(
-        center: LatLng(51.5, -0.09),
-        zoom: 8.0,
-      ),
-      layers: [
-        TileLayerOptions(
-          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
-          attributionBuilder: (_) {
-            return const Text("© OpenStreetMap contributors");
-          },
-          //tileProvider: const CachedTileProvider(),
+  Widget _buildMap(){
+    try {
+      return FlutterMap(
+        mapController: _mapController,
+        options: MapOptions(
+          center: LatLng(51.5, -0.09),
+          zoom: 8.0,
         ),
-        MarkerLayerOptions(
-          markers:  widget.travel != null ? widget.travel!.travelStops!.map((stop) => stop.toMarker()).toList() : [],
-        ),
-      ],
-    );
+        layers: [
+          TileLayerOptions(
+            urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            subdomains: ['a', 'b', 'c'],
+            attributionBuilder: (_) {
+              return const Text("© OpenStreetMap contributors");
+            },
+            errorImage: const AssetImage("assets/images/memory_icon.png"),
+            //tileProvider: const CachedTileProvider(),
+          ),
+          MarkerLayerOptions(
+            markers:  widget.travel != null ? widget.travel!.travelStops!.map((stop) => stop.toMarker()).toList() : [],
+          ),
+        ],
+      );
+    } catch (e) {
+      print(e);
+      return Container();
+    }
+
   }
 }

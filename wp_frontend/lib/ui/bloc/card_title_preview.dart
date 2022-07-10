@@ -54,67 +54,59 @@ class _CardTitlePreviewState extends State<CardTitlePreview> {
   Widget buildPreview() {
     return Padding(
       padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0, bottom: 10.0),
-      child:
-      Align(
-          alignment: Alignment.topLeft,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: MediaQuery.of(context).size.width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              SizedBox(
-                width:  300.0,
-                height: 70.0,
-                child:
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    AutoSizeText(widget.objectPreviewName,
-                      textAlign: TextAlign.start,
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Colors.black,
-                      ),
-                      maxLines: 2,
-                      minFontSize: 15,
-                      maxFontSize: 25,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  AutoSizeText(widget.objectPreviewName,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: Colors.black,
                     ),
-                    AutoSizeText(
-                      widget.objectCreationDate.toString(),
-                      textAlign: TextAlign.start,
-
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.black,
-                      ),
-                      maxLines: 2,
-                      minFontSize: 10,
-                      maxFontSize: 15,
-                    ),
-
-                  ],
-                ),
-
-              ),
-              SizedBox(
-                width:  25.0,
-                height: 25.0,
-                child:
-                Checkbox(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(Globals.radius),
+                    maxLines: 2,
+                    minFontSize: 15,
+                    maxFontSize: 25,
                   ),
-                  checkColor: Colors.white,
-                  fillColor: MaterialStateProperty.resolveWith(getColor),
-                  value: _isSelected,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _isSelected = value!;
-                      print("_isSelected: $_isSelected");
-                      widget.onSelect(_isSelected);
-                    });
-                  },
+                  AutoSizeText(
+                    widget.objectCreationDate.toString(),
+                    textAlign: TextAlign.start,
+
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.black,
+                    ),
+                    maxLines: 2,
+                    minFontSize: 10,
+                    maxFontSize: 15,
+                  ),
+
+                ],
+              ),
+              Checkbox(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Globals.radius),
                 ),
+                checkColor: Colors.white,
+                fillColor: MaterialStateProperty.resolveWith(getColor),
+                value: _isSelected,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _isSelected = value!;
+                    print("_isSelected: $_isSelected");
+                    widget.onSelect(_isSelected);
+                  });
+                },
               ),
             ],
-          )
+          ),
+        ),
       ),
     );
   }

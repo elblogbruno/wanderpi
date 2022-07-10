@@ -6,6 +6,8 @@ import 'package:wp_frontend/models/document.dart';
 import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/models/user.dart';
 
+import '../api/api.dart';
+
 class Travel extends BaseModel {
   final DateTime travelDateRangeStart;
   final DateTime travelDateRangeEnd;
@@ -35,15 +37,49 @@ class Travel extends BaseModel {
     this.travelDocuments,
   }) : super(id, name, latitude, longitude, address, creation_date, last_update_date, user_created_by);
 
-  Travel.fromJson(Map<dynamic, dynamic> json)
+  // async function to construct a Travel from a json object calling BaseModel.fromJson()
+  static Future<Travel> fromJson(Map<dynamic, dynamic> json) async {
+    final User? userCreatedBy = await Api().userApiEndpoint().getUserById(json['user_created_by']);
+
+    List<Stop> stops = [];
+
+    if (json['stops'] != null && (json['stops'] as List<dynamic>).isNotEmpty) {
+      // parse stops from json as list
+      print((json['stops'] as List<dynamic>).length);
+
+      stops = await Future.wait((json['stops'] as List<dynamic>).map((stopJson) async {
+        return await Stop.fromJson(stopJson);
+      }).toList());
+    }
+
+    return Travel(
+      id: json['id'],
+      name: json['name'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      address: json['address'],
+      creation_date: DateTime.parse(json['creation_date']),
+      last_update_date: DateTime.parse(json['last_update_date']),
+      user_created_by: userCreatedBy ?? User.notExistingUser() ,
+      travelDateRangeStart: DateTime.parse(json['date_range_start']),
+      travelDateRangeEnd: DateTime.parse(json['date_range_end']),
+      travelDescription: json['description'],
+      travelDistance: json['distance'],
+      travelSpentPrice: json['spent_price'],
+      travelStops: stops,
+      travelDocuments: (json['documents'] as List<dynamic>).map((e) => Document.fromJson(e)).toList(),
+    );
+  }
+
+  Travel.fromJson1(Map<dynamic, dynamic> json)
       : travelDateRangeStart = DateTime.parse(json['date_range_start']),
         travelDateRangeEnd = DateTime.parse(json['date_range_end']),
         travelDescription = json['description'],
         travelDistance = json['distance'],
         travelSpentPrice = json['spent_price'],
-        travelStops = (json['stops'] as List<dynamic>).map((e) => Stop.fromJson(e)).toList(),
+        travelStops = (json['stops'] as List<dynamic>).map((e) => Stop.fromJson1(e)).toList(),
         travelDocuments = (json['documents'] as List<dynamic>).map((e) => Document.fromJson(e)).toList(),
-        super.fromJson(json);
+        super.fromJson1(json);
 
 
 
@@ -84,6 +120,7 @@ class Travel extends BaseModel {
     }
 
     User user = User(
+      id: 'user$i',
       username: 'dd',
           email: 'dd',
       full_name: 'ddd',

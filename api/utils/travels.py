@@ -9,6 +9,9 @@ import datetime
 def get_travel(db: Session, travel_id: int):
     return db.query(models.Travel).filter(models.Travel.id == travel_id).first()
 
+def get_travel_stops(db: Session, travel_id: str, skip: int = 0, limit: int = 100):
+    return db.query(models.Stop).filter(models.Stop.travel_id == travel_id).offset(skip).limit(limit).all()
+
 def get_travels(db: Session, skip: int = 0, limit: int = 100):
 
     # convert the users to a list of schemas.User
@@ -43,27 +46,28 @@ def create_travel(db: Session, travel: schemas.Travel, current_user: schemas.Use
     
     db_travel.save(db)
 
-    travel = schemas.Travel(
-        id = id,
-        name = travel.name,
-        latitude = travel.latitude,
-        longitude = travel.longitude,
-        address = travel.address,
-        creation_date = current_date,
-        last_update_date = current_date,
-        date_range_start = travel.date_range_start,
-        date_range_end = travel.date_range_end,
-        description = travel.description,
-        distance = 0,
-        spent_price = 0, 
-        user_created_by = current_user,
-        stops=[],
-        documents= [],
-    )
+    return db_travel
+    # travel = schemas.Travel(
+    #     id = id,
+    #     name = travel.name,
+    #     latitude = travel.latitude,
+    #     longitude = travel.longitude,
+    #     address = travel.address,
+    #     creation_date = current_date,
+    #     last_update_date = current_date,
+    #     date_range_start = travel.date_range_start,
+    #     date_range_end = travel.date_range_end,
+    #     description = travel.description,
+    #     distance = 0,
+    #     spent_price = 0, 
+    #     user_created_by = current_user.id,
+    #     stops=[],
+    #     documents= [],
+    # )
 
-    print(travel)
+    # print(travel)
 
-    return travel
+    # return travel
 
 def delete_travel(db: Session, travel_id: str):
     travel = db.query(models.Travel).filter(models.Travel.id == travel_id).first()

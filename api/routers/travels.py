@@ -44,3 +44,8 @@ def delete_travel(id: str, db: Session = Depends(get_db), current_user: schemas.
 def read_travel(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
     travels_list = utils.travels.get_travels(db, skip=skip, limit=limit)
     return travels_list
+
+@router.get("/{id}/stops", response_model=list[schemas.Stop])
+def read_travel_stops(id: str, skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+    stops_list = utils.travels.get_travel_stops(db, id, skip=skip, limit=limit)
+    return stops_list

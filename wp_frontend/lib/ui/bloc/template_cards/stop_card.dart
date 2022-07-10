@@ -41,7 +41,7 @@ class _StopCardState extends State<StopCard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CardPreview(
-            objectPreviewName: widget.stop.stopDestinationName,
+            objectPreviewName: widget.stop.address,
             imageUrl: widget.stop.stopImageUri,
             thumbnailUrl: widget.stop.stopThumbnailUri,
             type: CardPreviewType.image,
@@ -84,7 +84,7 @@ class _StopCardState extends State<StopCard> {
   FlutterMap _buildMap(){
     return FlutterMap(
       options: MapOptions(
-        center: LatLng(widget.stop.stopLatitude, widget.stop.stopLongitude),
+        center: LatLng(widget.stop.latitude, widget.stop.longitude),
         zoom: 13.0,
       ),
       layers: [
@@ -101,7 +101,7 @@ class _StopCardState extends State<StopCard> {
             Marker(
               width: 80.0,
               height: 80.0,
-              point: LatLng(widget.stop.stopLatitude, widget.stop.stopLongitude),
+              point: LatLng(widget.stop.latitude, widget.stop.longitude),
               builder: (ctx) =>
                   Container(
                     child: FlutterLogo(),
@@ -131,8 +131,8 @@ class _StopCardState extends State<StopCard> {
         children:
         <Widget>[
           CardTitlePreview(
-            objectPreviewName: widget.stop.stopName,
-            objectCreationDate: widget.stop.stopCreationDate!,
+            objectPreviewName: widget.stop.name,
+            objectCreationDate: widget.stop.creationDate,
             onSelect: (bool isSelected) {
               setState(() {
                 if (isSelected) {
@@ -148,7 +148,7 @@ class _StopCardState extends State<StopCard> {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.location_on, color: Colors.black),
-                title: Text(widget.stop.stopDestinationName, style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                title: Text(widget.stop.address, style: Theme.of(context).textTheme.bodyText1?.copyWith(
                   color: Colors.black,
                 ),),
               ),

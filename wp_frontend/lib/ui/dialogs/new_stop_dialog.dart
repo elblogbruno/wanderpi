@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:wp_frontend/const/design_globals.dart';
 import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/ui/utils.dart';
 import 'package:wp_frontend/utils/geo_utils.dart';
 
 class NewStopDialog extends StatefulWidget  {
-
+  final User currentUser;
   final ValueChanged<Stop> onStopCreated;
   final Travel travel;
-  const NewStopDialog({Key? key, required this.onStopCreated, required this.travel}) :  super(key: key, );
+  const NewStopDialog({Key? key, required this.onStopCreated, required this.travel, required this.currentUser}) :  super(key: key, );
 
   @override
   State<NewStopDialog> createState() => _NewStopDialogState();
@@ -151,12 +152,15 @@ class _NewStopDialogState extends State<NewStopDialog> {
       stopDescription: _descriptionEditingController.value.text,
       stopDateRangeEnd: range.start,
       stopDateRangeStart: range.end,
-      stopDestinationName: _addressEditingController.value.text,
-      stopLatitude: value[0],
-      stopLongitude: value[1],
-      stopName: _nameEditingController.value.text,
-      stopId: 'demo',
-      stopTravelId: widget.travel.id
+      address: _addressEditingController.value.text,
+      latitude: value[0],
+      longitude: value[1],
+      name: _nameEditingController.value.text,
+      id: 'demo',
+      stopTravelId: widget.travel.id,
+      creation_date: DateTime.now(),
+      last_update_date: DateTime.now(),
+      user_created_by: widget.currentUser,
     );
 
     widget.onStopCreated(stop);

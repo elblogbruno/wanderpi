@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 import datetime
 
+from torch import memory_format
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -12,6 +14,7 @@ class TokenData(BaseModel):
     username: Union[str, None] = None
 
 class User(BaseModel):
+    id: str
     username: str
     email: str
     full_name: str
@@ -26,6 +29,7 @@ class UserCreate(BaseModel):
 
 class UserInDB(User):
     id: str
+    avatar_encoding: str
     hashed_password: str
     creation_date: datetime.datetime
     token:  Union[str, None] = None
@@ -42,7 +46,7 @@ class BaseSchema(BaseModel):
     address: str
     creation_date: datetime.datetime
     last_update_date: datetime.datetime
-    user_created_by: Union[User, None] = None 
+    user_created_by: Union[str, None] = None 
 
 class Wanderpi(BaseSchema):
     type: str
@@ -91,4 +95,8 @@ class Travel(BaseSchema):
 
     class Config:
         orm_mode = True
-   
+
+class MemoryDrive(BaseModel):
+    memory_type : str
+    memory_access_uri : str
+    memory_id : str

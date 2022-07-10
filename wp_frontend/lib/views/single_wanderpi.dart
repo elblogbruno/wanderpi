@@ -29,7 +29,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
     /* Column that holds the map and the bottom buttons */
     return
       ContextBar(
-        title: widget.wanderpi.wanderpiName,
+        title: widget.wanderpi.name,
         onBackPressed: () {
       widget.onBackPressed();
     },
@@ -83,7 +83,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
 
   Widget _showMapDialog(){
     return AlertDialog(
-      title: Text("${widget.wanderpi.wanderpiName } is located at ${widget.wanderpi.wanderpiAddress}"),
+      title: Text("${widget.wanderpi.name } is located at ${widget.wanderpi.address}"),
       content: Padding(
         padding: const EdgeInsets.all(10.0) ,
         child: Container(
@@ -178,7 +178,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
             Text(
-              widget.wanderpi.wanderpiAddress,
+              widget.wanderpi.address,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -187,7 +187,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
             ),
 
             Text(
-                "${widget.wanderpi.wanderpiLatitude}, ${widget.wanderpi.wanderpiLongitude}",
+                "${widget.wanderpi.latitude}, ${widget.wanderpi.longitude}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -206,7 +206,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            widget.wanderpi.wanderpiName,
+            widget.wanderpi.name,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -215,7 +215,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
           ),
 
           Text(
-            widget.wanderpi.wanderpiCreationDate.toIso8601String(),
+            widget.wanderpi.creationDate.toIso8601String(),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class _SingleWanderpiViewState extends State<SingleWanderpiView> {
             ),
           ),
 
-          Text(widget.wanderpi.wanderpiLastUpdateDate.toIso8601String(),
+          Text(widget.wanderpi.lastUpdateDate.toIso8601String(),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

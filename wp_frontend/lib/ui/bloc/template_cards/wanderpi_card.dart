@@ -107,8 +107,8 @@ class _WanderpiCardState extends State<WanderpiCard> {
         children:
         <Widget>[
           CardTitlePreview(
-            objectPreviewName: widget.wanderpi.wanderpiName,
-            objectCreationDate: widget.wanderpi.wanderpiCreationDate,
+            objectPreviewName: widget.wanderpi.name,
+            objectCreationDate: widget.wanderpi.creationDate,
             onSelect: (bool isSelected) {
               setState(() {
                 if (isSelected) {
@@ -124,7 +124,7 @@ class _WanderpiCardState extends State<WanderpiCard> {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.location_on, color: Colors.black),
-                title: Text(widget.wanderpi.wanderpiAddress, style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                title: Text(widget.wanderpi.address, style: Theme.of(context).textTheme.bodyText1?.copyWith(
                   color: Colors.black,
                 ),),
               ),
@@ -138,7 +138,7 @@ class _WanderpiCardState extends State<WanderpiCard> {
 
               ListTile(
                 leading: const Icon(Icons.moving , color: Colors.black),
-                title: Text("${widget.wanderpi.wanderpiLastUpdateDate} km", style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                title: Text("${widget.wanderpi.lastUpdateDate} km", style: Theme.of(context).textTheme.bodyText1?.copyWith(
                   color: Colors.black,
                 ),),
               ),

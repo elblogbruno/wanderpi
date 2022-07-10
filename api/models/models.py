@@ -1,3 +1,4 @@
+from ast import Str
 from faulthandler import disable
 from lib2to3.pgen2 import token
 from sqlalchemy.sql.schema import ForeignKey
@@ -35,7 +36,8 @@ class BaseModelSchema(object):
     creation_date = Column(DateTime, default=datetime.now)
     last_update_date = Column(DateTime, default=datetime.now)
     # it is a User pydantic class 
-    user_created_by =  relationship("User", back_populates="travels")
+    user_created_by = Column(String(255))
+    # user_created_by =  relationship("User", back_populates="travels")
 
     def save(self, db):
         db.add(self)
@@ -52,6 +54,7 @@ class User(Base):
     full_name = Column(String(255))
     hashed_password = Column(String(255))
     avatar_url = Column(String(255))
+    avatar_encoding = Column(String(255))
     disabled = Column(Boolean, default=False)
     creation_date = Column(DateTime, default=datetime.now)
     token = Column(String(255))

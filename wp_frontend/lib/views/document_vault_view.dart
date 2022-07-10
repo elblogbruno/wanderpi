@@ -5,7 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:wp_frontend/models/document.dart';
 import 'package:wp_frontend/models/travel.dart';
 import 'package:wp_frontend/ui/bar/context_bar.dart';
-import 'package:wp_frontend/ui/bloc/document_card.dart';
+import 'package:wp_frontend/ui/bloc/template_cards/document_card.dart';
 import 'package:wp_frontend/ui/grid/base_grid.dart';
 import 'package:wp_frontend/utils/maps/cached_tile_provider.dart';
 

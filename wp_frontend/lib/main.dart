@@ -6,6 +6,7 @@ import 'package:wp_frontend/models/stop.dart';
 import 'package:wp_frontend/models/travel.dart';
 import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/models/wanderpi.dart';
+import 'package:wp_frontend/resources/strings.dart';
 import 'package:wp_frontend/ui/bar/filter_bar.dart';
 import 'package:wp_frontend/ui/bar/corner_profile_picture.dart';
 import 'package:wp_frontend/ui/bar/floating_action_button.dart';
@@ -15,6 +16,11 @@ import 'package:wp_frontend/ui/bar/nav_rail.dart';
 import 'package:wp_frontend/ui/grid/stop_grid.dart';
 import 'package:wp_frontend/ui/grid/travel_grid.dart';
 import 'package:wp_frontend/ui/grid/wanderpi_grid.dart';
+import 'package:wp_frontend/ui/state_widgets/base_future_builder.dart';
+
+import 'package:wp_frontend/ui/state_widgets/loading_widget.dart';
+import 'package:wp_frontend/ui/state_widgets/error_widget_retry.dart';
+
 import 'package:wp_frontend/views/authentication/login_view.dart';
 import 'package:wp_frontend/views/calendar/calendar_view.dart';
 import 'package:wp_frontend/views/document_vault_view.dart';
@@ -34,41 +40,49 @@ Future<void> main() async {
 
   String? token = await  SharedApi.getToken();
 
-    if (token != null) {
-      bool valid = await Api().validateToken(token);
+  String? serverUri = await SharedApi.getServerUri();
 
-      if (!valid) {
-        SharedApi.deleteToken();
+  //await SharedApi.deleteUser();
+  //await SharedApi.deleteToken();
 
-        print('No token found');
-        runApp(Login());
-      } else {
-        print('Token: $token');
 
-        User? user = await SharedApi.getUser();
+  if (serverUri == null) {
+    print("Server URI is null");
 
-        MyApp app = MyApp(
-          child: MainScreen(title: 'Navigation Rail Demo', user: user!,),
-        );
+    MyApp app = const MyApp(
+      child: SettingsScreen(),
+    );
 
-        runApp(app);
-      }
+    runApp(app);
 
-    } else {
-      print('No token found');
+    return;
+  }
 
-      MyApp app = MyApp(
-        child: LoginScreen(),
-      );
+  if (token != null) {
 
-      runApp(app);
-    }
+    print('Token: $token');
+
+    MyApp app = MyApp(
+      child: MainScreen(title: 'Navigation Rail Demo', token: token, serverUri: serverUri),
+    );
+
+    runApp(app);
+  } else {
+    print('No token found');
+
+    MyApp app = MyApp(
+      child: LoginScreen(),
+    );
+
+    runApp(app);
+  }
 
 }
 
 class MyApp extends StatelessWidget {
   final Widget child;
-  const MyApp({Key? key, required this.child }) : super(key: key);
+
+  const MyApp({Key? key, required this.child}) : super(key: key);
 
 
   @override
@@ -105,10 +119,11 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  final User user;
   final String title;
+  final String? token;
+  final String? serverUri;
 
-  const MainScreen({Key? key, required this.title, required this.user}) : super(key: key);
+  const MainScreen({Key? key, required this.title,  this.token, this.serverUri}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MyHomePageState();
@@ -120,6 +135,8 @@ class _MyHomePageState extends State<MainScreen> {
   static const int SLIDE_VIEW = 2;
   static const int CALENDAR_VIEW = 3;
   static const int DOCUMENT_VAULT_VIEW = 4;
+
+  late String token;
 
   int _currentIndex = 0;
 
@@ -137,6 +154,7 @@ class _MyHomePageState extends State<MainScreen> {
 
   late Travel _lastTravel;
 
+  late User? _user;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -193,11 +211,11 @@ class _MyHomePageState extends State<MainScreen> {
   void _resetTravelGrid() {
     print('Reset travel grid');
 
-    currentGrid = TravelGrid(onTravelSelected: _onTravelSelected, currentUser: widget.user,);
+    currentGrid = TravelGrid(onTravelSelected: _onTravelSelected, currentUser: _user!,);
     _travelOpened = false;
 
   }
-  
+
   void _goHome(){
     setState(() {
       _currentIndex = 0;
@@ -247,10 +265,10 @@ class _MyHomePageState extends State<MainScreen> {
   }
 
   void _onTravelSelected(Travel travel) {
-    print('Selected: ${travel.name}');
+    print('Selected travel: ${travel.name}');
 
     setState(() {
-      currentGrid = StopGrid(travel: travel, onStopSelected: _onStopSelected, onBackPressed: () { setState(() { _resetTravelGrid(); } ); } ,);
+      currentGrid = StopGrid(currentUser: _user!, travel: travel, onStopSelected: _onStopSelected, onBackPressed: () { setState(() { _resetTravelGrid(); } ); } ,);
 
       print('current grid: ${currentGrid.runtimeType}');
 
@@ -275,27 +293,28 @@ class _MyHomePageState extends State<MainScreen> {
   }
 
 
-
+  @override
   void initState() {
     super.initState();
+    _user = null;
+    token = widget.token!;
 
-    _resetTravelGrid();
+    //_resetTravelGrid();
     _resetCalendarView();
     _resetMapView();
     _resetVaultView();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildNavRail(User user) {
     return NavRail(
       scaffoldKey: _scaffoldKey,
       drawerHeaderBuilder: (context) {
         return Column(
           children:  <Widget>[
             UserAccountsDrawerHeader(
-              currentAccountPicture: const CornerProfilePicture(radius: 0.5, userAvatarUrl: 'assets/images/profile.jpg',),
-              accountName: Text(widget.user.full_name),
-              accountEmail: Text(widget.user.email),
+              currentAccountPicture:  CornerProfilePicture(radius: 0.5, userAvatarUrl: user.avatar_url,),
+              accountName: Text(user.full_name),
+              accountEmail: Text(user.email),
             ),
             //BrainMemoryManagementCard(),
           ],
@@ -309,11 +328,12 @@ class _MyHomePageState extends State<MainScreen> {
               title: Text("Memory Management"),
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
               onTap: () async {
                 try{
-                  await  Api().logout();
+                  await  Api().authApiEndpoint().logout();
+
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -322,6 +342,13 @@ class _MyHomePageState extends State<MainScreen> {
                   );
                 } catch(e){
                   print(e);
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(),
+                    ),
+                  );
                 }
               },
             ),
@@ -392,26 +419,26 @@ class _MyHomePageState extends State<MainScreen> {
         children: <Widget>[
           //const ContextBar(),
           Stack(
-              children:  <Widget>[
-                currentGrid,
-                if (_showContextBar)
-                  FilterBar(),
-              ],
+            children:  <Widget>[
+              currentGrid,
+              if (_showContextBar)
+                FilterBar(),
+            ],
           ),
           // filter main grid by context
           Stack(
-              children:   <Widget>[
-                currentMapWidget,
-                if (_showContextBar)
-                  FilterBar(),
-              ],
+            children:   <Widget>[
+              currentMapWidget,
+              if (_showContextBar)
+                FilterBar(),
+            ],
           ),
           Stack(
-              children:   <Widget>[
-                SlideView(),
-                if (_showContextBar)
-                  FilterBar(),
-              ],
+            children:   <Widget>[
+              SlideView(),
+              if (_showContextBar)
+                FilterBar(),
+            ],
           ),
           Stack(
             children:   <Widget>[
@@ -495,6 +522,72 @@ class _MyHomePageState extends State<MainScreen> {
             ),
           ),
         );
+      },
+    );
+  }
+
+  late Future<User?> _calculation = Api().authApiEndpoint().validateToken(token);
+
+  @override
+  Widget build(BuildContext context) {
+
+    return FutureBuilder<User?>(
+      future: _calculation, // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
+
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            _user = snapshot.data!;
+
+            if (_user == null) {
+              SharedApi.deleteToken();
+
+              print('Invalid token found');
+
+              MyApp app = MyApp(
+                child: LoginScreen(),
+              );
+
+              runApp(app);
+            }
+
+            if (_travelOpened == false) {
+              _resetTravelGrid();
+            }
+
+            print('User: ${_user?.full_name}');
+
+            return _buildNavRail(_user!);
+          } else if (snapshot.hasError) {
+            print('ERROR : ${snapshot.error}');
+
+            if (snapshot.error == Strings.noAuthException.i18n) {
+              // log out
+              print('No auth exception');
+              // wait some time before redirecting to login page
+              Future.delayed(const Duration(seconds: 2), () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(),
+                  ),
+                );
+              });
+            }
+
+            return ErrorWidgetRetry(
+              error: snapshot.error.toString(),
+              onRetry: () =>
+                  setState(() {
+                    print('Retrying');
+                    _calculation =  Api().authApiEndpoint().validateToken(token);
+                  }
+                  ),
+            );
+          }
+        }
+
+        return LoadingWidget();
       },
     );
   }

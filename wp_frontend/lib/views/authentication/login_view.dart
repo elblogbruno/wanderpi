@@ -113,16 +113,14 @@ class _LoginViewState extends State<LoginScreen> {
                   child: FlatButton(
                     onPressed: () async {
                       try {
-                        Token token = await Api().login(_usernameController.text, _passwordController.text);
+                        Token token = await Api().authApiEndpoint().login(_usernameController.text, _passwordController.text);
 
                         if (token.access_token != null) {
-                          User user = await Api().getUser();
-
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MainScreen(user: user, title: 'Home',),
+                                  MainScreen(title: 'Home', token: token.access_token),
                             ),
                           );
                         }
@@ -133,11 +131,11 @@ class _LoginViewState extends State<LoginScreen> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text("Error"),
+                              title: const Text("Error"),
                               content: Text( e.toString()),
                               actions: <Widget>[
                                 FlatButton(
-                                  child: Text("Close"),
+                                  child: const Text("Close"),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },

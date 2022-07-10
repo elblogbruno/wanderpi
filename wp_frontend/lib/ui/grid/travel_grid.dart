@@ -9,11 +9,14 @@ import 'package:wp_frontend/models/travel.dart';
 import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/resources/strings.dart';
 import 'package:wp_frontend/ui/bar/context_bar.dart';
-import 'package:wp_frontend/ui/bloc/add_new_card.dart';
-import 'package:wp_frontend/ui/bloc/travel_card.dart';
+
+import 'package:wp_frontend/ui/bloc/template_cards/add_new_card.dart';
+import 'package:wp_frontend/ui/bloc/template_cards/travel_card.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/ui/dialogs/new_travel_dialog.dart';
 import 'package:wp_frontend/ui/grid/base_grid.dart';
+import 'package:wp_frontend/ui/state_widgets/base_future_builder.dart';
+
 
 class TravelGrid extends StatefulWidget{
   final ContentType? filter;
@@ -45,10 +48,10 @@ class _TravelGridState extends State<TravelGrid> {
           TravelCard(
             travel: travel,
             onDeleteClick: (Travel travelSelected) async {
-              await Api().deleteTravel(travelSelected);
+              await Api().travelApiEndpoint().deleteTravel(travelSelected);
 
               setState(() {
-                _calculation = Api().getTravels();
+                _calculation = Api().travelApiEndpoint().getTravels();
               });
             },
             onTap: () {
@@ -89,11 +92,11 @@ class _TravelGridState extends State<TravelGrid> {
     );
 
     for (int i = 0; i < _selectedTravels.length; i++){
-      await Api().deleteTravel(_selectedTravels[i]);
+      await Api().travelApiEndpoint().deleteTravel(_selectedTravels[i]);
     }
 
     setState(() {
-      _calculation = Api().getTravels();
+      _calculation = Api().travelApiEndpoint().getTravels();
     });
   }
 
@@ -116,14 +119,14 @@ class _TravelGridState extends State<TravelGrid> {
         return NewTravelDialog(
           currentUser: widget.currentUser,
           onTravelCreated: (Travel travel) async {
-            await Api().createTravel(travel);
+            await Api().travelApiEndpoint().createTravel(travel);
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Travel created!')),
             );
 
             setState(() {
-              _calculation = Api().getTravels();
+              _calculation = Api().travelApiEndpoint().getTravels();
             });
           },
         );
@@ -131,7 +134,7 @@ class _TravelGridState extends State<TravelGrid> {
     );
   }
 
-  Future<List<Travel>?> _calculation = Api().getTravels();
+  Future<List<Travel>?> _calculation = Api().travelApiEndpoint().getTravels();
 
   @override
   Widget build(BuildContext context) {
@@ -139,88 +142,39 @@ class _TravelGridState extends State<TravelGrid> {
 
     //Theme.of(context).colorScheme.background.withOpacity(0.7)
     return ContextBar(
-        showBar: true,
-        onDeleteClicked: bulkDelete,
-        onAddClicked: onAddClicked,
-        showBackButton: false,
-        showContextButtons: true,
-        showDeleteButton:  _selectedTravels.isNotEmpty,
-        title: title,
-        child:
-        FutureBuilder<List<Travel>?>(
-          future: _calculation, // a previously-obtained Future<String> or null
-          builder: (BuildContext context, AsyncSnapshot<List<Travel>?> snapshot) {
-            List<Widget> children;
-            if (snapshot.hasData) {
-              _travelList = snapshot.data!;
+      showBar: true,
+      onDeleteClicked: bulkDelete,
+      onAddClicked: onAddClicked,
+      showBackButton: false,
+      showContextButtons: true,
+      showDeleteButton:  _selectedTravels.isNotEmpty,
+      title: title,
+      child:
+      BaseFutureBuilder<List<Travel>?>(
+        calculation: _calculation, // a previously-obtained Future<String> or null
+        builder: (context, snapshot) {
+          _travelList = snapshot!;
 
-              if (_travelList.isNotEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: getCustomScrollView(context,
-                      buildTravelCardListFromList(_travelList)),
-                );
-              }else{
-                return Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child:  Center(
-                    child: AddMoreCard(
-                      objectToAdd: 'Travel',
-                      onTap: () { },
-                    )
-                    ),
-                );
-              }
-            } else if (snapshot.hasError) {
-              children = <Widget>[
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 60,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text('Error: ${snapshot.error}', textAlign: TextAlign.center,),
-                ),
-                InkWell(
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Icon(
-                        Icons.refresh,
-                        color: Colors.red,
-                        size: 60,
-                      ),
-                    ),
-                    onTap: () => setState(() { _calculation = Api().getTravels(); })
-                )
-              ];
-
-            } else {
-              children = <Widget>[
-                const SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(Strings.waitText.i18n),
-                ),
-
-              ];
-            }
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: children,
+          if (_travelList.isNotEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: getCustomScrollView(context,
+                  buildTravelCardListFromList(_travelList)),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Center(
+                  child: AddMoreCard(
+                    objectToAdd: 'Travel',
+                    onTap: () {},
+                  )
               ),
             );
-          },
-        ),
+          }
 
-
-
+        },
+      ),
     );
   }
 

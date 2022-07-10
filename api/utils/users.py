@@ -23,19 +23,36 @@ def refresh_token(db: Session, username: str, token: str):
 
     return user.token
 
-def get_user_with_token(db: Session, token: str, is_login: bool = False):
-    dic = db.query(models.User).filter(models.User.username == token).first()
+
+
+def get_user_by_token(db: Session, token: str, is_login: bool = False):
+    dic = db.query(models.User).filter(models.User.token == token).first()
     
     if dic is None or  (dic.token == None and not is_login):
         return None
 
     return schemas.UserInDB(**dic.__dict__)
 
-def get_user_by_id(db: Session, user_id: str):
-    return db.query(models.User).filter(models.User.id == user_id).first()
 
-def get_user(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+
+def get_user_by_id(db: Session, user_id: str, return_db_user: bool = False):
+    dic = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    if dic is None:
+        return None
+
+    if return_db_user:
+        return dic
+        
+    return schemas.UserInDB(**dic.__dict__)
+
+def get_user_by_username(db: Session, username: str, is_login: bool = False):
+    dic = db.query(models.User).filter(models.User.username == username).first()
+    
+    if dic is None or  (dic.token == None and not is_login):
+        return None
+
+    return schemas.UserInDB(**dic.__dict__)
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
@@ -54,6 +71,7 @@ def create_user(db: Session, user: schemas.UserCreate, hashed_password: str):
                             disabled=False,
                             creation_date=current_date,
                             avatar_url= 'https://www.gravatar.com/avatar/',
+                            avatar_encoding='null',
                             token=None)
     
     db_user.save(db)

@@ -8,11 +8,13 @@ import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/const/design_globals.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/models/travel.dart';
+import 'package:wp_frontend/models/user.dart';
+import 'package:wp_frontend/ui/bloc/card_people_preview.dart';
 import 'package:wp_frontend/ui/bloc/card_preview.dart';
 import 'package:wp_frontend/ui/utils.dart';
 import 'package:wp_frontend/utils/maps/cached_tile_provider.dart';
 
-import 'card_title_preview.dart';
+import '../card_title_preview.dart';
 
 
 
@@ -81,6 +83,10 @@ class _TravelCardState extends State<TravelCard> {
     );
   }
 
+  void onUserClick(User user) {
+    print('User clicked: ${user.full_name}');
+  }
+
   Widget buildContentInfoPart(BuildContext context) {
     /* Middle part of the card that holds the title and the image  in a grey background  of the same width as the card*/
     return Container(
@@ -111,15 +117,12 @@ class _TravelCardState extends State<TravelCard> {
               });
             },
           ),
+
           Column(
             children: <Widget>[
-              ListTile(
-                leading: Image.network(
-                  widget.travel.userCreatedBy.avatar_url,
-                  height: 30,
-                  width: 30,
-                ),
-                title: Text(widget.travel.userCreatedBy.full_name),
+              CardPeoplePreview(
+                  users: [widget.travel.userCreatedBy , widget.travel.userCreatedBy],
+                  onSelect: onUserClick
               ),
               ListTile(
                 leading: const Icon(Icons.location_on, color: Colors.black),

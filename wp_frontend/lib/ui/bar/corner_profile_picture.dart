@@ -17,9 +17,37 @@ class CornerProfilePicture extends StatefulWidget {
 class _CornerProfilePictureState extends State<CornerProfilePicture> {
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundImage: AssetImage(widget.userAvatarUrl),
+    final bool isNetworkImage = widget.userAvatarUrl.contains('http');
+
+    if (isNetworkImage) {
+      return Container(
+        width: widget.radius * 2,
+        height: widget.radius * 2,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: NetworkImage(widget.userAvatarUrl),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: widget.radius * 2,
+        height: widget.radius * 2,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: AssetImage(widget.userAvatarUrl),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    /*return CircleAvatar(
+      backgroundImage: widget.isNetworkImage ? NetworkImage(widget.userAvatarUrl) : AssetImage(widget.userAvatarUrl),
       radius: widget.radius,
-    );
+    );*/
   }
 }

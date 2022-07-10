@@ -34,10 +34,11 @@ def update_wanderpi(wanderpi: schemas.Wanderpi, db: Session = Depends(get_db), c
     return  utils.wanderpis.update_wanderpi(db=db, wanderpi=wanderpi, db_wanderpi = db_wanderpi)
 
 @router.delete("/{id}", response_model=schemas.Wanderpi)
-def delete_wanderpi(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+def delete_wanderpi(id: str, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
     db_wanderpi = utils.wanderpis.get_wanderpi(db=db, wanderpi_id=id)
 
     if not db_wanderpi:
         raise HTTPException(status_code=404, detail="Wanderpi with id {0} not found".format(str(id)))
 
     return  utils.wanderpis.delete_wanderpi(db=db, wanderpi_id=id)
+

@@ -40,7 +40,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def authenticate_user(db, username: str, password: str):
-    user = utils.users.get_user_with_token(db, username, is_login=True)
+    user = utils.users.get_user_by_username(db, username, is_login=True)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -73,13 +73,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db : Session = D
     except JWTError:
         raise credentials_exception
 
-    user = utils.users.get_user_with_token(db, token=token_data.username)
+    user = utils.users.get_user_by_username(db, username=token_data.username)
     if user is None:
         print("User not found")
         raise credentials_exception
     return user
 
-async def get_current_active_user(current_user: schemas.User = Depends(get_current_user)):
+async def get_current_active_user(current_user: schemas.UserInDB = Depends(get_current_user)):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

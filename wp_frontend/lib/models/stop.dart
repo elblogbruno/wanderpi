@@ -3,18 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/const/design_globals.dart';
+import 'package:wp_frontend/models/base_model.dart';
+import 'package:wp_frontend/models/user.dart';
 
-class Stop {
-  final String stopId;
-  final String stopName;
+import 'wanderpi.dart';
 
-  final double stopLatitude;
-  final double stopLongitude;
-  final String stopDestinationName;
-
-  final DateTime? stopLastUpdateDate;
-  final DateTime? stopCreationDate;
+class Stop extends BaseModel  {
   final DateTime stopDateRangeStart;
   final DateTime stopDateRangeEnd;
   final String stopDescription;
@@ -27,15 +23,17 @@ class Stop {
   final String? stopImageUri;
 
   final String stopTravelId;
+  final List<Wanderpi>? stopWanderpis;
 
   Stop({
-    required this.stopId,
-    required this.stopName,
-    required this.stopLatitude,
-    required this.stopLongitude,
-    required this.stopDestinationName,
-    this.stopLastUpdateDate,
-    this.stopCreationDate,
+    required String id,
+    required String name,   // Name of the travel (e.g. "London to Paris") (required) (string) (max-size 31)
+    required double latitude,
+    required double longitude,
+    required String  address,
+    required DateTime creation_date,
+    required DateTime last_update_date,
+    required User user_created_by,
     required this.stopDateRangeStart,
     required this.stopDateRangeEnd,
     required this.stopDescription,
@@ -44,18 +42,50 @@ class Stop {
     this.stopImageUri,
     this.stopThumbnailUri,
     this.stopThumbnailUrlSmall,
-    required this.stopTravelId
-  });
+    required this.stopTravelId,
+    this.stopWanderpis,
+  }) : super(id, name, latitude, longitude, address, creation_date, last_update_date, user_created_by);
 
-  Stop.fromJson(Map<dynamic, dynamic> json)
-      : stopId = json['id'],
-        stopName = json['name'],
-        stopLatitude = json['latitude'],
-        stopLongitude = json['longitude'],
-        stopDestinationName = json['address'],
-        stopLastUpdateDate = DateTime.parse(json['last_update_date']),
-        stopCreationDate = DateTime.parse(json['creation_date']),
-        stopDateRangeStart = DateTime.parse(json['date_range_start']),
+  // async function to construct a Stop from a json object calling BaseModel.fromJson()
+  static Future<Stop> fromJson(Map<dynamic, dynamic> json) async {
+    print('Stop.fromJson(): json: $json');
+    final User? userCreatedBy = await Api().userApiEndpoint().getUserById(json['user_created_by']);
+
+    List<Wanderpi> wanderpis = [];
+
+    if (json['wanderpis'] != null && (json['wanderpis'] as List<dynamic>).isNotEmpty) {
+      // parse stops from json as list
+      print((json['wanderpis'] as List<dynamic>).length);
+
+      wanderpis = await Future.wait((json['wanderpis'] as List<dynamic>).map((stopJson) async {
+        return await Wanderpi.fromJson(stopJson);
+      }).toList());
+    }
+
+    return Stop(
+        id: json['id'],
+        name: json['name'],
+        latitude: json['latitude'],
+        longitude: json['longitude'],
+        address: json['address'],
+        creation_date: DateTime.parse(json['creation_date']),
+        last_update_date: DateTime.parse(json['last_update_date']),
+        user_created_by: userCreatedBy ?? User.notExistingUser() ,
+      stopDateRangeStart: DateTime.parse(json['date_range_start']),
+      stopDateRangeEnd: DateTime.parse(json['date_range_end']),
+      stopDescription: json['description'],
+      stopDistance: json['distance'],
+      stopSpentPrice: json['spent_price'],
+      stopImageUri: json['image_uri'],
+      stopThumbnailUri: json['thumbnail_uri'],
+      stopThumbnailUrlSmall: json['thumbnail_uri_small'],
+      stopTravelId: json['travel_id'],
+      stopWanderpis: wanderpis,
+    );
+  }
+
+  Stop.fromJson1(Map<dynamic, dynamic> json)
+      : stopDateRangeStart = DateTime.parse(json['date_range_start']),
         stopDateRangeEnd = DateTime.parse(json['date_range_end']),
         stopDescription = json['description'],
         stopDistance = json['distance'],
@@ -63,17 +93,12 @@ class Stop {
         stopImageUri = json['image_uri'],
         stopThumbnailUri = json['thumbnail_uri'],
         stopThumbnailUrlSmall = json['thumbnail_uri_small'],
-        stopTravelId = json['travel_id'];
+        stopTravelId = json['travel_id'],
+        stopWanderpis = (json['wanderpis'] as List<dynamic>).map((e) => Wanderpi.fromJson1(e)).toList(),
+        super.fromJson1(json);
 
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
-    'id': stopId,
-    'name': stopName,
-    'latitude': stopLatitude,
-    'longitude': stopLongitude,
-    'address': stopDestinationName,
-    'last_update_date': stopLastUpdateDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
-    'creation_date': stopCreationDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
     'date_range_start': stopDateRangeStart.toIso8601String(),
     'date_range_end': stopDateRangeEnd.toIso8601String(),
     'description': stopDescription,
@@ -82,18 +107,21 @@ class Stop {
     'image_uri': stopImageUri ?? "https://picsum.photos/1920/720?random=0",
     'thumbnail_uri': stopThumbnailUri ?? "https://picsum.photos/1920/720?random=0",
     'thumbnail_uri_small': stopThumbnailUrlSmall ?? "https://picsum.photos/1920/720?random=0",
-    'travel_id': stopTravelId
+    'travel_id': stopTravelId,
+    ...super.toJson(),
   };
 
 
   static Stop randomFromInt(int i, double latitude, double longitude) {
     return Stop(
-      stopId: 'Id$i',
-      stopName: 'Name$i',
-      stopLatitude: latitude,
-      stopLongitude:  longitude,
-      stopDestinationName: 'DestinationName$i',
-      stopCreationDate: DateTime.now(),
+      id: "stop_${i}",
+      name: "Stop ${i}",
+      latitude: latitude + Random().nextDouble() * 0.01,
+      longitude: longitude + Random().nextDouble() * 0.01,
+      address: "Address ${i}",
+      creation_date: DateTime.now(),
+      last_update_date: DateTime.now(),
+      user_created_by: User.notExistingUser(),
       stopDateRangeStart: DateTime.now().subtract(Duration(days: Random().nextInt(100))),
       stopDateRangeEnd: DateTime.now().add(Duration(days: Random().nextInt(100))),
       stopDescription: 'Description$i',
@@ -103,13 +131,12 @@ class Stop {
       stopThumbnailUri: 'https://picsum.photos/400/300?random=$i',
       stopThumbnailUrlSmall: 'https://picsum.photos/200/100?random=$i',
       stopTravelId: '2',
-        stopLastUpdateDate: DateTime.now(),
     );
   }
 
   static Stop getBusStop(String query, List<Stop> busStops)  {
     for (Stop busStop in busStops) {
-      if (busStop.stopId == query) {
+      if (busStop.id == query) {
         return busStop;
       }
     }
@@ -120,7 +147,7 @@ class Stop {
     return Marker(
       width: 50.0,
       height: 50.0,
-      point: LatLng(stopLatitude, stopLongitude),
+      point: LatLng(latitude, longitude),
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(4.0),
         decoration: const BoxDecoration(

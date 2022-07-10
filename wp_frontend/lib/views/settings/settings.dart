@@ -15,6 +15,8 @@ class SettingsScreen extends StatefulWidget {
 
   class _SettingsScreenState extends State<SettingsScreen> {
     final TextEditingController _serverUriText = TextEditingController();
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
 
     @override
     Widget build(BuildContext context) {
@@ -23,8 +25,21 @@ class SettingsScreen extends StatefulWidget {
           title: const Text("Settings"),
         ),
         body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+        key: _formKey,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children:  [
+              const Text(
+                'Server URI',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               TextFormField(
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -46,14 +61,23 @@ class SettingsScreen extends StatefulWidget {
                   labelText: "Server URI",
                 ),
               ),
-              RaisedButton(
+              SizedBox(height: 10),
+              ElevatedButton(
                 child: const Text("Save"),
                 onPressed: () {
-                  SharedApi.saveServerUri(_serverUriText.text);
+
+                  // Validate returns true if the form is valid, or false otherwise.
+                  if (_formKey.currentState!.validate()) {
+                    SharedApi.saveServerUri(_serverUriText.text);
+                    Navigator.pop(context);
+                  }
+
                 },
               ),
             ],
           ),
+        ),
+        ),
         ),
       );
     }

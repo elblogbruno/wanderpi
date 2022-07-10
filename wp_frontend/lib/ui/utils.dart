@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/const/design_globals.dart';
+import 'package:wp_frontend/models/base_model.dart';
 
 Widget buildButton(BuildContext context, IconData icon, String text, Color color, Function onPressed){
 
@@ -46,4 +47,16 @@ InputDecoration getInputDecoration(String labelText, {String hintText = '', Icon
     ),
     icon: Icon(icon),
   );
+}
+
+bool arrayDifferent(List<BaseModel> a, List<BaseModel> b) {
+  if (a.length != b.length) {
+    return true;
+  }
+  for (int i = 0; i < a.length; i++) {
+    if (a[i].name != b[i].name) {
+      return true;
+    }
+  }
+  return false;
 }
