@@ -59,6 +59,8 @@ class User(Base):
     creation_date = Column(DateTime, default=datetime.now)
     token = Column(String(255))
     # children = relationship("Child")
+    # wanderpis where user appears
+    # wanderpis = relationship("Wanderpi") # TODO: Fix this
 
     def save(self, db):
         db.add(self)
@@ -115,3 +117,6 @@ class Wanderpi(Base, BaseModelSchema):
     uri = Column(String)
     thumbnail_uri = Column(String)
     stop_id = Column(String(36), ForeignKey("stops.id"))
+    
+    # list of documents, travels 
+    users_detected = Column(String) #relationship("User") TODO: Fix this

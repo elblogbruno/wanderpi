@@ -25,7 +25,7 @@ class BaseModel {
 
   // async function to construct a BaseModel from a json object
   static Future<BaseModel> fromJson(Map<dynamic, dynamic> json) async {
-    final User? userCreatedBy = await Api().userApiEndpoint().getUserById(json['user_created_by']);
+    final User? userCreatedBy = await Api.instance.userApiEndpoint().getUserById(json['user_created_by']);
     return BaseModel(
       json['id'],
       json['name'],
@@ -46,7 +46,7 @@ class BaseModel {
         address = json['address'],
         lastUpdateDate =  DateTime.parse(json['last_update_date']),
         creationDate = DateTime.parse(json['creation_date']),
-        userCreatedBy = Api().userApiEndpoint().getUserSync(json['user_created_by']);
+        userCreatedBy = Api.instance.userApiEndpoint().getUserSync(json['user_created_by']);
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
         'id': id,

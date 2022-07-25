@@ -1,13 +1,18 @@
-from tempfile import SpooledTemporaryFile
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 
 import face_recognition
+
+from utils.file import FileUtils
+from utils.path_manager import PathManager
+
 from dependencies import *
 
 import os
-import shutil
+import numpy as np
 import utils.users
+
+
 
 router = APIRouter(
     prefix="/token",
@@ -30,56 +35,23 @@ async def  validate_token(token: schemas.Token, db : Session = Depends(get_db)):
     
     return  user
 
-def save_file(file_location, file_content):
-    file_dir = os.path.dirname(file_location)
 
-    # if file_location does not exist, create it
-    if not os.path.exists(file_location):
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir, exist_ok=True)
-
-        with open(file_location, "wb") as f:
-            f.write(file_content)
-
-        print("File created")
-        return True
-    else:
-        print("File already exists")
-        return False
-
-def save_picture(file_location, uploaded_file):
-    file_dir = os.path.dirname(file_location)
-
-    # if file_location does not exist, create it
-    if not os.path.exists(file_location):
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir, exist_ok=True)
-
-        with open(file_location, "wb") as f:
-            f.write(uploaded_file.file.read())
-
-        print("File created")
-        return True
-    else:
-        print("File already exists")
-        return False
-
-# ONLY ALLOW PNG FILES TO BE UPLOADED FOR NOW
+# ONLY ALLOW PNG and JPG FILES TO BE UPLOADED FOR NOW
 # IMPORTANT: first we register user and then we get the user id to upload the file
 
 @router.post("/upload_profile_picture/{user_id}", response_model=schemas.UserInDB)
 async def create_upload_file(user_id: str, db: Session = Depends(get_db), uploaded_file: UploadFile = File(...)):    
     # check if uploaded file is a png file
-    if uploaded_file.content_type != "image/png":
+    if uploaded_file.content_type != "image/png" and uploaded_file.content_type != "image/jpeg":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PNG files are allowed",
+            detail="Only PNG and JPG files are allowed",
         )
 
     
-    file_location =  os.path.join(os.getcwd(), "api", "files",  uploaded_file.filename)
+    file_location =  PathManager.get_instance().calculate_path_for_file(uploaded_file.filename)
 
-    created = save_picture(file_location, uploaded_file)
+    created = FileUtils.save_picture(file_location, uploaded_file)
 
     if not created:
         raise HTTPException(
@@ -87,7 +59,9 @@ async def create_upload_file(user_id: str, db: Session = Depends(get_db), upload
             detail="There was an error creating the file",
         )
 
-    new_file_location = file_location.replace(uploaded_file.filename, f"{user_id}.png")
+    file_format = uploaded_file.content_type.split('/')[1] 
+
+    new_file_location = file_location.replace(uploaded_file.filename, f"{user_id}.{file_format}" )
  
     # # if new_file_location does exists delete it
     # if os.path.exists(new_file_location):
@@ -97,7 +71,7 @@ async def create_upload_file(user_id: str, db: Session = Depends(get_db), upload
     tmp_file_location = ""
 
     if os.path.exists(new_file_location):
-        tmp_file_location = os.path.join(os.getcwd(), "api", "files", f"{user_id}_{uuid.uuid4()}.png")
+        tmp_file_location = PathManager.get_instance().calculate_path_for_file(f"{user_id}_{uuid.uuid4()}.{file_format}")
         os.rename(new_file_location, tmp_file_location)
 
     # rename uploaded file to user_id.png
@@ -130,12 +104,25 @@ async def create_upload_file(user_id: str, db: Session = Depends(get_db), upload
     face_encoding = face_encodings[0] # get the first face encoding
 
     # encodings are saved in a encodings folder
-    encoding_location = os.path.join(os.getcwd(), "api", "encodings", f"{user_id}.txt") 
+    encoding_location = PathManager.get_instance().calculate_path_for_file(f"{user_id}.txt", file_type='enconding') 
+
+    # if new_file_location does exists, move it to a temporary location
+    tmp_enc_file_location = ""
+
+    if os.path.exists(encoding_location):
+        tmp_enc_file_location = PathManager.get_instance().calculate_path_for_file(f"{user_id}_tmp.txt", file_type='enconding') 
+        os.rename(encoding_location, tmp_enc_file_location)
+    
 
     # save the encoding to a .txt file
-    save_file(encoding_location, face_encoding.tobytes())
+    # save_file(encoding_location, face_encoding)
+    np.savetxt(encoding_location, face_encoding)
 
-    image_uri = '/file/image/' + str(user_id)
+    # img send by user is correct so we delete the last file 
+    if tmp_enc_file_location != "":
+        os.remove(tmp_enc_file_location)
+
+    image_uri = f'/file/image/{str(user_id)}?format={file_format}'
     # thumbnail_uri='/file/image/' + str(user_id) + '?height=100&width=100',
         
     user = utils.users.get_user_by_id(db, user_id=user_id, return_db_user=True)

@@ -55,6 +55,8 @@ dependencies:
   provider: ^4.3.2+4 #ADD
   cool_alert: ^1.1.0
 
+  web_socket_channel: ^2.2.0
+
   flutter_localizations:
     sdk: flutter
 

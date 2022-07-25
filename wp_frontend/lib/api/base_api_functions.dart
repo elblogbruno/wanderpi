@@ -10,14 +10,13 @@ import 'package:http/http.dart' as http;
 class BaseApi {
   static const int TIMEOUT_TIME = 5;
 
-  String get API_BASE_URL {
-    String? apiEndpoint = "";
-    SharedApi.getServerUri().then((value) => apiEndpoint = value);
+  Future<String> get API_BASE_URL async {
+    String? apiEndpoint =  await SharedApi.getServerUri();
 
     if (apiEndpoint!.isEmpty) {
-      return "http://localhost:8000/";
+      return Future.error(Strings.noServerUrlAvailable);
     } else {
-      return apiEndpoint!;
+      return apiEndpoint;
     }
   }
 

@@ -9,3 +9,5 @@ python-jose[cryptography]
 passlib[bcrypt]
 watchdog
 face-recognition
+asyncpg
+psycopg2-binary

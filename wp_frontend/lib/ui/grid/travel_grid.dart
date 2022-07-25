@@ -48,10 +48,10 @@ class _TravelGridState extends State<TravelGrid> {
           TravelCard(
             travel: travel,
             onDeleteClick: (Travel travelSelected) async {
-              await Api().travelApiEndpoint().deleteTravel(travelSelected);
+              await Api.instance.travelApiEndpoint().deleteTravel(travelSelected);
 
               setState(() {
-                _calculation = Api().travelApiEndpoint().getTravels();
+                _calculation = Api.instance.travelApiEndpoint().getTravels();
               });
             },
             onTap: () {
@@ -92,11 +92,11 @@ class _TravelGridState extends State<TravelGrid> {
     );
 
     for (int i = 0; i < _selectedTravels.length; i++){
-      await Api().travelApiEndpoint().deleteTravel(_selectedTravels[i]);
+      await Api.instance.travelApiEndpoint().deleteTravel(_selectedTravels[i]);
     }
 
     setState(() {
-      _calculation = Api().travelApiEndpoint().getTravels();
+      _calculation = Api.instance.travelApiEndpoint().getTravels();
     });
   }
 
@@ -119,14 +119,14 @@ class _TravelGridState extends State<TravelGrid> {
         return NewTravelDialog(
           currentUser: widget.currentUser,
           onTravelCreated: (Travel travel) async {
-            await Api().travelApiEndpoint().createTravel(travel);
+            await Api.instance.travelApiEndpoint().createTravel(travel);
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Travel created!')),
             );
 
             setState(() {
-              _calculation = Api().travelApiEndpoint().getTravels();
+              _calculation = Api.instance.travelApiEndpoint().getTravels();
             });
           },
         );
@@ -134,7 +134,7 @@ class _TravelGridState extends State<TravelGrid> {
     );
   }
 
-  Future<List<Travel>?> _calculation = Api().travelApiEndpoint().getTravels();
+  Future<List<Travel>?> _calculation = Api.instance.travelApiEndpoint().getTravels();
 
   @override
   Widget build(BuildContext context) {

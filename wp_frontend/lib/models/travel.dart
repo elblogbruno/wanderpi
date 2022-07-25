@@ -39,7 +39,7 @@ class Travel extends BaseModel {
 
   // async function to construct a Travel from a json object calling BaseModel.fromJson()
   static Future<Travel> fromJson(Map<dynamic, dynamic> json) async {
-    final User? userCreatedBy = await Api().userApiEndpoint().getUserById(json['user_created_by']);
+    final User? userCreatedBy = await Api.instance.userApiEndpoint().getUserById(json['user_created_by']);
 
     List<Stop> stops = [];
 

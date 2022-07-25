@@ -118,8 +118,8 @@ class _StopGridState extends State<StopGrid> {
           travel: widget.travel,
           currentUser: widget.currentUser,
           onStopCreated: (Stop stop) async {
-            //Stop finalStop = await Api().stopApiEndpoint().createStop(stop);
-            await Api().stopApiEndpoint().createStop(stop);
+            //Stop finalStop = await Api.instance.stopApiEndpoint().createStop(stop);
+            await Api.instance.stopApiEndpoint().createStop(stop);
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Stop created!')),
@@ -132,7 +132,7 @@ class _StopGridState extends State<StopGrid> {
             // });
 
             setState(() {
-              _calculation = Api().stopApiEndpoint().getStops(widget.travel);
+              _calculation = Api.instance.stopApiEndpoint().getStops(widget.travel);
             });
           },
         );
@@ -141,7 +141,7 @@ class _StopGridState extends State<StopGrid> {
   }
 
 
-  late Future<List<Stop>> _calculation = Api().stopApiEndpoint().getStops(widget.travel);
+  late Future<List<Stop>> _calculation = Api.instance.stopApiEndpoint().getStops(widget.travel);
 
 
   @override

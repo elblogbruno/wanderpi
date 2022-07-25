@@ -17,7 +17,7 @@ class CornerProfilePicture extends StatefulWidget {
 class _CornerProfilePictureState extends State<CornerProfilePicture> {
   @override
   Widget build(BuildContext context) {
-    final bool isNetworkImage = widget.userAvatarUrl.contains('http');
+    final bool isNetworkImage = widget.userAvatarUrl.contains('http') || widget.userAvatarUrl.contains('/file/image/');
 
     if (isNetworkImage) {
       return Container(

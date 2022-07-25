@@ -5,7 +5,9 @@ import '../../api/shared_preferences.dart';
 
 /* settings screen with an input field and a button */
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  final ValueChanged<String>? onSettingsSaved;
+
+  const SettingsScreen({Key? key, this.onSettingsSaved}) : super(key: key);
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -69,7 +71,14 @@ class SettingsScreen extends StatefulWidget {
                   // Validate returns true if the form is valid, or false otherwise.
                   if (_formKey.currentState!.validate()) {
                     SharedApi.saveServerUri(_serverUriText.text);
-                    Navigator.pop(context);
+
+                    if (widget.onSettingsSaved != null) {
+                      widget.onSettingsSaved!(_serverUriText.text);
+                    }
+                    else{
+                      Navigator.pop(context);
+                    }
+                    // Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
                   }
 
                 },

@@ -33,33 +33,26 @@ import 'package:wp_frontend/views/slide_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  TranslationData translations = TranslationData();
-  await translations.initTranslations();
-
-  String? token = await  SharedApi.getToken();
-
-  String? serverUri = await SharedApi.getServerUri();
-
-  //await SharedApi.deleteUser();
-  //await SharedApi.deleteToken();
-
-
-  if (serverUri == null) {
-    print("Server URI is null");
-
-    MyApp app = const MyApp(
-      child: SettingsScreen(),
-    );
-
-    runApp(app);
-
-    return;
+// function to validate a url string
+bool isValidUrl(String? url) {
+  if (url == null)
+  {
+    print("url is null");
+    return false;
   }
 
-  if (token != null) {
+  // RegExp regex = RegExp(
+  //     r"^(http(s)?:\/\/)?((w{3}\.)?)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(\/[^\s]*)?$");
+  //
+  // return regex.hasMatch(url);
 
+  return  Uri.tryParse(url)?.hasAbsolutePath ?? false;
+}
+
+void init(String serverUri, String? token){
+  Api api = Api(serverUri);
+
+  if (token != null) {
     print('Token: $token');
 
     MyApp app = MyApp(
@@ -76,6 +69,42 @@ Future<void> main() async {
 
     runApp(app);
   }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  TranslationData translations = TranslationData();
+  await translations.initTranslations();
+
+  String? token = await  SharedApi.getToken();
+
+  String? serverUri = await SharedApi.getServerUri();
+
+  print("Token: $token");
+  print("ServerUri: $serverUri");
+  //await SharedApi.deleteUser();
+  //await SharedApi.deleteToken();
+
+  if (isValidUrl(serverUri) == false) {
+    print("Server URI is null or invalid");
+
+    void _onSettingsSaved(String apiUrl)
+    {
+        init(apiUrl, token);
+    }
+
+    MyApp app = MyApp(
+      child: SettingsScreen(
+          onSettingsSaved: _onSettingsSaved
+      ),
+    );
+
+    runApp(app);
+
+    return;
+  }
+
+  init(serverUri!, token);
 
 }
 
@@ -259,7 +288,7 @@ class _MyHomePageState extends State<MainScreen> {
 
     setState(() {
       _lastStopGrid = currentGrid;
-      currentGrid = WanderpiGrid(travel: _lastTravel, stop: stop, onWanderpiSelected: _onWanderpiSelected, onBackPressed: _onBackPressed,);
+      currentGrid = WanderpiGrid(user: _user!, travel: _lastTravel, stop: stop, onWanderpiSelected: _onWanderpiSelected, onBackPressed: _onBackPressed,);
       _lastWanderpiGrid = currentGrid;
     });
   }
@@ -332,7 +361,7 @@ class _MyHomePageState extends State<MainScreen> {
               title: const Text("Logout"),
               onTap: () async {
                 try{
-                  await  Api().authApiEndpoint().logout();
+                  await  Api.instance.authApiEndpoint().logout();
 
                   Navigator.pushReplacement(
                     context,
@@ -526,7 +555,7 @@ class _MyHomePageState extends State<MainScreen> {
     );
   }
 
-  late Future<User?> _calculation = Api().authApiEndpoint().validateToken(token);
+  late Future<User?> _calculation = Api.instance.authApiEndpoint().validateToken(token);
 
   @override
   Widget build(BuildContext context) {
@@ -580,7 +609,7 @@ class _MyHomePageState extends State<MainScreen> {
               onRetry: () =>
                   setState(() {
                     print('Retrying');
-                    _calculation =  Api().authApiEndpoint().validateToken(token);
+                    _calculation =  Api.instance.authApiEndpoint().validateToken(token);
                   }
                   ),
             );

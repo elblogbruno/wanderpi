@@ -52,6 +52,8 @@ class Wanderpi(BaseSchema):
     type: str
     uri: str
     thumbnail_uri: str
+    users_detected: Union[str, None] = None 
+    # users_detected: Union[List[UserInDB], None] = None 
 
     class Config:
         orm_mode = True
@@ -100,3 +102,4 @@ class MemoryDrive(BaseModel):
     memory_type : str
     memory_access_uri : str
     memory_id : str
+    

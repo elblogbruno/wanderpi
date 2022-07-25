@@ -113,7 +113,7 @@ class _LoginViewState extends State<LoginScreen> {
                   child: FlatButton(
                     onPressed: () async {
                       try {
-                        Token token = await Api().authApiEndpoint().login(_usernameController.text, _passwordController.text);
+                        Token token = await Api.instance.authApiEndpoint().login(_usernameController.text, _passwordController.text);
 
                         if (token.access_token != null) {
                           Navigator.pushReplacement(

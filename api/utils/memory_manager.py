@@ -20,7 +20,8 @@ class Singleton(type):
 class MemoryManager:
     # __metaclass__ = Singleton
     __instance = None
-    def __init__(self, config_path, config_file_name) -> None:
+    
+    def __init__(self, config_path, config_file_name, ask_at_start = False) -> None:
         if MemoryManager.__instance is None:
             MemoryManager.__instance = self
         else:
@@ -29,6 +30,7 @@ class MemoryManager:
         self.memories = []
         self.config_path = config_path
         self.config_file_name = config_file_name
+        self.ask_at_start = ask_at_start
         self.start()
 
     @staticmethod
@@ -123,16 +125,17 @@ class MemoryManager:
                     self.memories.append(drive)
                     print("ID: " + memory["memory_id"] + " - Type: " + memory["memory_type"] + " -  Path: " + memory["memory_access_uri"])
 
-            r = input("Do you want to add a new Memory Drive (y/n): ")
-            
-            while r == "y":
-                memory_type, memory_access_uri = MemoryManager.ask_for_memory_input()
-                drive = MemoryDrive(memory_type, memory_access_uri, str(len(self.memories)))
-                self.memories.append(drive)
+            if self.ask_at_start:
+                r = input("Do you want to add a new Memory Drive (y/n): ")
+                
+                while r == "y":
+                    memory_type, memory_access_uri = MemoryManager.ask_for_memory_input()
+                    drive = MemoryDrive(memory_type, memory_access_uri, str(len(self.memories)))
+                    self.memories.append(drive)
 
-                self.save_memories_json()
+                    self.save_memories_json()
 
-                r = input("Do you want to add another Memory Drive (y/n): ")
+                    r = input("Do you want to add another Memory Drive (y/n): ")
         
         else:
             print("Config file does not exist")

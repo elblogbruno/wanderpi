@@ -6,19 +6,20 @@ import 'dart:io';
 import 'package:i18n_extension/default.i18n.dart';
 import 'package:wp_frontend/api/base_api_functions.dart';
 import 'package:wp_frontend/api/base_endpoint.dart';
-import 'package:wp_frontend/models/stop.dart';
+import 'package:wp_frontend/models/drive.dart';
+import 'package:wp_frontend/models/drive.dart';
 import 'package:wp_frontend/models/travel.dart';
 import 'package:http/http.dart' as http;
-import 'package:wp_frontend/models/wanderpi.dart';
+import 'package:wp_frontend/models/drive.dart';
 import 'package:wp_frontend/resources/strings.dart';
 
-class WanderpiApiEndpoint extends BaseApiEndpoint {
+class DrivesApiEndpoint extends BaseApiEndpoint {
 
-  WanderpiApiEndpoint({required super.API_ENDPOINT, required super.BASE_URL});
+  DrivesApiEndpoint({required super.API_ENDPOINT, required super.BASE_URL});
 
 
-  Future<List<Wanderpi>> getWanderpis(Stop  stop) async {
-    String finalUrl = "${BASE_URL}stops/${stop.id}/wanderpis";
+  Future<List<Drive>> getDrives() async {
+    String finalUrl = "${BASE_URL}drives";
     try {
       http.Response response = await BaseApi().apiPetition(finalUrl);
 
@@ -27,13 +28,13 @@ class WanderpiApiEndpoint extends BaseApiEndpoint {
 
         print(dataList.length);
 
-        List<Wanderpi> wanderpis = <Wanderpi>[];
+        List<Drive> drives = <Drive>[];
 
         for (int i = 0; i < dataList.length; i++) {
-          wanderpis.add(await Wanderpi.fromJson(dataList[i]));
+          drives.add(Drive.fromJson(dataList[i]));
         }
 
-        return wanderpis;
+        return drives;
       } else if (response.statusCode == 401) {
         return Future.error(Strings.noAuthException.i18n);
       } else {
@@ -48,17 +49,17 @@ class WanderpiApiEndpoint extends BaseApiEndpoint {
     }
   }
 
-  Future<Wanderpi> deleteWanderpi(Wanderpi wanderpi) async {
-    String finalUrl = "$API_ENDPOINT${wanderpi.id}";
+  Future<Drive> deleteDrive(Drive drive) async {
+    String finalUrl = "$API_ENDPOINT${drive.memoryId}";
 
     try {
 
-      print(wanderpi.toJson());
+      print(drive.toJson());
 
       http.Response response = await BaseApi().apiDeletePetition(finalUrl);
 
       if (response.statusCode == 200) {
-        return await Wanderpi.fromJson(jsonDecode(response.body));
+        return Drive.fromJson(jsonDecode(response.body));
       } else {
         throw Exception('Failed to create album.');
       }
@@ -71,40 +72,17 @@ class WanderpiApiEndpoint extends BaseApiEndpoint {
     }
   }
 
-  Future<Stop> createStop(Stop stop) async {
+  Future<Drive> createDrive(Drive drive) async {
     String finalUrl = API_ENDPOINT;
 
     try{
 
-      print(stop.toJson());
+      print(drive.toJson());
 
-      http.Response response = await BaseApi().apiPostPetition(finalUrl, stop.toJson());
-
-      if (response.statusCode == 200) {
-        return Stop.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Failed to create album.');
-      }
-    }
-    on TimeoutException catch (_) {
-      return Future.error(Strings.serverTimeout.i18n);
-    }
-    on SocketException catch (_) {
-      return Future.error(Strings.noInternet.i18n);
-    }
-  }
-
-  // TODO: FINISH THIS
-
-  Future<String> startBulkUpload(String drive_id, String stop_id) async
-  {
-    String finalUrl = '${API_ENDPOINT}bulk_upload/${drive_id}?stop_id=$stop_id';
-
-    try{
-      http.Response response = await BaseApi().apiPetition(finalUrl);
+      http.Response response = await BaseApi().apiPostPetition(finalUrl, drive.toJson());
 
       if (response.statusCode == 200) {
-        return response.body.toString();
+        return Drive.fromJson(jsonDecode(response.body));
       } else {
         throw Exception('Failed to create album.');
       }

@@ -1,3 +1,6 @@
+import 'package:wp_frontend/api/api.dart';
+import 'package:path/path.dart';
+
 class User {
   final String username;
   final String email;
@@ -19,7 +22,7 @@ class User {
       :  username = json['username'],
          email = json['email'],
          full_name = json['full_name'],
-          avatar_url = json['avatar_url'],
+          avatar_url = join(Api.instance.API_BASE_URL, json['avatar_url']),
          disabled = json['disabled'],
           id = json['id'];
 

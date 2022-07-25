@@ -49,7 +49,7 @@ class Stop extends BaseModel  {
   // async function to construct a Stop from a json object calling BaseModel.fromJson()
   static Future<Stop> fromJson(Map<dynamic, dynamic> json) async {
     print('Stop.fromJson(): json: $json');
-    final User? userCreatedBy = await Api().userApiEndpoint().getUserById(json['user_created_by']);
+    final User? userCreatedBy = await Api.instance.userApiEndpoint().getUserById(json['user_created_by']);
 
     List<Wanderpi> wanderpis = [];
 

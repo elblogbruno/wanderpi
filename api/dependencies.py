@@ -24,6 +24,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+current_user = None
+
+def set_local_current_user(user):
+    global current_user
+    current_user = user
+
+def get_local_current_user():
+    global current_user
+    return current_user
 
 # Dependency
 def get_db():
@@ -77,6 +86,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db : Session = D
     if user is None:
         print("User not found")
         raise credentials_exception
+    set_local_current_user(user)
     return user
 
 async def get_current_active_user(current_user: schemas.UserInDB = Depends(get_current_user)):

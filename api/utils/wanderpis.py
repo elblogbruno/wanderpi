@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from models import models
 
 import schemas
-
+# import uuid
+import datetime
 
 def get_wanderpi(db: Session, wanderpi_id: int):
     return db.query(models.Wanderpi).filter(models.Wanderpi.id == wanderpi_id).first()
@@ -14,8 +15,25 @@ def get_wanderpis(db: Session, skip: int = 0, limit: int = 100):
 
 
 
-def create_wanderpi(db: Session, wanderpi: schemas.Wanderpi):
-    db_wanderpi = models.Wanderpi(**wanderpi.dict())
+def create_wanderpi(db: Session, wanderpi: schemas.Wanderpi, current_user: schemas.User, stop_id: str):
+    # current_date = datetime.datetime.now()
+
+    # first information is filled in ProcessFile function
+    db_wanderpi = models.Wanderpi(
+        id = wanderpi.id,
+        name = wanderpi.name,
+        latitude = wanderpi.latitude,
+        longitude = wanderpi.longitude,
+        address = wanderpi.address,
+        type = wanderpi.type,
+        uri = wanderpi.uri,
+        thumbnail_uri = wanderpi.thumbnail_uri,
+        creation_date = wanderpi.current_date,
+        last_update_date = wanderpi.current_date,
+
+        user_created_by = current_user.id,
+        stop_id = stop_id,
+    )
     
     db_wanderpi.save(db)
 

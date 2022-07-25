@@ -4,7 +4,7 @@
 import threading
 
 class BaseTask(threading.Thread):
-    def __init__(self, task_id, task_type, task_progress, task_callback):
+    def __init__(self, task_id, task_type, task_progress, task_progress_callback, task_callback):
         threading.Thread.__init__(self)
 
         self.task_id = task_id
@@ -13,12 +13,13 @@ class BaseTask(threading.Thread):
 
         self.task_progress = task_progress
         self.task_callback = task_callback
+        self.task_progress_callback = task_progress_callback
 
-        self.task_result = None
+        self.result = None
     
     def run(self):
         self.task_status = "running"
-        self.task_callback(self.task_id,  self.task_type, self.task_status, self.task_progress, self.task_result, self.task_error)
+        self.task_callback(self.task_id,  self.task_type, self.task_status, self.task_progress, self.result, self.task_error)
         return
     
     def start(self):
@@ -45,7 +46,7 @@ class BaseTask(threading.Thread):
     def complete(self):
         self.task_status = "complete"
 
-        if self.task_result is not None:
-            self.task_callback(self.task_result)
+        if self.result is not None:
+            self.task_callback(self.result)
 
         return 
