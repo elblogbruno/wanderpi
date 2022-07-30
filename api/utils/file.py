@@ -1,7 +1,6 @@
 import uuid
 
 from matplotlib.image import thumbnail
-from tomlkit import datetime
 from torch import le
 from background.tasks.face_task import FaceTask
 from background.tasks.geo_task import GeoTask

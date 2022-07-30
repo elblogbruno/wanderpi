@@ -103,7 +103,7 @@ class MemoryManager:
             dic["memories"] = []
             
             for memory in self.memories:
-                dic["memories"].append(memory.to_dict())
+                dic["memories"].append(memory.dict())
             
             json.dump(dic, outfile)
 
@@ -143,7 +143,7 @@ class MemoryManager:
             
             while r == "y":
                 memory_type, memory_access_uri = MemoryManager.ask_for_memory_input()
-                drive = MemoryDrive(memory_type, memory_access_uri, str(len(self.memories)))
+                drive = MemoryDrive(memory_type = memory_type, memory_access_uri  = memory_access_uri, memory_id= str(len(self.memories)))
                 self.memories.append(drive)
 
                 self.save_memories_json()

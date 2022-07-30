@@ -3,10 +3,10 @@ import os
 
 class PathManager:
     """
-        This class is a singleton class for the database connection
-        It is used to connect to the database and to execute queries
+        This class is a singleton class for managing the paths of the application and the files
     """
     __instance = None
+
     def __init__(self):
         print("Path Manager: Initializing")
         if PathManager.__instance is None:
@@ -17,11 +17,13 @@ class PathManager:
         self.file_path = os.path.join(os.getcwd(), "api", "files")
         self.encoding_path = os.path.join(os.getcwd(), "api", "face_encodings")
 
-        if  not os.path.exists(self.file_path):
-            os.makedirs(self.encoding_path, exist_ok=True)
+        if not os.path.exists(self.file_path):
+            print("Path Manager: Creating file path " + self.file_path)
+            os.makedirs(self.encoding_path)
 
-        if  not os.path.exists(self.encoding_path):
-            os.makedirs(self.encoding_path, exist_ok=True)
+        if not os.path.exists(self.encoding_path):
+            print("Path Manager: Creating encoding path " + self.encoding_path)
+            os.makedirs(self.encoding_path)
 
     def calculate_path_for_file(self, filename, file_type = 'file'):
         if file_type == 'enconding':

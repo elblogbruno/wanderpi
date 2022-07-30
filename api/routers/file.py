@@ -1,4 +1,4 @@
-from django.http import FileResponse
+# from fastapi import FileResponse
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from utils.path_manager import PathManager
 from utils.image_editor import ImageEditor
@@ -25,7 +25,8 @@ async def get_image(file_id: str, format: str = 'jpeg', height: int = 0, width: 
     if height == 0 and width == 0:
         # img_png = Image.open(file_location)
 
-        return FileResponse(file_location)
+        # return FileResponse(file_location)
+        return StreamingResponse(file_location, media_type="image/{format}")
     else:
         im_png = ImageEditor.resize_image(file_location, height, width)
         # ImageShow.show(im_png)

@@ -5,6 +5,7 @@ import 'package:wp_frontend/api/api.dart';
 import 'package:wp_frontend/main.dart';
 import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/ui/utils.dart';
+import 'package:wp_frontend/views/authentication/sing_up_view.dart';
 
 import '../../models/token.dart';
 
@@ -155,11 +156,25 @@ class _LoginViewState extends State<LoginScreen> {
                 ),
               ),
             ),
-
             const SizedBox(
-              height: 130,
+              height: 70,
             ),
-            const Text('New User? Create Account')
+            // create a new account button
+            TextButton(
+              onPressed: (){
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        SignUp(),
+                  ),
+                );
+              },
+              child: const Text(
+                'Create a new account',
+                style: TextStyle(color: Colors.blue, fontSize: 15),
+              ),
+            ),
           ],
         ),
       ),

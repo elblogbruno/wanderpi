@@ -5,8 +5,9 @@ import 'package:wp_frontend/ui/state_widgets/base_design.dart';
 class ErrorWidgetRetry extends StatelessWidget {
   final String error;
   final VoidCallback onRetry;
+  final ElevatedButton? secondaryButton;
 
-  ErrorWidgetRetry({required this.error , required this.onRetry});
+  ErrorWidgetRetry({required this.error , required this.onRetry, this.secondaryButton});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,9 @@ class ErrorWidgetRetry extends StatelessWidget {
           ElevatedButton(
             onPressed: onRetry,
             child: Text('Retry'),
-          )
+          ),
+          if (secondaryButton != null)
+            secondaryButton!,
         ],
       ),
     );

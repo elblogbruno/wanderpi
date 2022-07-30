@@ -71,6 +71,21 @@ void init(String serverUri, String? token){
   }
 }
 
+void openSettings(String? token) {
+  void _onSettingsSaved(String apiUrl)
+  {
+    init(apiUrl, token);
+  }
+
+  MyApp app = MyApp(
+    child: SettingsScreen(
+        onSettingsSaved: _onSettingsSaved
+    ),
+  );
+
+  runApp(app);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   TranslationData translations = TranslationData();
@@ -88,18 +103,7 @@ Future<void> main() async {
   if (isValidUrl(serverUri) == false) {
     print("Server URI is null or invalid");
 
-    void _onSettingsSaved(String apiUrl)
-    {
-        init(apiUrl, token);
-    }
-
-    MyApp app = MyApp(
-      child: SettingsScreen(
-          onSettingsSaved: _onSettingsSaved
-      ),
-    );
-
-    runApp(app);
+    openSettings(token);
 
     return;
   }
@@ -606,6 +610,12 @@ class _MyHomePageState extends State<MainScreen> {
 
             return ErrorWidgetRetry(
               error: snapshot.error.toString(),
+              secondaryButton: ElevatedButton(
+                onPressed: () {
+                  openSettings(token);
+                },
+                child: const Text('Change Server Url'),
+              ),
               onRetry: () =>
                   setState(() {
                     print('Retrying');

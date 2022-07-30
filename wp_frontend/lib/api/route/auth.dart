@@ -9,6 +9,7 @@ import 'package:wp_frontend/api/base_endpoint.dart';
 import 'package:wp_frontend/api/shared_preferences.dart';
 import 'package:wp_frontend/models/token.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:wp_frontend/models/user.dart';
 import 'package:wp_frontend/resources/strings.dart';
 
@@ -125,5 +126,76 @@ class AuthApiEndpoint extends BaseApiEndpoint {
     }
   }
 
+  Future<User?> register(String username, String password, String email, String full_name) async {
+    try{
+      String finalUrl = "${API_ENDPOINT}register";
 
+      // json dictionary to send
+      Map<String, dynamic> json = {
+        "username": username,
+        "password": password,
+        "email": email,
+        "full_name": full_name,
+      };
+
+      http.Response response = await BaseApi().apiPostPetition(
+            finalUrl, json, needs_auth: false);
+
+      print(response.body);
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+        // check if response is token or error
+        User user = User.fromJson(jsonDecode(response.body));
+
+        SharedApi.saveUser(user);
+
+        return user;
+      } else {
+        throw Exception(jsonDecode(response.body)["detail"]);
+      }
+    }
+    on TimeoutException catch (_) {
+      return Future.error(Strings.serverTimeout.i18n);
+    }
+    on SocketException catch (_) {
+      return Future.error(Strings.noInternet.i18n);
+    }
+  }
+
+  Future<User> uploadProfilePicture(String user_id, String path, String imageType) async {
+    try{
+      String finalUrl = "${API_ENDPOINT}upload_profile_picture/{$user_id}";
+
+      // create multipart request
+      var request = http.MultipartRequest("POST", Uri.parse(finalUrl));
+      request.files.add(await http.MultipartFile.fromPath('uploaded_file', path,
+          contentType: MediaType('image', imageType)));
+
+      // send request
+      var streamedResponse = await request.send();
+
+      print(streamedResponse.statusCode);
+
+      var response = await http.Response.fromStream(streamedResponse);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        // check if response is token or error
+        User user = User.fromJson(jsonDecode(response.body));
+
+        SharedApi.saveUser(user);
+
+        return user;
+      } else {
+        throw Exception(jsonDecode(response.body)["detail"]);
+      }
+    }
+    on TimeoutException catch (_) {
+      return Future.error(Strings.serverTimeout.i18n);
+    }
+    on SocketException catch (_) {
+      return Future.error(Strings.noInternet.i18n);
+    }
+  }
 }
