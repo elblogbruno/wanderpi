@@ -28,8 +28,8 @@ def create_wanderpi(db: Session, wanderpi: schemas.Wanderpi, current_user: schem
         type = wanderpi.type,
         uri = wanderpi.uri,
         thumbnail_uri = wanderpi.thumbnail_uri,
-        creation_date = wanderpi.current_date,
-        last_update_date = wanderpi.current_date,
+        creation_date = wanderpi.creation_date,
+        last_update_date = wanderpi.creation_date,
 
         user_created_by = current_user.id,
         stop_id = stop_id,

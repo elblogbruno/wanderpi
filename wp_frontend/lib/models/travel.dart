@@ -37,20 +37,25 @@ class Travel extends BaseModel {
     this.travelDocuments,
   }) : super(id, name, latitude, longitude, address, creation_date, last_update_date, user_created_by);
 
+  static Future<Travel> resolveStops(Travel travel) async {
+    List<Stop> stops = [];
+
+    // if (json['stops'] != null && (json['stops'] as List<dynamic>).isNotEmpty) {
+    //   // parse stops from json as list
+    //   print((json['stops'] as List<dynamic>).length);
+    //
+    //   stops = await Future.wait((json['stops'] as List<dynamic>).map((stopJson) async {
+    //     return await Stop.fromJson(stopJson);
+    //   }).toList());
+    // }
+    //
+    // travel.travelStops = stops;
+    return travel;
+  }
+
   // async function to construct a Travel from a json object calling BaseModel.fromJson()
   static Future<Travel> fromJson(Map<dynamic, dynamic> json) async {
     final User? userCreatedBy = await Api.instance.userApiEndpoint().getUserById(json['user_created_by']);
-
-    List<Stop> stops = [];
-
-    if (json['stops'] != null && (json['stops'] as List<dynamic>).isNotEmpty) {
-      // parse stops from json as list
-      print((json['stops'] as List<dynamic>).length);
-
-      stops = await Future.wait((json['stops'] as List<dynamic>).map((stopJson) async {
-        return await Stop.fromJson(stopJson);
-      }).toList());
-    }
 
     return Travel(
       id: json['id'],
@@ -66,7 +71,7 @@ class Travel extends BaseModel {
       travelDescription: json['description'],
       travelDistance: json['distance'],
       travelSpentPrice: json['spent_price'],
-      travelStops: stops,
+      travelStops: [],
       travelDocuments: (json['documents'] as List<dynamic>).map((e) => Document.fromJson(e)).toList(),
     );
   }

@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:wp_frontend/const/design_globals.dart';
 import 'package:wp_frontend/models/user.dart';
+import 'package:wp_frontend/ui/bar/corner_profile_picture.dart';
 
 
 
@@ -47,6 +48,9 @@ class CardPeoplePreview extends StatelessWidget {
     List<Widget> _users = [];
 
     for (int i = 0; i < users.length; i++) {
+      print(users[i].id);
+
+
       _users.add(
         GestureDetector(
           onTap: () {
@@ -56,10 +60,13 @@ class CardPeoplePreview extends StatelessWidget {
             padding: EdgeInsets.all(10),
             child: Row(
               children: <Widget>[
-                CircleAvatar(
-                  backgroundImage: NetworkImage(users[i].avatar_url),
-                  radius: i == 0 ? 20 : 15,
-                ),
+                CornerProfilePicture(
+                    userAvatarUrl: users[i].avatar_url,
+                    radius: i == 0 ? 20 : 15),
+                // CircleAvatar(
+                //   backgroundImage: NetworkImage(users[i].avatar_url),
+                //   radius: i == 0 ? 20 : 15,
+                // ),
                 const SizedBox(
                   width: 5,
                 ),

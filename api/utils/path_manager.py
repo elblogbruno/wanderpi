@@ -19,11 +19,11 @@ class PathManager:
 
         if not os.path.exists(self.file_path):
             print("Path Manager: Creating file path " + self.file_path)
-            os.makedirs(self.encoding_path)
+            os.makedirs(self.file_path, exist_ok=True)
 
         if not os.path.exists(self.encoding_path):
             print("Path Manager: Creating encoding path " + self.encoding_path)
-            os.makedirs(self.encoding_path)
+            os.makedirs(self.encoding_path, exist_ok=True)
 
     def calculate_path_for_file(self, filename, file_type = 'file'):
         if file_type == 'enconding':

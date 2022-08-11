@@ -70,7 +70,7 @@ class Stop(BaseSchema):
     image_uri : str
     travel_id: str
 
-    wanderpis: List[Wanderpi] = []
+    # wanderpis: List[Wanderpi] = []
 
     class Config:
         orm_mode = True

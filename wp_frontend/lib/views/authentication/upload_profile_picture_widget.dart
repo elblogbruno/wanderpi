@@ -78,9 +78,13 @@ class _UploadPictureWidgetState extends State<UploadPictureWidget> {
         try {
           final User? user = await Api.instance.authApiEndpoint()
               .uploadProfilePicture(widget.currentUser.id, filePath, imageType);
+
+          print('User updated');
+
           if (user != null) {
             widget.onUserUpdated(user);
           }
+
         } catch (e) {
           print(e);
           showDialog(context: context,

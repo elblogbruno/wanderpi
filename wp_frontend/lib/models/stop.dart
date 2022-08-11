@@ -80,7 +80,7 @@ class Stop extends BaseModel  {
       stopThumbnailUri: json['thumbnail_uri'],
       stopThumbnailUrlSmall: json['thumbnail_uri_small'],
       stopTravelId: json['travel_id'],
-      stopWanderpis: wanderpis,
+      stopWanderpis: [],
     );
   }
 
