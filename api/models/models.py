@@ -100,7 +100,7 @@ class Stop(Base, BaseModelSchema):
     travel_id = Column(String(36), ForeignKey("travels.id"))
 
     # list of documents, travels 
-    wanderpis = relationship("Wanderpi")
+    # wanderpis = relationship("Wanderpi")
 
 class Document(Base, BaseModelSchema):
     __tablename__ = 'documents'

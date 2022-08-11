@@ -114,6 +114,9 @@ class FileUtils:
         file_name = os.path.basename(file_path) # we get the name of file with format 
         file_format = file_name.split('.')[1] # TODO: BETTER WAY OF GETTING FILE FORMAT
 
+        if file_format == 'jpg':
+            file_format = 'jpeg'
+
         thumbnail_file_format = file_format
 
         tmp_file = schemas.Wanderpi(
@@ -134,8 +137,8 @@ class FileUtils:
         
         if image is None:
             file_type = 'video'
-            image = FileUtils.extract_frame_from_video(file_path, "tmp.jpg", 1)
-            thumbnail_file_format = 'jpg'
+            image = FileUtils.extract_frame_from_video(file_path, "tmp.jpeg", 1)
+            thumbnail_file_format = 'jpeg'
             
             if len(image) == 0:
                 print("Could not read video")
@@ -147,7 +150,7 @@ class FileUtils:
         tmp_file.type = file_type
 
         uri = f"/file/{file_type}/{str(id)}?format={file_format}" # file_type can be 'video' and 'image' by the moment
-        thumbnail_uri = f"/file/image/{str(id)}?format={thumbnail_file_format}&width{500}&height{500}" # thumbnail is always image
+        thumbnail_uri = f"/file/image/{str(id)}?format={thumbnail_file_format}&width={500}&height={500}" # thumbnail is always image
  
         tmp_file.uri = uri
         tmp_file.thumbnail_uri = thumbnail_uri

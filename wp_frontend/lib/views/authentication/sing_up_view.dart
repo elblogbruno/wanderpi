@@ -57,6 +57,8 @@ class _LoginViewState extends State<SignUpScreen> {
   bool _showUploadWidget = false;
   late User currentUser;
 
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
 
@@ -175,7 +177,7 @@ class _LoginViewState extends State<SignUpScreen> {
             UploadPictureWidget(
               onUserUpdated: (User value) {
                 // show snack_bar with success message
-                Scaffold.of(context).showSnackBar(
+                _scaffoldKey.currentState?.showSnackBar(
                   const SnackBar(
                     content: Text("Registered succesfully. You can login now!"),
                     duration: Duration(seconds: 2),
@@ -253,6 +255,7 @@ class _LoginViewState extends State<SignUpScreen> {
 
   
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         title: const Text("Signup Page"),

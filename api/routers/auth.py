@@ -41,6 +41,8 @@ async def  validate_token(token: schemas.Token, db : Session = Depends(get_db)):
 
 @router.post("/upload_profile_picture/{user_id}", response_model=schemas.UserInDB)
 async def create_upload_file(user_id: str, db: Session = Depends(get_db), uploaded_file: UploadFile = File(...)):    
+    print("Uploading profile picture from user " + user_id)
+    
     # check if uploaded file is a png file
     if uploaded_file.content_type != "image/png" and uploaded_file.content_type != "image/jpeg":
         raise HTTPException(
@@ -126,6 +128,13 @@ async def create_upload_file(user_id: str, db: Session = Depends(get_db), upload
     # thumbnail_uri='/file/image/' + str(user_id) + '?height=100&width=100',
         
     user = utils.users.get_user_by_id(db, user_id=user_id, return_db_user=True)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not found",
+        )
+
     user.avatar_url = image_uri
     user.avatar_encoding = os.path.basename(encoding_location)
     user.save(db)

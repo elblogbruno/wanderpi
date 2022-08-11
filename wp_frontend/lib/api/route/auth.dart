@@ -165,7 +165,7 @@ class AuthApiEndpoint extends BaseApiEndpoint {
 
   Future<User> uploadProfilePicture(String user_id, String path, String imageType) async {
     try{
-      String finalUrl = "${API_ENDPOINT}upload_profile_picture/{$user_id}";
+      String finalUrl = "${API_ENDPOINT}upload_profile_picture/$user_id";
 
       // create multipart request
       var request = http.MultipartRequest("POST", Uri.parse(finalUrl));

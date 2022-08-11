@@ -22,7 +22,7 @@ class Api {
   wanderpiApiEndpoint() => _wanderpiApiEndpoint;
   authApiEndpoint() => _authApiEndpoint;
 
-  String API_BASE_URL = 'https://api.wanderpi.com/';
+  String API_BASE_URL = '';
 
   static final Api _instance = Api._internal();
 

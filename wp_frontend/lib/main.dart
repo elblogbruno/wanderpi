@@ -344,6 +344,7 @@ class _MyHomePageState extends State<MainScreen> {
       drawerHeaderBuilder: (context) {
         return Column(
           children:  <Widget>[
+            if (user != null && Api.instance.API_BASE_URL != '')
             UserAccountsDrawerHeader(
               currentAccountPicture:  CornerProfilePicture(radius: 0.5, userAvatarUrl: user.avatar_url,),
               accountName: Text(user.full_name),

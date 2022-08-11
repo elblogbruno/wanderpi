@@ -33,7 +33,7 @@ def update_stop(db: Session, stop: schemas.Stop,  db_stop: models.Stop):
     db_stop.thumbnail_uri = stop.thumbnail_uri
     db_stop.thumbnail_uri_small = stop.thumbnail_uri_small
     db_stop.travel_id = stop.travel_id
-    db_stop.wanderpis = stop.wanderpis
+    # db_stop.wanderpis = stop.wanderpis
 
 
     db.add(db_stop)
@@ -61,9 +61,7 @@ def create_stop(db: Session, stop: schemas.Stop):
         thumbnail_uri = stop.thumbnail_uri,
         thumbnail_uri_small = stop.thumbnail_uri_small,
         travel_id = stop.travel_id,
-        wanderpis = stop.wanderpis
-
-
+        # wanderpis = stop.wanderpis
     )
     
     db_stop.save(db)
