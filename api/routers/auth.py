@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 
 import face_recognition
 
@@ -39,16 +39,29 @@ async def  validate_token(token: schemas.Token, db : Session = Depends(get_db)):
 # ONLY ALLOW PNG and JPG FILES TO BE UPLOADED FOR NOW
 # IMPORTANT: first we register user and then we get the user id to upload the file
 
-@router.post("/upload_profile_picture/{user_id}", response_model=schemas.UserInDB)
-async def create_upload_file(user_id: str, db: Session = Depends(get_db), uploaded_file: UploadFile = File(...)):    
+@router.post("/upload_profile_picture", response_model=schemas.UserInDB)
+async def create_upload_file(request: Request, db: Session = Depends(get_db), uploaded_file: UploadFile = File(...)):    
+    # get user_id from request fields 
+    user_id = request.headers.get("user_id")
+
+    print("Searching for user {}".format(user_id))
+
+    user = utils.users.get_user_by_id(db, user_id=user_id, return_db_user=True)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with id {} not found".format(user_id),
+        )
+    
     # check if uploaded file is a png file
     if uploaded_file.content_type != "image/png" and uploaded_file.content_type != "image/jpeg":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only PNG and JPG files are allowed",
         )
-
     
+
     file_location =  PathManager.get_instance().calculate_path_for_file(uploaded_file.filename)
 
     created = FileUtils.save_picture(file_location, uploaded_file)
@@ -124,8 +137,7 @@ async def create_upload_file(user_id: str, db: Session = Depends(get_db), upload
 
     image_uri = f'/file/image/{str(user_id)}?format={file_format}'
     # thumbnail_uri='/file/image/' + str(user_id) + '?height=100&width=100',
-        
-    user = utils.users.get_user_by_id(db, user_id=user_id, return_db_user=True)
+
     user.avatar_url = image_uri
     user.avatar_encoding = os.path.basename(encoding_location)
     user.save(db)
